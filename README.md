@@ -226,60 +226,106 @@ Die einzelnen Postitionen des Drehschalter werden in einem Array definiert. Dies
 Hier ein Beispiel:
  //              |Folder No.|                 |Mode|                               |Special|                  |Special2|
   RotSwMap[0][0] =     -1;     RotSwMap[0][1] =  Volume_2;            RotSwMap[0][2] = 5;         RotSwMap[0][3] = 0;
+  
   RotSwMap[1][0] =     -1;     RotSwMap[1][1] =  Volume_2;            RotSwMap[1][2] = 15;        RotSwMap[1][3] = 0;
+  
   RotSwMap[2][0] =     3;      RotSwMap[2][1] =  Party_3;             RotSwMap[2][2] = 0;         RotSwMap[2][3] = 0;
+  
   RotSwMap[3][0] =     4;      RotSwMap[3][1] =  Party_3;             RotSwMap[3][2] = 0;         RotSwMap[3][3] = 0;
+  
   RotSwMap[4][0] =     5;      RotSwMap[4][1] =  Party_3;             RotSwMap[4][2] = 0;         RotSwMap[4][3] = 0;
+  
   RotSwMap[5][0] =     6;      RotSwMap[5][1] =  Party_3;             RotSwMap[5][2] = 0;         RotSwMap[5][3] = 0;
+  
   RotSwMap[6][0] =     7;      RotSwMap[6][1] =  Party_3;             RotSwMap[6][2] = 0;         RotSwMap[6][3] = 0;
+  
   RotSwMap[7][0] =     8;      RotSwMap[7][1] =  Party_3;             RotSwMap[7][2] = 0;         RotSwMap[7][3] = 0;
+  
   RotSwMap[8][0] =     0;      RotSwMap[8][1] =  2;                   RotSwMap[8][2] = 0;         RotSwMap[8][3] = 0;
+  
   RotSwMap[9][0] =     0;      RotSwMap[9][1] =  8;                   RotSwMap[9][2] = 1;         RotSwMap[9][3] = 0;
+  
   RotSwMap[10][0] =    -1;     RotSwMap[10][1] = Remove_Modifier_6;   RotSwMap[10][2] = 1;        RotSwMap[10][3] = 0;
+  
   RotSwMap[11][0] =    -1;     RotSwMap[11][1] = Pause_1;             RotSwMap[11][2] = 5;        RotSwMap[11][3] = 5;
+  
 
 Das Array ist genau wie die RFID Tags aufgebaut.
 Array Slot [x][0] enthält etweder die Ordnernummer (1-99), die Modifierkennung (0) oder eine Kennung für Saystembefehle (-1)
 Array Slot [x][1] enthält den Mode und kann über die Enums auch als Wort eingetragen werden:
+
+
 für [x][0] = 1-99:
+
   Hoerspiel_1 = 1,
+  
   Album_2 = 2,
+  
   Party_3 = 3,
+  
   Einzel_4 = 4,
+  
   Hoerbuch_5 = 5,
+  
   Hoerspiel_von_bis_7 = 7,
+  
   Album_von_bis_8 = 8,
+  
   Party_von_bis_9 = 9,
+  
   Hoerbuch_von_bis_10 = 10,
+  
   Puzzle_11 = 11
 
 
 für [x][0] = 0:
+
   SleepTimer_1 = 1,
+  
   FreezeDance_2 = 2,
+  
   Locked_3 = 3,
+  
   ToddlerMode_4 = 4,
+  
   KindergardenMode_5 = 5,
+  
   RepeatSingleModifier_6 = 6,
+  
   FeedbackModifier_7 = 7,
+  
   PuzzleGame_8 = 8,
+  
   QuizGame_9 = 9,
+  
   ButtonSmash_10 = 10
 
+
 für [x][0] = -1:
+
   Pause_1 = 1,
+  
   Volume_2 = 2,
+  
   Forward_3 = 3,
+  
   Backward_4 = 4,
+  
   ShutDown_5 = 5,
+  
   Remove_Modifier_6
 
 
-Array Slot [x][1] & Array Slot [x][2], stehen für die Specialwerte die je nach Mode eine andere Bedeutung haben
-Von-Bis Modis: [x][1] = Von, [x][2] = bis
-Einzel oder Puzzleteil: [x][1] = Tracknummer
-Quiz: [x][1] = Ordner Nr. mit den Fragen
-Button Smash: [x][1] = Ordner Nr. mit den Sounds, [x][2] = Lauttstärke
+Array Slot [x][1] & Array Slot [x][2], stehen für die Specialwerte die je nach Mode eine andere Bedeutung haben:
+
+
+- Von-Bis Modis: [x][1] = Von, [x][2] = bis
+
+- Einzel oder Puzzleteil: [x][1] = Tracknummer
+
+- Quiz: [x][1] = Ordner Nr. mit den Fragen
+
+- Button Smash: [x][1] = Ordner Nr. mit den Sounds, [x][2] = Lauttstärke
 
 
 
