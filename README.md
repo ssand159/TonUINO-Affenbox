@@ -224,7 +224,10 @@ Die Widerstände werden zwischen die Schalterstellungen gelötet und bilden eine
 
 Die einzelnen Postitionen des Drehschalter werden in einem Array definiert. Diese Array ist in void setup () deklariert.
 Hier ein Beispiel:
+
+
  //              |Folder No.|                 |Mode|                               |Special|                  |Special2|
+ 
   RotSwMap[0][0] =     -1;     RotSwMap[0][1] =  Volume_2;            RotSwMap[0][2] = 5;         RotSwMap[0][3] = 0;
   
   RotSwMap[1][0] =     -1;     RotSwMap[1][1] =  Volume_2;            RotSwMap[1][2] = 15;        RotSwMap[1][3] = 0;
@@ -255,65 +258,66 @@ Array Slot [x][0] enthält etweder die Ordnernummer (1-99), die Modifierkennung 
 Array Slot [x][1] enthält den Mode und kann über die Enums auch als Wort eingetragen werden:
 
 
-für [x][0] = 1-99:
+-- für [x][0] = 1-99:
 
-  Hoerspiel_1 = 1,
+ - Hoerspiel_1 = 1,
   
-  Album_2 = 2,
+ - Album_2 = 2,
   
-  Party_3 = 3,
+-  Party_3 = 3,
   
-  Einzel_4 = 4,
+-  Einzel_4 = 4,
   
-  Hoerbuch_5 = 5,
+-  Hoerbuch_5 = 5,
   
-  Hoerspiel_von_bis_7 = 7,
+-  Hoerspiel_von_bis_7 = 7,
   
-  Album_von_bis_8 = 8,
+-  Album_von_bis_8 = 8,
   
-  Party_von_bis_9 = 9,
+-  Party_von_bis_9 = 9,
   
-  Hoerbuch_von_bis_10 = 10,
+-  Hoerbuch_von_bis_10 = 10,
   
-  Puzzle_11 = 11
-
-
-für [x][0] = 0:
-
-  SleepTimer_1 = 1,
-  
-  FreezeDance_2 = 2,
-  
-  Locked_3 = 3,
-  
-  ToddlerMode_4 = 4,
-  
-  KindergardenMode_5 = 5,
-  
-  RepeatSingleModifier_6 = 6,
-  
-  FeedbackModifier_7 = 7,
-  
-  PuzzleGame_8 = 8,
-  
-  QuizGame_9 = 9,
-  
-  ButtonSmash_10 = 10
+ - Puzzle_11 = 11
 
 
-für [x][0] = -1:
+-- für [x][0] = 0:
 
-  Pause_1 = 1,
+  - SleepTimer_1 = 1,
   
-  Volume_2 = 2,
+-  FreezeDance_2 = 2,
   
-  Forward_3 = 3,
+-  Locked_3 = 3,
+  
+ - ToddlerMode_4 = 4,
+  
+-  KindergardenMode_5 = 5,
+  
+-  RepeatSingleModifier_6 = 6,
+  
+-  FeedbackModifier_7 = 7,
+  
+-  PuzzleGame_8 = 8,
+  
+-  QuizGame_9 = 9,
+  
+-  ButtonSmash_10 = 10
+
+
+-- für [x][0] = -1:
+
+-  Pause_1 = 1,
+  
+ - Volume_2 = 2,
+  
+-  Forward_3 = 3,
   
   Backward_4 = 4,
   
-  ShutDown_5 = 5,
+-  ShutDown_5 = 5,
   
-  Remove_Modifier_6
+-  Remove_Modifier_6
+
 
 
 Array Slot [x][1] & Array Slot [x][2], stehen für die Specialwerte die je nach Mode eine andere Bedeutung haben:
