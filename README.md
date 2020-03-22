@@ -51,6 +51,9 @@ Funktionsumfang/ Änderungen
 
 
 
+HINWEIS: Bitte den mp3 Ordner erneuern!
+
+
 
 
 ## Feature: Puzzle Spiel
@@ -350,3 +353,7 @@ Array Slot [x][1] & Array Slot [x][2], stehen für die Specialwerte die je nach 
 
 
 
+## Feature: Rotary Encoder
+
+Mit dem Rotary Encoder kann die Lautstärke eingestellt werden.
+Um diesen nutzen zu können muss die Bibliothen im data Ordner eingebunden werden.
