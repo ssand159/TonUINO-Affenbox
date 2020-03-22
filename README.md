@@ -53,6 +53,8 @@ Funktionsumfang/ Änderungen
 
 HINWEIS: Bitte den mp3 Ordner erneuern!
 
+Viele Funktionen, sind über #defines aktivierbar und/pder konfigurierbar 
+
 
 
 
