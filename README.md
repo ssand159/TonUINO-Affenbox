@@ -220,11 +220,11 @@ Die Widerstände werden zwischen die Schalterstellungen gelötet und bilden eine
 über folgende #defines wird die Hardware konfiguriert:
 
 
-#define ROTARY_SWITCH_POSITIONS 12  //Anzahl Schalterstellungen
+*#define ROTARY_SWITCH_POSITIONS 12*  //Anzahl Schalterstellungen
 
-#define ROTARY_SWITCH_TOLERNACE 0.15 //Toleranz der Schwellspannung des Spannungsteiler
+*#define ROTARY_SWITCH_TOLERNACE 0.15* //Toleranz der Schwellspannung des Spannungsteiler
 
-#define ROTARY_SWITCH_TRIGGER_TIME 2000 //Zeit die vergehen muss damit die gewählte Schalterstellung angenommen wird in ms
+*#define ROTARY_SWITCH_TRIGGER_TIME 2000* //Zeit die vergehen muss damit die gewählte Schalterstellung angenommen wird in ms
 
 
 Die einzelnen Postitionen des Drehschalter werden in einem Array definiert. Diese Array ist in void setup () deklariert.
@@ -263,6 +263,7 @@ Hier ein Beispiel:
   
 
 Das Array ist genau wie die RFID Tags aufgebaut.
+
 Array Slot [x][0] enthält etweder die Ordnernummer (1-99), die Modifierkennung (0) oder eine Kennung für Saystembefehle (-1)
 Array Slot [x][1] enthält den Mode und kann über die Enums auch als Wort eingetragen werden:
 
@@ -325,7 +326,7 @@ Array Slot [x][1] enthält den Mode und kann über die Enums auch als Wort einge
   
 -  Forward_3 = 3,
   
-  Backward_4 = 4,
+ - Backward_4 = 4,
   
 -  ShutDown_5 = 5,
   
