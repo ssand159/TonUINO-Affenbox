@@ -33,7 +33,7 @@ Funktionsumfang/ Änderungen
 
 - Start Up Sound und ShutDown Sound über ein define eingefügt.
 
-- Zu-/Abschalten des Lautsprechers über einen Pin
+- Zu-/Abschalten des Lautsprechers um das Störgeräusch des DF Players beim Einschalten zu entfernen. Setzt eine zusätzliche Schaltung voraus.
 
 - Ausschalten über langen druck auf Pause Taste, setzt geeignete Hardware vorraus (z.B. Pololu Switch)
 
@@ -359,3 +359,14 @@ Array Slot [x][1] & Array Slot [x][2], stehen für die Specialwerte die je nach 
 
 Mit dem Rotary Encoder kann die Lautstärke eingestellt werden.
 Um diesen nutzen zu können muss die Bibliothen im data Ordner eingebunden werden.
+
+
+## Feature: Lautsprecherschalter
+
+Mit einer antiseriellen verschaltung zweier MOSFET, kann man über den Arduino gesteuert,den Lautsprecher Ein- und Ausschalten.
+In meinem Fork setzte ich das ein um zu Beginn den Lautsprecher auszuschalten. 
+Denkbar wäre auch den Lautsprecher für die Verwendung eines Kopfhörers.
+
+
+Bei der Wahl der MOSFET muss man auf einen möglichst geringen Widerstand achten.
+
