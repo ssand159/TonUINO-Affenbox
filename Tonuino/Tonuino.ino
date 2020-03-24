@@ -147,46 +147,51 @@ uint8_t RotSwCurrentPos = 0;
 unsigned long RotSwMillis = 0;
 uint8_t RotSwNewPos = 0;
 uint8_t RotSwActivePos = 0;
-
-typedef enum Enum_PlayMode
-{
-  Hoerspiel_1 = 1,
-  Album_2 = 2,
-  Party_3 = 3,
-  Einzel_4 = 4,
-  Hoerbuch_5 = 5,
-  Hoerspiel_von_bis_7 = 7,
-  Album_von_bis_8 = 8,
-  Party_von_bis_9 = 9,
-  Puzzle_10 = 10,
-  Hoerbuch_von_bis_11 = 11
-};
-typedef enum Enum_Modifier
-{
-  SleepTimer_1 = 1,
-  FreezeDance_2 = 2,
-  Locked_3 = 3,
-  ToddlerMode_4 = 4,
-  KindergardenMode_5 = 5,
-  RepeatSingleModifier_6 = 6,
-  FeedbackModifier_7 = 7,
-  PuzzleGame_8 = 8,
-  QuizGame_9 = 9,
-  ButtonSmash_10 = 10
-};
-typedef enum Enum_SystemControl
-{
-  Pause_1 = 1,
-  Volume_2 = 2,
-  Forward_3 = 3,
-  Backward_4 = 4,
-  ShutDown_5 = 5,
-  Remove_Modifier_6
-};
-
 //Array Slot [x,0] = Folder No., Array[x,1] = Play Mode, Array[x,2] = Special, Array[x,3] = Special2. If Folder = 0 then Mode = Modifier
 int8_t RotSwMap [ROTARY_SWITCH_POSITIONS][4];
 #endif
+
+typedef enum Enum_PlayMode
+{
+  ModifierMode = 0,
+  AudioDrama = 1,
+  Album = 2,
+  Party = 3,
+  Single = 4,
+  AudioBook = 5,
+  AdminMenu = 6,
+  AudioDrama_Section = 7,
+  Album_Section = 8,
+  Party_Section = 9,
+  AudioBook_Section = 10,
+  PuzzlePart = 11
+  
+};
+typedef enum Enum_Modifier
+{
+  SleepTimerMod = 1,
+  FreezeDanceMod = 2,
+  LockedMod = 3,
+  ToddlerModeMod = 4,
+  KindergardenModeMod = 5,
+  RepeatSingleMod = 6,
+  FeedbackMod = 7,
+  PuzzleGameMod = 8,
+  QuizGameMod = 9,
+  ButtonSmashMod = 10,
+  AdminMenuMod = 255
+};
+typedef enum Enum_SystemControl
+{
+  PauseCont = 1,
+  VolumeCont = 2,
+  ForwardCont = 3,
+  BackwardCont = 4,
+  ShutDownCont = 5,
+  RemoveModifierCont_6
+};
+
+
 //////////////////////////////////////////////////////////////////////////
 
 //////// battery check //////////////////////////////////////////////////
@@ -262,7 +267,7 @@ static uint16_t _lastTrackFinished;
 void timerIsr();
 #endif
 #ifdef ROTARY_SWITCH
-bool SetModifier (uint8_t _Mode, uint8_t _Special, uint8_t _Special2);
+bool SetModifier (uint8_t tmpMode, uint8_t tmpSpecial1, uint8_t tmpSpecial2);
 void RotSwloop(uint8_t TriggerTime = 0);
 #endif
 void shutDown ();
@@ -548,7 +553,7 @@ class SleepTimer: public Modifier {
 #ifdef DEBUG
       Serial.println(F("SleepTimer:getActive"));
 #endif
-      return 1;
+      return SleepTimerMod;
     }
 };
 //////////////////////////////////////////////////////////////////////////
@@ -595,7 +600,7 @@ class FreezeDance: public Modifier {
 #ifdef DEBUG
       Serial.println(F("FreezeDance:getActive"));
 #endif
-      return 2;
+      return FreezeDanceMod ;
     }
 };
 //////////////////////////////////////////////////////////////////////////
@@ -630,7 +635,7 @@ class PuzzleGame: public Modifier {
 
     void Failure ()
     {
-      if (mode == 1) {
+      if (mode == PuzzlePart) {
         PartOneSaved = false;
       }
       PartTwoSaved = false;
@@ -721,7 +726,7 @@ class PuzzleGame: public Modifier {
     virtual bool handleRFID(nfcTagObject *newCard) {
 
       this->tmpCard = *newCard;
-      if (tmpCard.nfcFolderSettings.mode != 11) {
+      if (tmpCard.nfcFolderSettings.mode != PuzzlePart) {
 #ifdef DEBUG
         Serial.println(F("PuzzleGame:RFID > No Valid Part"));
 #endif
@@ -755,7 +760,7 @@ class PuzzleGame: public Modifier {
 #ifdef DEBUG
       Serial.println(F("PuzzleGame:getActive"));
 #endif
-      return 8;
+      return PuzzleGameMod;
     }
 };
 //////////////////////////////////////////////////////////////////////////
@@ -918,7 +923,7 @@ class QuizGame: public Modifier {
     virtual bool handleRFID(nfcTagObject * newCard) {
 
       this->tmpCard = *newCard;
-      if (tmpCard.nfcFolderSettings.mode != 11) {
+      if (tmpCard.nfcFolderSettings.mode != PuzzlePart) {
 #ifdef DEBUG
         Serial.println(F("QuizGame:RFID > No Valid Part"));
 #endif
@@ -945,7 +950,7 @@ class QuizGame: public Modifier {
 #ifdef DEBUG
       Serial.println(F("QuizGame:getActive"));
 #endif
-      return 9;
+      return QuizGameMod;
     }
 };
 //////////////////////////////////////////////////////////////////////////
@@ -1079,7 +1084,7 @@ class ButtonSmash: public Modifier {
 #ifdef DEBUG
       Serial.println(F("ButtonSmash:getActive"));
 #endif
-      return 10;
+      return ButtonSmashMod ;
     }
 };
 //////////////////////////////////////////////////////////////////////////
@@ -1133,7 +1138,7 @@ class Locked: public Modifier {
 #endif
     }
     uint8_t getActive() {
-      return 3;
+      return LockedMod;
     }
 };
 //////////////////////////////////////////////////////////////////////////
@@ -1184,7 +1189,7 @@ class ToddlerMode: public Modifier {
 #ifdef DEBUG
       Serial.println(F("ToddlerMode:getActive"));
 #endif
-      return 4;
+      return ToddlerModeMod ;
     }
 };
 //////////////////////////////////////////////////////////////////////////
@@ -1253,7 +1258,7 @@ class KindergardenMode: public Modifier {
 #ifdef DEBUG
       Serial.println(F("KindergardenMode:getActive"));
 #endif
-      return 5;
+      return KindergardenModeMod;
     }
 };
 //////////////////////////////////////////////////////////////////////////
@@ -1278,7 +1283,7 @@ class RepeatSingleModifier: public Modifier {
 #ifdef DEBUG
       Serial.println(F("RepeatSingle:getActive"));
 #endif
-      return 6;
+      return RepeatSingleMod;
     }
 };
 //////////////////////////////////////////////////////////////////////////
@@ -1320,6 +1325,12 @@ class FeedbackModifier: public Modifier {
 #endif
       return false;
     }
+     uint8_t getActive() {
+#ifdef DEBUG
+      Serial.println(F("Feedback:getActive"));
+#endif
+      return FeedbackMod;
+    }
 };
 //////////////////////////////////////////////////////////////////////////
 // Leider kann das Modul selbst keine Queue abspielen, daher müssen wir selbst die Queue verwalten
@@ -1347,14 +1358,14 @@ static void nextTrack(uint16_t track) {
   Serial.println(F("nextTrack"));
 #endif
 
-  if (myFolder->mode == 1 || myFolder->mode == 7) {
+  if (myFolder->mode == AudioDrama || myFolder->mode == AudioDrama_Section) {
 #ifdef DEBUG
     Serial.println(F("Hörspiel aktiv > no new Track"));
 #endif
     setstandbyTimer();
 
   }
-  if (myFolder->mode == 2 || myFolder->mode == 8) {
+  if (myFolder->mode == Album || myFolder->mode == Album_Section) {
     if (currentTrack != numTracksInFolder) {
       currentTrack = currentTrack + 1;
       mp3.playFolderTrack(myFolder->folder, currentTrack);
@@ -1367,7 +1378,7 @@ static void nextTrack(uint16_t track) {
       setstandbyTimer();
     { }
   }
-  if (myFolder->mode == 3 || myFolder->mode == 9 || myFolder->mode == 11) {
+  if (myFolder->mode == Party || myFolder->mode == Party_Section || myFolder->mode == PuzzlePart) {
     if (currentTrack != numTracksInFolder - firstTrack + 1) {
 #ifdef DEBUG
       Serial.print(F("Party > queue next "));
@@ -1388,15 +1399,15 @@ static void nextTrack(uint16_t track) {
     mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
   }
 
-  if (myFolder->mode == 4) {
+  if (myFolder->mode == Single) {
 #ifdef DEBUG
     Serial.println(F("Einzel aktiv"));
 #endif
 
     setstandbyTimer();
   }
-  if (myFolder->mode == 5 || myFolder->mode == 10) {
-    if (currentTrack + 1 < firstTrack + numTracksInFolder) {
+  if (myFolder->mode == AudioBook || myFolder->mode == AudioBook_Section) {
+    if (currentTrack != numTracksInFolder) {
       currentTrack = currentTrack + 1;
 #ifdef DEBUG
       Serial.print(F("Hörbuch aktiv > next Track, "
@@ -1425,7 +1436,7 @@ static void previousTrack() {
 #ifdef DEBUG
   Serial.println(F("previousTrack"));
 #endif
-  if (myFolder->mode == 2 || myFolder->mode == 8) {
+  if (myFolder->mode == Album || myFolder->mode == Album_Section) {
 #ifdef DEBUG
     Serial.println(F("Album aktiv > prev Track"));
 #endif
@@ -1434,7 +1445,7 @@ static void previousTrack() {
     }
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
-  if (myFolder->mode == 3 || myFolder->mode == 9) {
+  if (myFolder->mode == Party || myFolder->mode == Party_Section) {
     if (currentTrack != 1) {
 #ifdef DEBUG
       Serial.print(F("Party aktiv > back in qeueue "));
@@ -1453,17 +1464,17 @@ static void previousTrack() {
 #endif
     mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
   }
-  if (myFolder->mode == 4) {
+  if (myFolder->mode == Single) {
 #ifdef DEBUG
     Serial.println(F("Einzel aktiv > repeat track"));
 #endif
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
-  if (myFolder->mode == 5 || myFolder->mode == 10) {
+  if (myFolder->mode == AudioBook || myFolder->mode == AudioBook_Section) {
 #ifdef DEBUG 2
     Serial.println(F("Hörbuch aktiv > save state"));
 #endif
-    if (currentTrack > firstTrack) {
+    if (currentTrack != firstTrack) {
       currentTrack = currentTrack - 1;
     }
     mp3.playFolderTrack(myFolder->folder, currentTrack);
@@ -1750,7 +1761,7 @@ void playFolder() {
 #endif
 
   // Hörspielmodus: eine zufällige Datei aus dem Ordner
-  if (myFolder->mode == 1) {
+  if (myFolder->mode == AudioDrama) {
 #ifdef DEBUG
     Serial.println(F("Hörspiel > one random track"));
 #endif
@@ -1761,7 +1772,7 @@ void playFolder() {
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
   // Album Modus: kompletten Ordner spielen
-  if (myFolder->mode == 2) {
+  if (myFolder->mode == Album) {
 #ifdef DEBUG
     Serial.println(F("Album > complete folder"));
 #endif
@@ -1769,7 +1780,7 @@ void playFolder() {
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
   // Party Modus: Ordner in zufälliger Reihenfolge
-  if (myFolder->mode == 3) {
+  if (myFolder->mode == Party) {
 #ifdef DEBUG
     Serial.println(
       F("Party > random complete folder"));
@@ -1779,7 +1790,7 @@ void playFolder() {
     mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
   }
   // Einzel Modus: eine Datei aus dem Ordner abspielen
-  if (myFolder->mode == 4) {
+  if (myFolder->mode == Single) {
 #ifdef DEBUG
     Serial.println(
       F("Einzel > one specific track"));
@@ -1788,7 +1799,7 @@ void playFolder() {
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
   // Hörbuch Modus: kompletten Ordner spielen und Fortschritt merken
-  if (myFolder->mode == 5) {
+  if (myFolder->mode == AudioBook) {
 #ifdef DEBUG
     Serial.println(F("Hörbuch > complete folder, "
                      "save track"));
@@ -1800,11 +1811,11 @@ void playFolder() {
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
   // Spezialmodus Von-Bis: Hörspiel: eine zufällige Datei aus dem Ordner
-  if (myFolder->mode == 7) {
+  if (myFolder->mode == AudioDrama_Section) {
 #ifdef DEBUG
     Serial.println(F("Von-Bis Hörspiel > one random track"));
     Serial.print(myFolder->special);
-    Serial.print(F("bis "));
+    Serial.print(F(" to "));
     Serial.println(myFolder->special2);
 #endif
     numTracksInFolder = myFolder->special2;
@@ -1816,11 +1827,11 @@ void playFolder() {
   }
 
   // Spezialmodus Von-Bis: Album: alle Dateien zwischen Start und Ende spielen
-  if (myFolder->mode == 8) {
+  if (myFolder->mode == Album_Section) {
 #ifdef DEBUG
     Serial.println(F("Von-Bis Album > complete range of tracks"));
     Serial.print(myFolder->special);
-    Serial.print(F("bis "));
+    Serial.print(F(" to "));
     Serial.println(myFolder->special2);
 #endif
     numTracksInFolder = myFolder->special2;
@@ -1829,7 +1840,7 @@ void playFolder() {
   }
 
   // Spezialmodus Von-Bis: Party Ordner in zufälliger Reihenfolge
-  if (myFolder->mode == 9) {
+  if (myFolder->mode == Party_Section) {
 #ifdef DEBUG
     Serial.println(
       F("Von-Bis Party > random complete range"));
@@ -1841,7 +1852,7 @@ void playFolder() {
     mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
   } 
   // Spezialmodus Von-Bis: Hörbuch: kompletten Ordner spielen und Fortschritt merken (nur für ein Hörbuch zur Zeit je Ordner)
-  if (myFolder->mode == 10) {
+  if (myFolder->mode == AudioBook_Section) {
 #ifdef DEBUG
     Serial.println(
       F("Von-Bis Hörbuch > complete range, saves track"));
@@ -1858,7 +1869,7 @@ void playFolder() {
     mp3.playFolderTrack(myFolder->folder, currentTrack);
   }
   // Spezialmodus Puzzel: Spiel das nach Auflegen einer Karte die dazugehörige Gegenkarte erwartet. Puzzel Start Karte muss zuerst aufgelegt werden.
-  if (myFolder->mode == 11) {
+  if (myFolder->mode == PuzzlePart) {
 #ifdef DEBUG
     Serial.println(
       F("Puzzle"));
@@ -2184,7 +2195,7 @@ void loop() {
     return;
 
   if (readCard(&myCard) == true) {
-    if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != 0 && myCard.nfcFolderSettings.mode != 0) {
+    if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != 0 && myCard.nfcFolderSettings.mode != ModifierMode) {
       playFolder();
     }
 
@@ -2292,24 +2303,24 @@ void adminMenu(bool fromCard = false) {
     tempCard.nfcFolderSettings.special2 = 0;
     tempCard.nfcFolderSettings.mode = voiceMenu(10, 966, 966, false, false, 0, true);
 
-    if (tempCard.nfcFolderSettings.mode != 0) {
-      if (tempCard.nfcFolderSettings.mode == 1) {
+    if (tempCard.nfcFolderSettings.mode != ModifierMode) {
+      if (tempCard.nfcFolderSettings.mode == AudioDrama) {
         switch (voiceMenu(4, 960, 960)) {
           case 1: tempCard.nfcFolderSettings.special = 5; break;
           case 2: tempCard.nfcFolderSettings.special = 15; break;
           case 3: tempCard.nfcFolderSettings.special = 30; break;
           case 4: tempCard.nfcFolderSettings.special = 60; break;
         }
-      } else if (tempCard.nfcFolderSettings.mode == 8) {
+      } else if (tempCard.nfcFolderSettings.mode == Album_Section) {
         switch (voiceMenu(2, 1, 1)) {
           case 1: tempCard.nfcFolderSettings.special = 0; break;
           case 2: tempCard.nfcFolderSettings.special2 = 1; break;
         }
       }
-      else if (tempCard.nfcFolderSettings.mode == 9) {
+      else if (tempCard.nfcFolderSettings.mode == Party_Section) {
         tempCard.nfcFolderSettings.special =  voiceMenu(99, 301, 0, true, 0, 0, true);
       }
-      else if (tempCard.nfcFolderSettings.mode == 10) {
+      else if (tempCard.nfcFolderSettings.mode == AudioBook_Section) {
         tempCard.nfcFolderSettings.special =  voiceMenu(99, 301, 0, true, 0, 0, true);
         tempCard.nfcFolderSettings.special2 =  voiceMenu(30, 904, 0, true, 0, 0, true);
       }
@@ -2612,29 +2623,29 @@ bool setupFolder(folderSettings * theFolder) {
   //  writeAudiobookMemory (myFolder->folder,myFolder->special3, 1);
 
   // Einzelmodus > Datei abfragen
-  if (theFolder->mode == 4)
+  if (theFolder->mode == Single)
     theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 320, 0,
                                    true, theFolder->folder);
   // Admin Funktionen
-  if (theFolder->mode == 6) {
+  if (theFolder->mode == AdminMenu) {
     theFolder->folder = 0;
     theFolder->mode = 255;
   }
   // Spezialmodus Von-Bis
-  if (theFolder->mode == 7 || theFolder->mode == 8 || theFolder->mode == 9 || theFolder->mode == 10) {
+  if (theFolder->mode == AudioDrama_Section || theFolder->mode == Album_Section || theFolder->mode == Party_Section || theFolder->mode == AudioBook_Section) {
     theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 321, 0,
                                    true, theFolder->folder);
     theFolder->special2 = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 322, 0,
                                     true, theFolder->folder, theFolder->special);
   }
     // Speicherplatz Hörbuch
-  if (theFolder->mode == 5 || theFolder->mode == 10) {
+  if (theFolder->mode == AudioBook || theFolder->mode == AudioBook_Section) {
     theFolder->special3 = voiceMenu(255, 325, 0,
                                    false, 0, 0, true);
   }
   
   //Puzzle oder Quiz Karte
-  if (theFolder->mode == 11 ) {
+  if (theFolder->mode == PuzzlePart ) {
     theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 323, 0,
                                    true, theFolder->folder);
     theFolder->special2 = voiceMenu(255, 324, 0,
@@ -2834,7 +2845,7 @@ bool readCard(nfcTagObject * nfcTag) {
           return false;
         }
         }
-        if (tempCard.nfcFolderSettings.mode != 0 && tempCard.nfcFolderSettings.mode != 255) {
+        if (tempCard.nfcFolderSettings.mode != Modifier && tempCard.nfcFolderSettings.mode != 255) {
         if (isPlaying()) {
           mp3.playAdvertisement(260);
         }
@@ -3131,13 +3142,13 @@ void RotSwSet (uint8_t RotarySwitchPosition) {
 #endif
 //////////////////////////////////////////////////////////////////////////
 
-bool SetModifier (uint8_t _Mode, uint8_t _Special, uint8_t _Special2) {
+bool SetModifier (uint8_t tmpMode, uint8_t tmpSpecial1, uint8_t tmpSpecial2) {
   if (activeModifier != NULL) {
-    if (activeModifier->getActive() == _Mode) {
+    if (activeModifier->getActive() == tmpMode) {
         return RemoveModifier();
     }
   }
-  if (_Mode != 0 && _Mode != 255) {
+  if (tmpMode != ModifierMode && tmpMode != AdminMenuMod) {
     if (isPlaying()) {
       mp3.playAdvertisement(260);
     }
@@ -3155,20 +3166,20 @@ bool SetModifier (uint8_t _Mode, uint8_t _Special, uint8_t _Special2) {
     }
   }
   delay(2000);
-  switch (_Mode) {
+  switch (tmpMode) {
     case 0:
     case 255:
       mfrc522.PICC_HaltA(); mfrc522.PCD_StopCrypto1(); adminMenu(true);  break;
-    case 1: activeModifier = new SleepTimer(_Special); break;
+    case 1: activeModifier = new SleepTimer(tmpSpecial1); break;
     case 2: activeModifier = new FreezeDance(); break;
     case 3: activeModifier = new Locked(); break;
     case 4: activeModifier = new ToddlerMode(); break;
     case 5: activeModifier = new KindergardenMode(); break;
     case 6: activeModifier = new RepeatSingleModifier(); break;
     case 7: activeModifier = new FeedbackModifier(); break;
-    case 8: activeModifier = new PuzzleGame(_Special); break;
-    case 9: activeModifier = new QuizGame(_Special); break;
-    case 10: activeModifier = new ButtonSmash(_Special, _Special2); break;
+    case 8: activeModifier = new PuzzleGame(tmpSpecial1); break;
+    case 9: activeModifier = new QuizGame(tmpSpecial1); break;
+    case 10: activeModifier = new ButtonSmash(tmpSpecial1, tmpSpecial2); break;
   }
   //delay(2000);
   return false;
