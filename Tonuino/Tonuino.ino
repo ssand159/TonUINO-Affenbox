@@ -2808,7 +2808,7 @@ bool readCard(nfcTagObject * nfcTag) {
   tempCard.nfcFolderSettings.special = buffer[7];
   tempCard.nfcFolderSettings.special2 = buffer[8];
   tempCard.nfcFolderSettings.special3 = buffer[9];
-  tempCard.nfcFolderSettings.special3 = buffer[10];
+  tempCard.nfcFolderSettings.special4 = buffer[10];
   
   if (tempCard.cookie == cardCookie) {
 
