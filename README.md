@@ -32,30 +32,23 @@ Mein eigener Fork der TonUINO DEV 2.1
 Funktionsumfang/ Änderungen
 
 - Start Up Sound und ShutDown Sound über ein define eingefügt.
-
 - Zu-/Abschalten des Lautsprechers um das Störgeräusch des DF Players beim Einschalten zu entfernen. Setzt eine zusätzliche Schaltung voraus.
-
 - Ausschalten über langen druck auf Pause Taste, setzt geeignete Hardware vorraus (z.B. Pololu Switch)
-
 - Serielle Ausgaben können über ein #define zu/abgeschaltete werden um Programmspeicher zu sparen.
-
 - Rotary Encoder KY 040 unterstützung zur Lautstärkeregelung
-
 - Drehschalter unterstützung um Ordner abzuspielen , Modifier auszuwählen oder für Systembefehle (Pause, Volume, ...)
-
 - Hörbuchmodus Von-Bis 
-
 - erweiterter Hörbuchspeicher um zusammen mit dem Hörbuchmodus Von-Bis mehrere Hörbücher in einem Ordner abzulegen
-
 - Spiele: Puzzle, Quiz, Button Smash
-
 
 
 HINWEIS: Bitte den mp3 Ordner erneuern!
 
-Viele Funktionen, sind über #defines aktivierbar und/pder konfigurierbar 
+
+Viele Funktionen, sind über #defines aktivierbar und/oder konfigurierbar 
 
 
+# Software Features
 
 
 ## Feature: Puzzle Spiel
@@ -207,11 +200,27 @@ Wenn ihr zusätzlich noch eine Auswahl an Puzzle-/Antwort Tags unbedruckt lasst,
 
 
 
-# Quelle für MP3s
+## Quelle für MP3s
 
 Eine Datenbank mit Piktogrammen und MP3 mit Passenden Wörtern in verschiednen Sprachen findet ihr hier
 
 http://www.arasaac.org/descargas.php
+
+
+## Hörbuch von bis mit Erweitertem Speicher
+
+
+Es gibt nun auch die Möglichkeit einen Bereich von MP3s in einem Ordner als Hörbuch zu definieren.
+
+Um mit diesem neuen Abspielmodus mehere Hörbücher innerhalb eines Ordner wie gehabt nutzen zu können, wurde die Möglichkeit eingebaut mehrere Speicherplätze in einem Ordner zu vergeben.
+
+Beim Knofigurieren einer neue Karte gibt es entsprechend neue Menüpunkte.
+
+
+# Hardware Features
+
+
+Alle Hardware bezognen Features sind über #defines zu-/abwählbar und konfigurierbar, wenn nötig.
 
 
 ## Feature: Drehschalter
@@ -221,21 +230,18 @@ Ihr benötigt dazu einen einpoligen Drehschalter, und Widerstände der selben Gr
 
 Die Widerstände werden zwischen die Schalterstellungen gelötet und bilden einen Spannungsteiler, der für jede Stellung eine Spannung definiert. Der erste Schalterkontakt wird mit GND verbunden, der Letzte mit 5V. Der Mittelkontakt muss mit einem Analogen Input verbunden werden.
 
-Über das #define ROTARY_SWITCH wird der Drehschalter im Programm ergänzt
-über folgende #defines wird die Hardware konfiguriert:
+Über das **#define ROTARY_SWITCH** wird der Drehschalter im Programm ergänzt.
+Über folgende #defines wird die Hardware konfiguriert:
 
 
-*#define ROTARY_SWITCH_POSITIONS 12*  //Anzahl Schalterstellungen
-
-*#define ROTARY_SWITCH_TOLERNACE 0.15* //Toleranz der Schwellspannung des Spannungsteiler
-
-*#define ROTARY_SWITCH_TRIGGER_TIME 2000* //Zeit die vergehen muss damit die gewählte Schalterstellung angenommen wird in ms
+- *#define ROTARY_SWITCH_PIN  A5*  //Analog In Pin
+- *#define ROTARY_SWITCH_POSITIONS 12*  //Anzahl Schalterstellungen
+- *#define ROTARY_SWITCH_TOLERNACE 0.15* //Toleranz der Schwellspannung des Spannungsteiler
+- *#define ROTARY_SWITCH_TRIGGER_TIME 2000* //Zeit die vergehen muss damit die gewählte Schalterstellung angenommen wird in ms
 
 
 Die einzelnen Postitionen des Drehschalter werden in einem Array definiert. Diese Array ist in void setup () deklariert.
 Hier ein Beispiel:
-
-
 
 
  //              |Folder No.|                 |Mode|                               |Special|                  |Special2|
@@ -263,10 +269,8 @@ Hier ein Beispiel:
   RotSwMap[10][0] =    -1;     RotSwMap[10][1] = Remove_Modifier_6;   RotSwMap[10][2] = 1;        RotSwMap[10][3] = 0;
   
   RotSwMap[11][0] =    -1;     RotSwMap[11][1] = Pause_1;             RotSwMap[11][2] = 5;        RotSwMap[11][3] = 5;
-  
-  
-  
 
+  
 Das Array ist genau wie die RFID Tags aufgebaut.
 
 Array Slot [x][0] enthält etweder die Ordnernummer (1-99), die Modifierkennung (0) oder eine Kennung für Saystembefehle (-1)
@@ -275,90 +279,65 @@ Array Slot [x][1] enthält den Mode und kann über die Enums auch als Wort einge
 
 **für [x][0] = 1-99:**
 
- - Hoerspiel_1 = 1,
-  
- - Album_2 = 2,
-  
--  Party_3 = 3,
-  
--  Einzel_4 = 4,
-  
--  Hoerbuch_5 = 5,
-  
--  Hoerspiel_von_bis_7 = 7,
-  
--  Album_von_bis_8 = 8,
-  
--  Party_von_bis_9 = 9,
-  
--  Hoerbuch_von_bis_10 = 10,
-  
- - Puzzle_11 = 11
-
-
+-  ModifierMode = 0
+-  AudioDrama = 1
+-  Album = 2
+-  Party = 3
+-  Single = 4
+-  AudioBook = 5
+-  AdminMenu = 6
+-  AudioDrama_Section = 7
+-  Album_Section = 8
+-  Party_Section = 9
+-  AudioBook_Section = 10
+-  PuzzlePart = 11
 
 
 **für [x][0] = 0:**
 
-  - SleepTimer_1 = 1,
-  
--  FreezeDance_2 = 2,
-  
--  Locked_3 = 3,
-  
- - ToddlerMode_4 = 4,
-  
--  KindergardenMode_5 = 5,
-  
--  RepeatSingleModifier_6 = 6,
-  
--  FeedbackModifier_7 = 7,
-  
--  PuzzleGame_8 = 8,
-  
--  QuizGame_9 = 9,
-  
--  ButtonSmash_10 = 10
-
-
+-  SleepTimerMod = 1
+-  FreezeDanceMod = 2
+-  LockedMod = 3
+-  ToddlerModeMod = 4
+-  KindergardenModeMod = 5
+-  RepeatSingleMod = 6
+-  FeedbackMod = 7
+-  PuzzleGameMod = 8
+-  QuizGameMod = 9
+-  ButtonSmashMod = 10
+-  AdminMenuMod = 255
 
 
  **für [x][0] = -1:**
 
--  Pause_1 = 1,
-  
- - Volume_2 = 2,
-  
--  Forward_3 = 3,
-  
- - Backward_4 = 4,
-  
--  ShutDown_5 = 5,
-  
--  Remove_Modifier_6
-
-
-
+-  PauseCont = 1,
+-  VolumeCont = 2,
+-  ForwardCont = 3,
+-  BackwardCont = 4,
+-  ShutDownCont = 5,
+-  RemoveModifierCont_6
 
 
 Array Slot [x][1] & Array Slot [x][2], stehen für die Specialwerte die je nach Mode eine andere Bedeutung haben:
 
-
 - Von-Bis Modis: [x][1] = Von, [x][2] = bis
-
 - Einzel oder Puzzleteil: [x][1] = Tracknummer
-
 - Quiz: [x][1] = Ordner Nr. mit den Fragen
-
 - Button Smash: [x][1] = Ordner Nr. mit den Sounds, [x][2] = Lauttstärke
-
-
 
 
 ## Feature: Rotary Encoder
 
 Mit dem Rotary Encoder kann die Lautstärke eingestellt werden.
-Um diesen nutzen zu können muss die Bibliothen im data Ordner eingebunden werden.
+Um diesen nutzen zu können muss die Bibliothek *ClickEncoder.h* im data Ordner eingebunden werden.
+
+Über das **#define ROTARY_ENCODER** wird der Drehencoder im Programm ergänzt.
+Über die folgenden #defines wird die Hardware konfiguriert.
+
+
+- *#define ROTARY_ENCODER_PIN_A 5*   
+- *#define ROTARY_ENCODER_PIN_B 6*  
+- *#define ROTARY_ENCODER_PIN_SUPPLY 8* //Es ist möglich einen IO Pin zu verwenden um den Encoder zu versorgen. Falls das nicht gewünshct ist diese Zeile auskommentieren.
 
 
 ## Feature: Lautsprecherschalter
@@ -370,3 +349,9 @@ Denkbar wäre auch den Lautsprecher für die Verwendung eines Kopfhörers.
 
 Bei der Wahl der MOSFET muss man auf einen möglichst geringen Widerstand achten.
 
+
+Über das **#define SPEAKER_SWITCH** wird der Lautsprecherschalter im Programm ergänzt.
+Über die folgenden #defines wird die Hardware konfiguriert:
+
+
+- *#define SpeakerOnPin 8* //digital IO Pin
