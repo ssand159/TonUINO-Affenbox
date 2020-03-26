@@ -165,7 +165,7 @@ typedef enum Enum_PlayMode
   Party_Section = 9,
   AudioBook_Section = 10,
   PuzzlePart = 11
-  
+
 };
 typedef enum Enum_Modifier
 {
@@ -271,7 +271,7 @@ bool SetModifier (uint8_t tmpMode, uint8_t tmpSpecial1, uint8_t tmpSpecial2);
 void RotSwloop(uint8_t TriggerTime = 0);
 #endif
 void shutDown ();
-static void nextTrack(uint16_t track);
+static void nextTrack();
 uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
                   bool preview = false, int previewFromFolder = 0, int defaultValue = 0, bool exitWithLongPress = false);
 bool isPlaying();
@@ -302,10 +302,20 @@ class Mp3Notify {
       Serial.println(action);
     }
     static void OnPlayFinished(DfMp3_PlaySources source, uint16_t track) {
-      //      Serial.print("end track");
-      //      Serial.println(track);
-      //      delay(100);
-      nextTrack(track);
+      //nextTrack(track);
+#ifdef Debug
+      Serial.println(track);
+#endif
+      //delay(100);
+      if (track == _lastTrackFinished) {
+#ifdef DEBUG
+        Serial.println(F("Ignoring duplicate OnPlayFinished event"));
+#endif
+        return;
+      }
+      _lastTrackFinished = track;
+
+      nextTrack();
     }
     static void OnPlaySourceOnline(DfMp3_PlaySources source) {
       PrintlnSourceAction(source, "online");
@@ -1325,7 +1335,7 @@ class FeedbackModifier: public Modifier {
 #endif
       return false;
     }
-     uint8_t getActive() {
+    uint8_t getActive() {
 #ifdef DEBUG
       Serial.println(F("Feedback:getActive"));
 #endif
@@ -1334,153 +1344,128 @@ class FeedbackModifier: public Modifier {
 };
 //////////////////////////////////////////////////////////////////////////
 // Leider kann das Modul selbst keine Queue abspielen, daher müssen wir selbst die Queue verwalten
-static void nextTrack(uint16_t track) {
-#ifdef DEBUG
-  Serial.print("nextTrack No ");
-  Serial.println(track);
-#endif
+static void nextTrack() {
+  uint16_t tmpNextTrack;
 
   if (activeModifier != NULL)
     if (activeModifier->handleNext() == true)
       return;
-
-  if (track == _lastTrackFinished) {
-    return;
-  }
-  _lastTrackFinished = track;
 
   if (knownCard == false)
     // Wenn eine neue Karte angelernt wird soll das Ende eines Tracks nicht
     // verarbeitet werden
     return;
 
-#ifdef DEBUG
-  Serial.println(F("nextTrack"));
-#endif
+  switch (myFolder->mode) {
+    case Album:
+    case Album_Section:
+      if (currentTrack != numTracksInFolder)
+        tmpNextTrack = currentTrack + 1;
+      else
+        setstandbyTimer();
+      break;
 
-  if (myFolder->mode == AudioDrama || myFolder->mode == AudioDrama_Section) {
+    case Party:
+    case Party_Section:
+      if (currentTrack != numTracksInFolder - firstTrack + 1)
+        tmpNextTrack = currentTrack + 1;
+      else {
 #ifdef DEBUG
-    Serial.println(F("Hörspiel aktiv > no new Track"));
+        Serial.println(F("queue End"));
 #endif
-    setstandbyTimer();
-
-  }
-  if (myFolder->mode == Album || myFolder->mode == Album_Section) {
-    if (currentTrack != numTracksInFolder) {
-      currentTrack = currentTrack + 1;
-      mp3.playFolderTrack(myFolder->folder, currentTrack);
-#ifdef DEBUG
-      Serial.print(F("Album aktiv > next Track "));
-      Serial.print(currentTrack);
-#endif
-    } else
-
-      setstandbyTimer();
-    { }
-  }
-  if (myFolder->mode == Party || myFolder->mode == Party_Section || myFolder->mode == PuzzlePart) {
-    if (currentTrack != numTracksInFolder - firstTrack + 1) {
-#ifdef DEBUG
-      Serial.print(F("Party > queue next "));
-#endif
-      currentTrack++;
-    } else {
-#ifdef DEBUG
-      Serial.println(F("Queue End > repeat"));
-#endif
-      currentTrack = 1;
-      //// Wenn am Ende der Queue neu gemischt werden soll bitte die Zeilen wieder aktivieren
-      //     Serial.println(F("Ende der Queue > mische neu"));
-      //     shuffleQueue();
-    }
-#ifdef DEBUG
-    Serial.println(queue[currentTrack - 1]);
-#endif
-    mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
-  }
-
-  if (myFolder->mode == Single) {
-#ifdef DEBUG
-    Serial.println(F("Einzel aktiv"));
-#endif
-
-    setstandbyTimer();
-  }
-  if (myFolder->mode == AudioBook || myFolder->mode == AudioBook_Section) {
-    if (currentTrack != numTracksInFolder) {
-      currentTrack = currentTrack + 1;
-#ifdef DEBUG
-      Serial.print(F("Hörbuch aktiv > next Track, "
-                     "save state"));
-      Serial.println(currentTrack);
-#endif
-
-      mp3.playFolderTrack(myFolder->folder, currentTrack);
-
-      // Fortschritt im EEPROM abspeichern
-      writeAudiobookMemory (myFolder->folder,myFolder->special3, currentTrack);
-    } else {
-      // Fortschritt zurücksetzen (wenn vorhanden: auf das nächste Hörspiel im Ordner. sonst: ganz auf den Anfang)
-      if (currentTrack < mp3.getFolderTrackCount(myFolder->folder)) {
-        writeAudiobookMemory (myFolder->folder,myFolder->special3, firstTrack + numTracksInFolder);
-      } else {
-        writeAudiobookMemory (myFolder->folder,myFolder->special3, 1);
+        currentTrack = 1;
+        //// Wenn am Ende der Queue neu gemischt werden soll bitte die Zeilen wieder aktivieren
+        //     Serial.println(F("Ende der Queue > mische neu"));
+        //     shuffleQueue();
       }
+      tmpNextTrack = queue[tmpNextTrack - 1];
+      break;
+
+    case AudioBook:
+    case AudioBook_Section:
+      if (currentTrack != numTracksInFolder) {
+        tmpNextTrack = currentTrack + 1;
+
+        // Fortschritt im EEPROM abspeichern
+        writeAudiobookMemory (myFolder->folder, myFolder->special3, tmpNextTrack);
+      } else {
+        // Fortschritt zurücksetzen (wenn vorhanden: auf das nächste Hörspiel im Ordner. sonst: ganz auf den Anfang)
+        if (currentTrack < mp3.getFolderTrackCount(myFolder->folder)) {
+          writeAudiobookMemory (myFolder->folder, myFolder->special3, firstTrack + numTracksInFolder);
+        } else {
+          writeAudiobookMemory (myFolder->folder, myFolder->special3, 1);
+        }
+        setstandbyTimer();
+      }
+      break;
+
+    default:
+#ifdef DEBUG
+      Serial.println(F("No next Track"));
+#endif
       setstandbyTimer();
-    }
+      return;
+      break;
   }
+
+#ifdef DEBUG
+  Serial.print("next track: ");
+  Serial.println(tmpNextTrack);
+#endif
+
+  mp3.playFolderTrack(myFolder->folder, tmpNextTrack);
+  currentTrack = tmpNextTrack;
   delay(500);
 }
 //////////////////////////////////////////////////////////////////////////
 static void previousTrack() {
+  uint16_t tmpPreviousTrack;
+
+  switch (myFolder->mode) {
+    case Album:
+    case Album_Section:
+      if (currentTrack != firstTrack)
+        tmpPreviousTrack = currentTrack - 1;
+      break;
+
+    case Party:
+    case Party_Section:
+      if (currentTrack != 1)
+        tmpPreviousTrack = currentTrack - 1;
+      else
+      {
 #ifdef DEBUG
-  Serial.println(F("previousTrack"));
+        Serial.print(F("beginn queue"));
 #endif
-  if (myFolder->mode == Album || myFolder->mode == Album_Section) {
+        tmpPreviousTrack = numTracksInFolder;
+      }
+      tmpPreviousTrack = queue[tmpPreviousTrack - 1];
+      break;
+
+    case AudioBook:
+    case AudioBook_Section:
+      if (currentTrack != firstTrack)
+        tmpPreviousTrack = currentTrack - 1;
+
+      // Fortschritt im EEPROM abspeichern
+      writeAudiobookMemory (myFolder->folder, myFolder->special3, tmpPreviousTrack);
+      break;
+
+    default:
 #ifdef DEBUG
-    Serial.println(F("Album aktiv > prev Track"));
+      Serial.println(F("No previous Track"));
 #endif
-    if (currentTrack != firstTrack) {
-      currentTrack = currentTrack - 1;
-    }
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
+      setstandbyTimer();
+      break;
   }
-  if (myFolder->mode == Party || myFolder->mode == Party_Section) {
-    if (currentTrack != 1) {
+
 #ifdef DEBUG
-      Serial.print(F("Party aktiv > back in qeueue "));
+  Serial.print("previous track: ");
+  Serial.println(tmpPreviousTrack);
 #endif
-      currentTrack--;
-    }
-    else
-    {
-#ifdef DEBUG
-      Serial.print(F("Anfang Queue > end"));
-#endif
-      currentTrack = numTracksInFolder;
-    }
-#ifdef DEBUG
-    Serial.println(queue[currentTrack - 1]);
-#endif
-    mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
-  }
-  if (myFolder->mode == Single) {
-#ifdef DEBUG
-    Serial.println(F("Einzel aktiv > repeat track"));
-#endif
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
-  }
-  if (myFolder->mode == AudioBook || myFolder->mode == AudioBook_Section) {
-#ifdef DEBUG 2
-    Serial.println(F("Hörbuch aktiv > save state"));
-#endif
-    if (currentTrack != firstTrack) {
-      currentTrack = currentTrack - 1;
-    }
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
-    // Fortschritt im EEPROM abspeichern
-    writeAudiobookMemory (myFolder->folder,myFolder->special3, currentTrack);
-  }
+
+  mp3.playFolderTrack(myFolder->folder, tmpPreviousTrack);
+  currentTrack = tmpPreviousTrack;
   delay(1000);
 }
 //////////////////////////////////////////////////////////////////////////
@@ -1520,7 +1505,7 @@ void setup() {
   Serial.println(F("created by Thorsten Voß and licensed under GNU/GPL."));
   Serial.println(F("Information and contribution at https://tonuino.de.\n"));
   Serial.println(F("Fork by Marco Schulz"));
-  
+
   analogReference(DEFAULT);
 
   // Busy Pin
@@ -1604,16 +1589,16 @@ void setup() {
 #endif
 
 
-//
-//#ifdef CHECK_BATTERY
-//  pinMode(LEDredPin, OUTPUT);
-//  pinMode(LEDgreenPin, OUTPUT);
-//
-//  setColor(0, 10, 0); // White Color
-//
-//  batLevel_LEDyellow = batLevel_LEDyellowOn;
-//  batLevel_LEDred = batLevel_LEDredOn;
-//#endif
+  //
+  //#ifdef CHECK_BATTERY
+  //  pinMode(LEDredPin, OUTPUT);
+  //  pinMode(LEDgreenPin, OUTPUT);
+  //
+  //  setColor(0, 10, 0); // White Color
+  //
+  //  batLevel_LEDyellow = batLevel_LEDyellowOn;
+  //  batLevel_LEDred = batLevel_LEDredOn;
+  //#endif
 
   // load Settings from EEPROM
   loadSettingsFromFlash();
@@ -1722,13 +1707,11 @@ void volumeDownButton() {
 #endif
 //////////////////////////////////////////////////////////////////////////
 void nextButton() {
-
-
   if (activeModifier != NULL)
     if (activeModifier->handleNextButton() == true)
       return;
 
-  nextTrack(random(65536));
+  nextTrack();
   delay(300);
 }
 //////////////////////////////////////////////////////////////////////////
@@ -1745,6 +1728,7 @@ void previousButton() {
 //////////////////////////////////////////////////////////////////////////
 void playFolder() {
   uint8_t counter = 0;
+  uint16_t playTrack;
 #ifdef DEBUG
   Serial.println(F("playFolder")) ;
 #endif
@@ -1760,123 +1744,145 @@ void playFolder() {
   Serial.println(myFolder->folder);
 #endif
 
-  // Hörspielmodus: eine zufällige Datei aus dem Ordner
-  if (myFolder->mode == AudioDrama) {
+  switch (myFolder->mode) {
+    case AudioDrama:
 #ifdef DEBUG
-    Serial.println(F("Hörspiel > one random track"));
+      Serial.println(F("Hörspiel > one random track"));
 #endif
-    currentTrack = random(1, numTracksInFolder + 1);
+      playTrack = random(1, numTracksInFolder + 1);
+      break;
+    case AudioDrama_Section:
 #ifdef DEBUG
-    Serial.println(currentTrack);
+      Serial.println(F("Von-Bis Hörspiel > one random track"));
+      Serial.print(myFolder->special);
+      Serial.print(F(" to "));
+      Serial.println(myFolder->special2);
 #endif
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
-  }
-  // Album Modus: kompletten Ordner spielen
-  if (myFolder->mode == Album) {
+      numTracksInFolder = myFolder->special2;
+      playTrack = random(myFolder->special, numTracksInFolder + 1);
+      break;
+
+    case Album:
 #ifdef DEBUG
-    Serial.println(F("Album > complete folder"));
+      Serial.println(F("Album > complete folder"));
 #endif
-    currentTrack = 1;
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
-  }
-  // Party Modus: Ordner in zufälliger Reihenfolge
-  if (myFolder->mode == Party) {
+      playTrack = 1;
+      break;
+    case Album_Section:
 #ifdef DEBUG
-    Serial.println(
-      F("Party > random complete folder"));
+      Serial.println(F("Von-Bis Album > complete range of tracks"));
+      Serial.print(myFolder->special);
+      Serial.print(F(" to "));
+      Serial.println(myFolder->special2);
 #endif
-    shuffleQueue();
-    currentTrack = 1;
-    mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
-  }
-  // Einzel Modus: eine Datei aus dem Ordner abspielen
-  if (myFolder->mode == Single) {
+      numTracksInFolder = myFolder->special2;
+      playTrack = myFolder->special;
+      break;
+
+    case Party:
 #ifdef DEBUG
-    Serial.println(
-      F("Einzel > one specific track"));
+      Serial.println(
+        F("Party > random complete folder"));
 #endif
-    currentTrack = myFolder->special;
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
-  }
-  // Hörbuch Modus: kompletten Ordner spielen und Fortschritt merken
-  if (myFolder->mode == AudioBook) {
+      shuffleQueue();
+      playTrack = queue[0];
+      break;
+    case Party_Section:
 #ifdef DEBUG
-    Serial.println(F("Hörbuch > complete folder, "
-                     "save track"));
+      Serial.println(
+        F("Von-Bis Party > random complete range"));
 #endif
-    currentTrack = readAudiobookMemory(myFolder->folder,myFolder->special3);
-    if (currentTrack == 0 || currentTrack > numTracksInFolder) {
-      currentTrack = 1;
-    }
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
-  }
-  // Spezialmodus Von-Bis: Hörspiel: eine zufällige Datei aus dem Ordner
-  if (myFolder->mode == AudioDrama_Section) {
+      firstTrack = myFolder->special;
+      numTracksInFolder = myFolder->special2;
+      shuffleQueue();
+      playTrack = queue[0];
+      break;
+
+    case AudioBook:
 #ifdef DEBUG
-    Serial.println(F("Von-Bis Hörspiel > one random track"));
-    Serial.print(myFolder->special);
-    Serial.print(F(" to "));
-    Serial.println(myFolder->special2);
+      Serial.println(F("Hörbuch > complete folder, "
+                       "save track"));
 #endif
-    numTracksInFolder = myFolder->special2;
-    currentTrack = random(myFolder->special, numTracksInFolder + 1);
+      playTrack = readAudiobookMemory(myFolder->folder, myFolder->special3);
+      if (playTrack == 0 || playTrack > numTracksInFolder) {
+        playTrack = 1;
+      }
+      break;
+    case AudioBook_Section:
 #ifdef DEBUG
-    Serial.println(currentTrack);
+      Serial.println(
+        F("Von-Bis Hörbuch > complete range, saves track"));
 #endif
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
+      firstTrack = myFolder->special;
+      numTracksInFolder = myFolder->special2;
+      playTrack = readAudiobookMemory(myFolder->folder, myFolder->special3);
+      if (playTrack < firstTrack || playTrack >= firstTrack + numTracksInFolder) {
+        playTrack = firstTrack;
+#ifdef DEBUG
+        Serial.println(F("not correct tag, start from beginn"));
+#endif
+      }
+      break;
+
+    case Single:
+#ifdef DEBUG
+      Serial.println(
+        F("Einzel > one specific track"));
+#endif
+      playTrack = myFolder->special;
+      break;
+
+    case PuzzlePart:
+#ifdef DEBUG
+      Serial.println(
+        F("Puzzle"));
+#endif
+      playTrack = myFolder->special;
+      break;
   }
 
-  // Spezialmodus Von-Bis: Album: alle Dateien zwischen Start und Ende spielen
-  if (myFolder->mode == Album_Section) {
-#ifdef DEBUG
-    Serial.println(F("Von-Bis Album > complete range of tracks"));
-    Serial.print(myFolder->special);
-    Serial.print(F(" to "));
-    Serial.println(myFolder->special2);
-#endif
-    numTracksInFolder = myFolder->special2;
-    currentTrack = myFolder->special;
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
-  }
 
-  // Spezialmodus Von-Bis: Party Ordner in zufälliger Reihenfolge
-  if (myFolder->mode == Party_Section) {
-#ifdef DEBUG
-    Serial.println(
-      F("Von-Bis Party > random complete range"));
-#endif
-    firstTrack = myFolder->special;
-    numTracksInFolder = myFolder->special2;
-    shuffleQueue();
-    currentTrack = 1;
-    mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
-  } 
-  // Spezialmodus Von-Bis: Hörbuch: kompletten Ordner spielen und Fortschritt merken (nur für ein Hörbuch zur Zeit je Ordner)
-  if (myFolder->mode == AudioBook_Section) {
-#ifdef DEBUG
-    Serial.println(
-      F("Von-Bis Hörbuch > complete range, saves track"));
-#endif
-    firstTrack = myFolder->special;
-    numTracksInFolder = myFolder->special2;
-    currentTrack = readAudiobookMemory(myFolder->folder,myFolder->special3);
-    if (currentTrack < firstTrack || currentTrack >= firstTrack + numTracksInFolder) {
-      currentTrack = firstTrack;
-#ifdef DEBUG
-      Serial.println(F("not correct tag, start from beginn"));
-#endif
+  /*  // Hörspielmodus: eine zufällige Datei aus dem Ordner
+    if (myFolder->mode == AudioDrama) {
     }
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
-  }
-  // Spezialmodus Puzzel: Spiel das nach Auflegen einer Karte die dazugehörige Gegenkarte erwartet. Puzzel Start Karte muss zuerst aufgelegt werden.
-  if (myFolder->mode == PuzzlePart) {
+    // Album Modus: kompletten Ordner spielen
+    if (myFolder->mode == Album) {
+    }
+    // Party Modus: Ordner in zufälliger Reihenfolge
+    if (myFolder->mode == Party) {
+    }
+    // Einzel Modus: eine Datei aus dem Ordner abspielen
+    if (myFolder->mode == Single) {
+    }
+    // Hörbuch Modus: kompletten Ordner spielen und Fortschritt merken
+    if (myFolder->mode == AudioBook) {
+    }
+    // Spezialmodus Von-Bis: Hörspiel: eine zufällige Datei aus dem Ordner
+    if (myFolder->mode == AudioDrama_Section) {
+    }
+
+    // Spezialmodus Von-Bis: Album: alle Dateien zwischen Start und Ende spielen
+    if (myFolder->mode == Album_Section) {
+    }
+
+    // Spezialmodus Von-Bis: Party Ordner in zufälliger Reihenfolge
+    if (myFolder->mode == Party_Section) {
+    }
+    // Spezialmodus Von-Bis: Hörbuch: kompletten Ordner spielen und Fortschritt merken (nur für ein Hörbuch zur Zeit je Ordner)
+    if (myFolder->mode == AudioBook_Section) {
+    }
+    // Spezialmodus Puzzel: Spiel das nach Auflegen einer Karte die dazugehörige Gegenkarte erwartet. Puzzel Start Karte muss zuerst aufgelegt werden.
+    if (myFolder->mode == PuzzlePart) {
+    }*/
+
 #ifdef DEBUG
-    Serial.println(
-      F("Puzzle"));
+  Serial.print(F("play track: "));
+  Serial.println(playTrack);
 #endif
-    currentTrack = myFolder->special;
-    mp3.playFolderTrack(myFolder->folder, currentTrack);
-  }
+
+  mp3.playFolderTrack(myFolder->folder, playTrack);
+  currentTrack = playTrack;
+
   while (!isPlaying() && counter <= 50) {
     delay(100);
     counter ++;
@@ -1982,7 +1988,7 @@ void shutDown () {
 
   mp3.pause();
   delay(500);
-  
+
 #ifdef STARTUP_SOUND
   mp3.setVolume(mySettings.initVolume);
   delay(500);
@@ -2005,9 +2011,9 @@ void loop() {
     RotEncSetVolume();
 #endif
 
-//#ifdef CHECK_BATTERY
-//    batteryCheck();
-//#endif
+    //#ifdef CHECK_BATTERY
+    //    batteryCheck();
+    //#endif
 
 #ifdef ROTARY_SWITCH
     RotSwloop(ROTARY_SWITCH_TRIGGER_TIME);
@@ -2611,7 +2617,7 @@ void resetCard() {
 }
 //////////////////////////////////////////////////////////////////////////
 bool setupFolder(folderSettings * theFolder) {
-  // Ordner abfragen 
+  // Ordner abfragen
   theFolder->folder = voiceMenu(99, 301, 0, true, 0, 0, true);
   if (theFolder->folder == 0) return false;
 
@@ -2638,12 +2644,12 @@ bool setupFolder(folderSettings * theFolder) {
     theFolder->special2 = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 322, 0,
                                     true, theFolder->folder, theFolder->special);
   }
-    // Speicherplatz Hörbuch
+  // Speicherplatz Hörbuch
   if (theFolder->mode == AudioBook || theFolder->mode == AudioBook_Section) {
     theFolder->special3 = voiceMenu(255, 325, 0,
-                                   false, 0, 0, true);
+                                    false, 0, 0, true);
   }
-  
+
   //Puzzle oder Quiz Karte
   if (theFolder->mode == PuzzlePart ) {
     theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 323, 0,
@@ -2657,9 +2663,9 @@ bool setupFolder(folderSettings * theFolder) {
 //////////////////////////////////////////////////////////////////////////
 void setupCard() {
   mp3.pause();
-  #ifdef DEBUG
+#ifdef DEBUG
   Serial.println(F("setupCard"));
-  #endif
+#endif
   nfcTagObject newCard;
   if (setupFolder(&newCard.nfcFolderSettings) == true)
   {
@@ -2675,9 +2681,9 @@ void setupCard() {
 bool readCard(nfcTagObject * nfcTag) {
   nfcTagObject tempCard;
   // Show some details of the PICC (that is: the tag/card)
- #ifdef DEBUG
+#ifdef DEBUG
   Serial.println(F("Card UID "));
- #endif
+#endif
   dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
 #ifdef DEBUG
   Serial.print(F("PICC type "));
@@ -2794,7 +2800,7 @@ bool readCard(nfcTagObject * nfcTag) {
   Serial.print(F("Data on Card : "));
 #endif
   dump_byte_array(buffer, 16);
-  
+
   uint32_t tempCookie;
   tempCookie = (uint32_t)buffer[0] << 24;
   tempCookie += (uint32_t)buffer[1] << 16;
@@ -2809,7 +2815,7 @@ bool readCard(nfcTagObject * nfcTag) {
   tempCard.nfcFolderSettings.special2 = buffer[8];
   tempCard.nfcFolderSettings.special3 = buffer[9];
   tempCard.nfcFolderSettings.special4 = buffer[10];
-  
+
   if (tempCard.cookie == cardCookie) {
 
     if (activeModifier != NULL && tempCard.nfcFolderSettings.folder != 0) {
@@ -3070,7 +3076,7 @@ uint8_t RotSwGetPosition () {
   for (uint8_t x = 0; x <= ROTARY_SWITCH_POSITIONS; x++)
   {
     if (analogValue >= (ROTARY_SWITCH_STEP_MIN * x) && analogValue <= (ROTARY_SWITCH_STEP_MAX * x)) {
-      return x+1;
+      return x + 1;
     }
   }
 }
@@ -3145,7 +3151,7 @@ void RotSwSet (uint8_t RotarySwitchPosition) {
 bool SetModifier (uint8_t tmpMode, uint8_t tmpSpecial1, uint8_t tmpSpecial2) {
   if (activeModifier != NULL) {
     if (activeModifier->getActive() == tmpMode) {
-        return RemoveModifier();
+      return RemoveModifier();
     }
   }
   if (tmpMode != ModifierMode && tmpMode != AdminMenuMod) {
@@ -3186,34 +3192,32 @@ bool SetModifier (uint8_t tmpMode, uint8_t tmpSpecial1, uint8_t tmpSpecial2) {
 }
 
 bool RemoveModifier() {
-      activeModifier = NULL;
+  activeModifier = NULL;
 #ifdef DEBUG
-      Serial.println(F("modifier removed"));
+  Serial.println(F("modifier removed"));
 #endif
-      if (isPlaying()) {
-        mp3.playAdvertisement(261);
-      }
-      else {
-        //            mp3.start();
-        //            delay(100);
-        //            mp3.playAdvertisement(261);
-        //            delay(100);
-        //            mp3.pause();
-        mp3.pause();
-        delay(500);
-        mp3.playMp3FolderTrack(261);
-        waitForTrackToFinish();
-      }
-      //delay(2000);
-      return false;
+  if (isPlaying()) {
+    mp3.playAdvertisement(261);
   }
+  else {
+    //            mp3.start();
+    //            delay(100);
+    //            mp3.playAdvertisement(261);
+    //            delay(100);
+    //            mp3.pause();
+    mp3.pause();
+    delay(500);
+    mp3.playMp3FolderTrack(261);
+    waitForTrackToFinish();
+  }
+  //delay(2000);
+  return false;
+}
 
-  uint8_t readAudiobookMemory (uint8_t folder, uint8_t memoryNumber) {
-    return EEPROM.read(folder + (99*memoryNumber));
-  }
+uint8_t readAudiobookMemory (uint8_t folder, uint8_t memoryNumber) {
+  return EEPROM.read(folder + (99 * memoryNumber));
+}
 
-  void writeAudiobookMemory (uint8_t folder, uint8_t memoryNumber, uint8_t track) {
-    EEPROM.update(folder + (99*memoryNumber), track);
-  }
-  
-  
+void writeAudiobookMemory (uint8_t folder, uint8_t memoryNumber, uint8_t track) {
+  EEPROM.update(folder + (99 * memoryNumber), track);
+}
