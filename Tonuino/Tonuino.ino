@@ -1980,16 +1980,16 @@ void shutDown () {
   Serial.println("Shut Down");
 #endif
 
-#ifdef STARTUP_SOUND
   mp3.pause();
   delay(500);
+  
+#ifdef STARTUP_SOUND
   mp3.setVolume(mySettings.initVolume);
   delay(500);
 #ifdef DEBUG
   Serial.println("Shut Down Sound");
 #endif
   mp3.playMp3FolderTrack(265);
-  delay(1000);
   waitForTrackToFinish();
 #endif
 
