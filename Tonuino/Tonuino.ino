@@ -318,6 +318,9 @@ class Mp3Notify {
 static DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(mySoftwareSerial);
 //////////////////////////////////////////////////////////////////////////
 void shuffleQueue() {
+  #ifdef DEBUG
+  Serial.println(F("shuffle Queue"));
+#endif
   // Queue für die Zufallswiedergabe erstellen
   for (uint8_t x = 0; x < numTracksInFolder - firstTrack + 1; x++)
     queue[x] = x + firstTrack;
@@ -332,16 +335,11 @@ void shuffleQueue() {
     queue[i] = queue[j];
     queue[j] = t;
   }
-  //#ifdef DEBUG
-  //  Serial.println(F("Queue :"));
-  //  for (uint8_t x = 0; x < numTracksInFolder - firstTrack + 1 ; x++)
-  //    Serial.println(queue[x]);
-  //#endif
 }
 //////////////////////////////////////////////////////////////////////////
 void writeSettingsToFlash() {
 #ifdef DEBUG
-  Serial.println(F("writeSettings"));
+  Serial.println(F("write settings to flash"));
 #endif
   int address = sizeof(myFolder->folder) * 100;
   EEPROM.put(address, mySettings);
@@ -349,7 +347,7 @@ void writeSettingsToFlash() {
 //////////////////////////////////////////////////////////////////////////
 void resetSettings() {
 #ifdef DEBUG
-  Serial.println(F("resetSettings"));
+  Serial.println(F("reset settings"));
 #endif
   mySettings.cookie = cardCookie;
   mySettings.version = 2;
@@ -376,8 +374,7 @@ void resetSettings() {
 void migrateSettings(int oldVersion) {
   if (oldVersion == 1) {
 #ifdef DEBUG
-    Serial.println(F("resetSettings"));
-    Serial.println(F("1 > 2"));
+    Serial.println(F("migrate Settings"));
 #endif
     mySettings.version = 2;
     mySettings.adminMenuLocked = 0;
@@ -391,7 +388,7 @@ void migrateSettings(int oldVersion) {
 //////////////////////////////////////////////////////////////////////////
 void loadSettingsFromFlash() {
 #ifdef DEBUG
-  Serial.println(F("loadSettings"));
+  Serial.println(F("load settings from flash"));
 #endif
   int address = sizeof(myFolder->folder) * 100;
   EEPROM.get(address, mySettings);
@@ -440,7 +437,7 @@ void loadSettingsFromFlash() {
 void setstandbyTimer() {
 
 #ifdef DEBUG
-  Serial.println(F("setstandbyTimer"));
+  Serial.println(F("set standby timer"));
 #endif
   if (mySettings.standbyTimer != 0)
     sleepAtMillis = millis() + (mySettings.standbyTimer * 60 * 1000);
@@ -454,7 +451,7 @@ void setstandbyTimer() {
 //////////////////////////////////////////////////////////////////////////
 void disablestandbyTimer() {
 #ifdef DEBUG
-  Serial.println(F("disablestandby"));
+  Serial.println(F("disable standby timer"));
 #endif
   sleepAtMillis = 0;
 }
@@ -462,12 +459,9 @@ void disablestandbyTimer() {
 void checkStandbyAtMillis() {
   if (sleepAtMillis != 0 && millis > sleepAtMillis) {
 #ifdef DEBUG
-    Serial.println(F("power off"));
+    Serial.println(F("standby active"));
 #endif
     // enter sleep state
-    digitalWrite(shutdownPin, HIGH);
-    delay(500);
-
     // http://discourse.voss.earth/t/intenso-s10000-powerbank-automatische-abschaltung-software-only/805
     // powerdown to 27mA (powerbank switches off after 30-60s)
     mfrc522.PCD_AntennaOff();
@@ -477,6 +471,7 @@ void checkStandbyAtMillis() {
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     cli();  // Disable interrupts
     sleep_mode();
+    shutDown();
   }
 }
 //////////////////////////////////////////////////////////////////////////
@@ -528,7 +523,7 @@ class SleepTimer: public Modifier {
     void loop() {
       if (this->sleepAtMillis != 0 && millis > this->sleepAtMillis) {
 #ifdef DEBUG
-        Serial.println(F("SleepTimer:loop > SLEEP"));
+        Serial.println(F("SleepTimer > sleep"));
 #endif
         mp3.pause();
         setstandbyTimer();
@@ -539,7 +534,7 @@ class SleepTimer: public Modifier {
 
     SleepTimer(uint8_t minutes) {
 #ifdef DEBUG
-      Serial.println(F("SleepTimer"));
+      Serial.print(F("SleepTimer minutes: "));
       Serial.println(minutes);
 #endif
       this->sleepAtMillis = millis() + minutes * 60000;
@@ -548,9 +543,6 @@ class SleepTimer: public Modifier {
       //      delay(500);
     }
     uint8_t getActive() {
-#ifdef DEBUG
-      Serial.println(F("SleepTimer:getActive"));
-#endif
       return SleepTimerMod;
     }
 };
@@ -564,8 +556,9 @@ class FreezeDance: public Modifier {
     void setNextStopAtMillis() {
       uint16_t seconds = random(this->minSecondsBetweenStops, this->maxSecondsBetweenStops + 1);
 #ifdef DEBUG
-      Serial.println(F("=FreezeDance:setNextStopAtMillis "));
-      Serial.println(seconds);
+      Serial.print(F("FreezeDance set next stop at "));
+      Serial.print(seconds);
+      Serial.println(F(" s."));
 #endif
       this->nextStopAtMillis = millis() + seconds * 1000;
     }
@@ -574,7 +567,7 @@ class FreezeDance: public Modifier {
     void loop() {
       if (this->nextStopAtMillis != 0 && millis > this->nextStopAtMillis) {
 #ifdef DEBUG
-        Serial.println(F("FreezeDance:loop > FREEZE"));
+        Serial.println(F("FreezeDance > freeze"));
 #endif
         if (isPlaying()) {
           mp3.playAdvertisement(301);
@@ -585,7 +578,7 @@ class FreezeDance: public Modifier {
     }
     FreezeDance(void) {
 #ifdef DEBUG
-      Serial.println(F("= FreezeDance"));
+      Serial.println(F("FreezeDance"));
 #endif
       if (isPlaying()) {
         delay(1000);
@@ -595,9 +588,6 @@ class FreezeDance: public Modifier {
       setNextStopAtMillis();
     }
     uint8_t getActive() {
-#ifdef DEBUG
-      Serial.println(F("FreezeDance:getActive"));
-#endif
       return FreezeDanceMod ;
     }
 };
@@ -624,7 +614,7 @@ class PuzzleGame: public Modifier {
       PartOneSaved = false;
       PartTwoSaved = false;
 #ifdef DEBUG
-      Serial.println(F("PuzzleGame:Success"));
+      Serial.println(F("PuzzleGame > success"));
 #endif
 
       mp3.playMp3FolderTrack(297); //Toll gemacht! Das ist richtig.
@@ -639,7 +629,7 @@ class PuzzleGame: public Modifier {
       PartTwoSaved = false;
 
 #ifdef DEBUG
-      Serial.println(F("PuzzleGame:Failure"));
+      Serial.println(F("PuzzleGame > Failure"));
 #endif
 
       mp3.playMp3FolderTrack(296); //Bist du dir sicher das diese Karte richtig ist? Versuche es doch noch einmal.
@@ -675,7 +665,7 @@ class PuzzleGame: public Modifier {
           readButtons();
         } while (upButton.isPressed() || downButton.isPressed());
 #ifdef DEBUG
-        Serial.println(F("PuzzleGame:loop > Del part"));
+        Serial.println(F("PuzzleGame > delete part"));
 #endif
         mp3.pause();
         delay(100);
@@ -690,7 +680,7 @@ class PuzzleGame: public Modifier {
       mp3.loop();
       mp3.pause();
 #ifdef DEBUG
-      Serial.println(F("= PuzzleGame"));
+      Serial.println(F("PuzzleGame"));
 #endif
 
       mode = special;
@@ -701,23 +691,14 @@ class PuzzleGame: public Modifier {
     }
 
     virtual bool handleNext() {
-#ifdef DEBUG
-      Serial.println(F("PuzzleGame:Next > Lock"));
-#endif
       return true;
     }
 
     virtual bool handleNextButton()       {
-#ifdef DEBUG
-      Serial.println(F("PuzzleGame:NextButton > Lock"));
-#endif
       return true;
     }
 
     virtual bool handlePreviousButton() {
-#ifdef DEBUG
-      Serial.println(F("PuzzleGame:PrevButton > Lock"));
-#endif
       return true;
     }
 
@@ -726,7 +707,7 @@ class PuzzleGame: public Modifier {
       this->tmpCard = *newCard;
       if (tmpCard.nfcFolderSettings.mode != PuzzlePart) {
 #ifdef DEBUG
-        Serial.println(F("PuzzleGame:RFID > No Valid Part"));
+        Serial.println(F("PuzzleGame > no valid part"));
 #endif
         mp3.pause();
         delay(100);
@@ -735,7 +716,7 @@ class PuzzleGame: public Modifier {
       }
       else {
 #ifdef DEBUG
-        Serial.println(F("PuzzleGame:RFID > Valid Part"));
+        Serial.println(F("PuzzleGame > valid part"));
 #endif
         if (!PartOneSaved)
         {
@@ -755,9 +736,6 @@ class PuzzleGame: public Modifier {
     }
 
     uint8_t getActive() {
-#ifdef DEBUG
-      Serial.println(F("PuzzleGame:getActive"));
-#endif
       return PuzzleGameMod;
     }
 };
@@ -781,7 +759,7 @@ class QuizGame: public Modifier {
       PartOneSaved = false;
       PartTwoSaved = false;
 #ifdef DEBUG
-      Serial.println(F("QuizGame:Success"));
+      Serial.println(F("QuizGame > success"));
 #endif
       mp3.playMp3FolderTrack(297);
       waitForTrackToFinish();
@@ -791,7 +769,7 @@ class QuizGame: public Modifier {
     void Failure () {
       PartTwoSaved = false;
 #ifdef DEBUG
-      Serial.println(F("QuizGame:Failure"));
+      Serial.println(F("QuizGame > failure"));
 #endif
       mp3.playMp3FolderTrack(296);
       waitForTrackToFinish();
@@ -815,9 +793,6 @@ class QuizGame: public Modifier {
 
       if (PartOneSaved && PartTwoSaved) {
         if (!isPlaying()) {
-#ifdef DEBUG
-          Serial.println(F("QuizGame:loop > Compare"));
-#endif
           CompareParts();
         }
       }
@@ -827,7 +802,7 @@ class QuizGame: public Modifier {
           readButtons();
         } while (upButton.isPressed() || downButton.isPressed());
 #ifdef DEBUG
-        Serial.println(F("QuizGame:loop > Del part"));
+        Serial.println(F("QuizGame > delete part"));
 #endif
         mp3.pause();
         delay(100);
@@ -842,7 +817,7 @@ class QuizGame: public Modifier {
     QuizGame(uint8_t special) {
       mp3.loop();
 #ifdef DEBUG
-      Serial.println(F("= QuizGame"));
+      Serial.println(F("QuizGame"));
 #endif
       mp3.pause();
 
@@ -854,26 +829,22 @@ class QuizGame: public Modifier {
       currentTrack = 0;
 
 #ifdef DEBUG
-      Serial.println(F("= QuizGame > Queue set"));
+      Serial.println(F("QuizGame > queue set"));
 #endif
       next();
     }
 
     void  next() {
       numTracksInFolder = mp3.getFolderTrackCount(PartOneFolder);
-#ifdef DEBUG
-      Serial.println(F("QuizGame:next()"));
-      Serial.println(currentTrack);
-      Serial.println(numTracksInFolder - firstTrack + 1);
-#endif
+
       if (currentTrack != numTracksInFolder - firstTrack + 1) {
 #ifdef DEBUG
-        Serial.println(F("QuizGame:next()-> Queue next"));
+        Serial.println(F("QuizGame > queue next"));
 #endif
         currentTrack++;
       } else {
 #ifdef DEBUG
-        Serial.println(F("QuizGame:next > repeat"));
+        Serial.println(F("QuizGame > queue repeat"));
 #endif
         currentTrack = 1;
       }
@@ -888,15 +859,12 @@ class QuizGame: public Modifier {
     }
 
     virtual bool handleNext() {
-#ifdef DEBUG
-      Serial.println(F("QuizGame:Next > Lock"));
-#endif
       return true;
     }
 
     virtual bool handlePause() {
 #ifdef DEBUG
-      Serial.println(F("QuizGame:Pause > Pause and repeat "));
+      Serial.println(F("QuizGame > pause and repeat "));
 #endif
       mp3.pause();
       delay(100);
@@ -905,16 +873,10 @@ class QuizGame: public Modifier {
     }
 
     virtual bool handleNextButton()       {
-#ifdef DEBUG
-      Serial.println(F("QuizGame:NextButton > Lock"));
-#endif
       return true;
     }
 
     virtual bool handlePreviousButton() {
-#ifdef DEBUG
-      Serial.println(F("QuizGame:PrevButton > Lock"));
-#endif
       return true;
     }
 
@@ -923,7 +885,7 @@ class QuizGame: public Modifier {
       this->tmpCard = *newCard;
       if (tmpCard.nfcFolderSettings.mode != PuzzlePart) {
 #ifdef DEBUG
-        Serial.println(F("QuizGame:RFID > No Valid Part"));
+        Serial.println(F("QuizGame > no valid part"));
 #endif
         mp3.pause();
         delay(100);
@@ -932,7 +894,7 @@ class QuizGame: public Modifier {
       }
       else {
 #ifdef DEBUG
-        Serial.println(F("QuizGame:RFID > Valid Part"));
+        Serial.println(F("QuizGame > valid part"));
 #endif
         if (PartOneSaved && !PartTwoSaved) {
           PartTwoSpecial = tmpCard.nfcFolderSettings.special;
@@ -945,9 +907,6 @@ class QuizGame: public Modifier {
     }
 
     uint8_t getActive() {
-#ifdef DEBUG
-      Serial.println(F("QuizGame:getActive"));
-#endif
       return QuizGameMod;
     }
 };
@@ -965,49 +924,35 @@ class ButtonSmash: public Modifier {
     ButtonSmash(uint8_t special, uint8_t special2) {
       mp3.loop();
 #ifdef DEBUG
-      Serial.println(F("= ButtonSmash"));
+      Serial.println(F("ButtonSmash"));
 #endif
       mp3.pause();
       delay(200);
-#ifdef DEBUG
-      Serial.println(F("= ButtonSmash > Set Vol"));
-#endif
+      
       mp3.setVolume(special2);
       delay(200);
-#ifdef DEBUG
-      Serial.println(F("= ButtonSmash > Set Folder"));
-#endif
+
       Folder = special;
       numTracksInFolder = mp3.getFolderTrackCount(Folder);
-#ifdef DEBUG
-      Serial.println(F("= ButtonSmash > queue set"));
-#endif
+
       firstTrack = 1;
       shuffleQueue();
       currentTrack = 0;
-
-#ifdef DEBUG
-      Serial.println(F("= ButtonSmash > Init End"));
-#endif
     }
 
     void  next() {
       mp3.pause();
       delay(100);
       numTracksInFolder = mp3.getFolderTrackCount(Folder);
-#ifdef DEBUG
-      Serial.println(F("ButtonSmash:next()"));
-      Serial.println(currentTrack);
-      Serial.println(numTracksInFolder - firstTrack + 1);
-#endif
+      
       if (currentTrack != numTracksInFolder - firstTrack + 1) {
 #ifdef DEBUG
-        Serial.println(F("ButtonSmash:next()-> queue next"));
+        Serial.println(F("ButtonSmash > queue next"));
 #endif
         currentTrack++;
       } else {
 #ifdef DEBUG
-        Serial.println(F("ButtonSmash:next > repeat"));
+        Serial.println(F("ButtonSmash > repeat queue"));
 #endif
         firstTrack = 1;
         shuffleQueue();
@@ -1018,70 +963,43 @@ class ButtonSmash: public Modifier {
     }
 
     virtual bool handleNext() {
-#ifdef DEBUG
-      Serial.println(F("ButtonSmash:Next"));
-#endif
       return true;
     }
 
     virtual bool handlePause() {
-#ifdef DEBUG
-      Serial.println(F("ButtonSmash:Pause"));
-#endif
       next();
       return true;
     }
 
     virtual bool handleNextButton()       {
-#ifdef DEBUG
-      Serial.println(F("ButtonSmash:NextButton"));
-#endif
       next();
       return true;
     }
 
     virtual bool handlePreviousButton() {
-#ifdef DEBUG
-      Serial.println(F("ButtonSmash:PrevButton"));
-#endif
       next();
       return true;
     }
 
     virtual bool handleVolumeUp() {
-#ifdef DEBUG
-      Serial.println(F("ButtonSmash:VolUp"));
-#endif
       next();
       return true;
     }
     virtual bool handleVolumeDown() {
-#ifdef DEBUG
-      Serial.println(F("ButtonSmash:VolDown"));
-#endif
       next();
       return true;
     }
 
     virtual bool handleShutDown() {
-#ifdef DEBUG
-      Serial.println(F("ButtonSmash:ShutDown"));
-#endif
       next();
       return true;
     }
     virtual bool handleRFID(nfcTagObject * newCard) {
-#ifdef DEBUG
-      Serial.println(F("ButtonSmash:RFID"));
-#endif
       next();
       return true;
     }
 
     uint8_t getActive() {
-#ifdef DEBUG
-      Serial.println(F("ButtonSmash:getActive"));
-#endif
       return ButtonSmashMod ;
     }
 };
@@ -1089,50 +1007,29 @@ class ButtonSmash: public Modifier {
 class Locked: public Modifier {
   public:
     virtual bool handlePause()     {
-#ifdef DEBUG
-      Serial.println(F("Locked:Pause > Lock"));
-#endif
       return true;
     }
     virtual bool handleNextButton()       {
-#ifdef DEBUG
-      Serial.println(F("Locked:NextButton > Lock"));
-#endif
       return true;
     }
     virtual bool handlePreviousButton() {
-#ifdef DEBUG
-      Serial.println(F("Locked:PrevButton > Lock"));
-#endif
       return true;
     }
     virtual bool handleVolumeUp()   {
-#ifdef DEBUG
-      Serial.println(F("Locked:VolUp > Lock"));
-#endif
       return true;
     }
     virtual bool handleVolumeDown() {
-#ifdef DEBUG
-      Serial.println(F("Locked:VolDown > Lock"));
-#endif
       return true;
     }
     virtual bool handleShutDown() {
-#ifdef DEBUG
-      Serial.println(F("Locked:ShutDown > Lock"));
-#endif
       return true;
     }
     virtual bool handleRFID(nfcTagObject *newCard) {
-#ifdef DEBUG
-      Serial.println(F("Locked:RFID > Lock"));
-#endif
       return true;
     }
     Locked(void) {
 #ifdef DEBUG
-      Serial.println(F("= Locked"));
+      Serial.println(F("Locked Moifier"));
 #endif
     }
     uint8_t getActive() {
@@ -1143,50 +1040,26 @@ class Locked: public Modifier {
 class ToddlerMode: public Modifier {
   public:
     virtual bool handlePause()     {
-#ifdef DEBUG
-      Serial.println(F("ToddlerMode:Pause > Lock"));
-#endif
       return true;
     }
     virtual bool handleNextButton()       {
-#ifdef DEBUG
-      Serial.println(F("ToddlerMode:NextButton > Lock"));
-#endif
       return true;
     }
     virtual bool handlePreviousButton() {
-#ifdef DEBUG
-      Serial.println(F("ToddlerMode:PrevButton > Lock"));
-#endif
       return true;
     }
     virtual bool handleVolumeUp()   {
-#ifdef DEBUG
-      Serial.println(F("ToddlerMode:VolUp > Lock"));
-#endif
       return true;
     }
     virtual bool handleVolumeDown() {
-#ifdef DEBUG
-      Serial.println(F("ToddlerMode:VolDown > Lock"));
-#endif
       return true;
     }
     virtual bool handleShutDown() {
-#ifdef DEBUG
-      Serial.println(F("Locked:ShutDown > Lock"));
-#endif
       return true;
     }
     ToddlerMode(void) {
-#ifdef DEBUG
-      Serial.println(F("= ToddlerMode"));
-#endif
     }
     uint8_t getActive() {
-#ifdef DEBUG
-      Serial.println(F("ToddlerMode:getActive"));
-#endif
       return ToddlerModeMod ;
     }
 };
@@ -1199,7 +1072,7 @@ class KindergardenMode: public Modifier {
   public:
     virtual bool handleNext() {
 #ifdef DEBUG
-      Serial.println(F("KindergardenMode:Next"));
+      Serial.println(F("KindergardenMode > next"));
 #endif
       if (this->cardQueued == true) {
         this->cardQueued = false;
@@ -1219,26 +1092,17 @@ class KindergardenMode: public Modifier {
       return false;
     }
     virtual bool handleNextButton()       {
-#ifdef DEBUG
-      Serial.println(F("KindergardenMode:NextButton > Lock"));
-#endif
       return true;
     }
     virtual bool handlePreviousButton() {
-#ifdef DEBUG
-      Serial.println(F("KindergardenMode:PrevButton > Lock"));
-#endif
       return true;
     }
     virtual bool handleShutDown() {
-#ifdef DEBUG
-      Serial.println(F("KindergardenMode:ShutDown > Lock"));
-#endif
       return true;
     }
     virtual bool handleRFID(nfcTagObject * newCard) { // lot of work to do!
 #ifdef DEBUG
-      Serial.println(F("KindergardenMode:RFID > queued"));
+      Serial.println(F("KindergardenMode > RFID queued"));
 #endif
       this->nextCard = *newCard;
       this->cardQueued = true;
@@ -1253,9 +1117,6 @@ class KindergardenMode: public Modifier {
 #endif
     }
     uint8_t getActive() {
-#ifdef DEBUG
-      Serial.println(F("KindergardenMode:getActive"));
-#endif
       return KindergardenModeMod;
     }
 };
@@ -1264,7 +1125,7 @@ class RepeatSingleModifier: public Modifier {
   public:
     virtual bool handleNext() {
 #ifdef DEBUG
-      Serial.println(F("RepeatSingle:Next > repeat track"));
+      Serial.println(F("RepeatSingle > repeat track"));
 #endif
       delay(50);
       if (isPlaying()) return true;
@@ -1278,9 +1139,6 @@ class RepeatSingleModifier: public Modifier {
 #endif
     }
     uint8_t getActive() {
-#ifdef DEBUG
-      Serial.println(F("RepeatSingle:getActive"));
-#endif
       return RepeatSingleMod;
     }
 };
@@ -1300,7 +1158,7 @@ class FeedbackModifier: public Modifier {
       }
       delay(500);
 #ifdef DEBUG
-      Serial.println(F("Feedback:VolDown"));
+      Serial.println(F("Feedback > VolDown"));
 #endif
       return false;
     }
@@ -1313,20 +1171,17 @@ class FeedbackModifier: public Modifier {
       }
       delay(500);
 #ifdef DEBUG
-      Serial.println(F("Feedback:VolUp"));
+      Serial.println(F("Feedback >VolUp"));
 #endif
       return false;
     }
     virtual bool handleRFID(nfcTagObject *newCard) {
 #ifdef DEBUG
-      Serial.println(F("Feedback:RFID"));
+      Serial.println(F("Feedback > RFID"));
 #endif
       return false;
     }
     uint8_t getActive() {
-#ifdef DEBUG
-      Serial.println(F("Feedback:getActive"));
-#endif
       return FeedbackMod;
     }
 };
@@ -1334,24 +1189,27 @@ class FeedbackModifier: public Modifier {
 // Leider kann das Modul selbst keine Queue abspielen, daher müssen wir selbst die Queue verwalten
 static void nextTrack(uint16_t track) {
   uint16_t tmpNextTrack = 65536;
- 
-#ifdef DEBUG
-  Serial.println(F("nextTrack"));
-#endif
 
   if (activeModifier != NULL)
     if (activeModifier->handleNext() == true)
+    #ifdef DEBUG
+      Serial.println(F("Next track locked"));
+#endif
       return;
 
-if (track == _lastTrackFinished) {
+  if (track == _lastTrackFinished) {
     return;
   }
   _lastTrackFinished = track;
-  
+
   if (knownCard == false)
     // Wenn eine neue Karte angelernt wird soll das Ende eines Tracks nicht
     // verarbeitet werden
     return;
+
+#ifdef DEBUG
+  Serial.println(F("nextTrack"));
+#endif
 
   switch (myFolder->mode) {
     case Album:
@@ -1532,49 +1390,19 @@ void setup() {
 #endif
 
 #ifdef ROTARY_SWITCH
-  // Enum_PlayMode
-  //        Hoerspiel_1 = 1,
-  //        Album_2 = 2,
-  //        Party_3 = 3,
-  //        Einzel_4 = 4,
-  //        Hoerbuch_5 = 5,
-  //        Hoerspiel_von_bis_7 = 7,
-  //        Album_von_bis_8 = 8,
-  //        Party_von_bis_9 = 9,
-  //        Puzzle_10 = 10,
-  //        Hoerbuch_von_bis_11 = 11
-  // Enum_Modifier
-  //        SleepTimer_1 = 1,
-  //        FreezeDance_2 = 2,
-  //        Locked_3 = 3,
-  //        ToddlerMode_4 = 4,
-  //        KindergardenMode_5 = 5,
-  //        RepeatSingleModifier_6 = 6,
-  //        FeedbackModifier_7 = 7,
-  //        PuzzleGame_8 = 8,
-  //        QuizGame_9 = 9,
-  //        ButtonSmash_10 = 10
-  // Enum_SystemControl
-  //         Pause_1 = 1,
-  //         Volume_2 = 2,
-  //         Forward_3 = 3,
-  //         Backward_4 = 4,
-  //         ShutDown_5 = 5,
-  //         Remove_Modifier_6
-
   //              |Folder No.|                 |Mode|                               |Special|                  |Special2|
-  RotSwMap[0][0] =     -1;     RotSwMap[0][1] =  Volume_2;             RotSwMap[0][2] = 5;         RotSwMap[0][3] = 0;
-  RotSwMap[1][0] =     -1;     RotSwMap[1][1] =  Volume_2;             RotSwMap[1][2] = 15;         RotSwMap[1][3] = 0;
-  RotSwMap[2][0] =     3;     RotSwMap[2][1] =  Party_3;             RotSwMap[2][2] = 0;         RotSwMap[2][3] = 0;
-  RotSwMap[3][0] =     4;     RotSwMap[3][1] =  Party_3;             RotSwMap[3][2] = 0;         RotSwMap[3][3] = 0;
-  RotSwMap[4][0] =     5;     RotSwMap[4][1] =  Party_3;             RotSwMap[4][2] = 0;         RotSwMap[4][3] = 0;
-  RotSwMap[5][0] =     6;     RotSwMap[5][1] =  Party_3;             RotSwMap[5][2] = 0;         RotSwMap[5][3] = 0;
-  RotSwMap[6][0] =     7;     RotSwMap[6][1] =  Party_3;             RotSwMap[6][2] = 0;         RotSwMap[6][3] = 0;
-  RotSwMap[7][0] =     8;     RotSwMap[7][1] =  Party_3;             RotSwMap[7][2] = 0;         RotSwMap[7][3] = 0;
+  RotSwMap[0][0] =     -1;     RotSwMap[0][1] =  0;             RotSwMap[0][2] = 5;         RotSwMap[0][3] = 0;
+  RotSwMap[1][0] =     -1;     RotSwMap[1][1] =  0;             RotSwMap[1][2] = 15;         RotSwMap[1][3] = 0;
+  RotSwMap[2][0] =     3;     RotSwMap[2][1] =  0;             RotSwMap[2][2] = 0;         RotSwMap[2][3] = 0;
+  RotSwMap[3][0] =     4;     RotSwMap[3][1] =  0;             RotSwMap[3][2] = 0;         RotSwMap[3][3] = 0;
+  RotSwMap[4][0] =     5;     RotSwMap[4][1] =  0;             RotSwMap[4][2] = 0;         RotSwMap[4][3] = 0;
+  RotSwMap[5][0] =     6;     RotSwMap[5][1] =  0;             RotSwMap[5][2] = 0;         RotSwMap[5][3] = 0;
+  RotSwMap[6][0] =     7;     RotSwMap[6][1] =  0;             RotSwMap[6][2] = 0;         RotSwMap[6][3] = 0;
+  RotSwMap[7][0] =     8;     RotSwMap[7][1] =  0;             RotSwMap[7][2] = 0;         RotSwMap[7][3] = 0;
   RotSwMap[8][0] =     0;     RotSwMap[8][1] =  2;       RotSwMap[8][2] = 0;         RotSwMap[8][3] = 0;
   RotSwMap[9][0] =     0;     RotSwMap[9][1] =  8;        RotSwMap[9][2] = 1;         RotSwMap[9][3] = 0;
-  RotSwMap[10][0] =    -1;     RotSwMap[10][1] = Remove_Modifier_6;          RotSwMap[10][2] = 1;        RotSwMap[10][3] = 0;
-  RotSwMap[11][0] =    -1;     RotSwMap[11][1] = Pause_1;      RotSwMap[11][2] = 5;        RotSwMap[11][3] = 5;
+  RotSwMap[10][0] =    -1;     RotSwMap[10][1] = 0;          RotSwMap[10][2] = 1;        RotSwMap[10][3] = 0;
+  RotSwMap[11][0] =    -1;     RotSwMap[11][1] = 0;      RotSwMap[11][2] = 5;        RotSwMap[11][3] = 5;
 
   RotSwCurrentPos = RotSwGetPosition();
   RotSwActivePos = RotSwCurrentPos;
@@ -1586,8 +1414,6 @@ void setup() {
   digitalWrite(SpeakerOnPin, LOW);
 #endif
 
-
-  //
   //#ifdef CHECK_BATTERY
   //  pinMode(LEDredPin, OUTPUT);
   //  pinMode(LEDgreenPin, OUTPUT);
@@ -1637,7 +1463,7 @@ void setup() {
   if (digitalRead(buttonPause) == LOW && digitalRead(buttonUp) == LOW &&
       digitalRead(buttonDown) == LOW) {
 #ifdef DEBUG
-    Serial.println(F("Reset > EEPROM wird gelöscht"));
+    Serial.println(F("Delete EEPROM"));
 #endif
     for (int i = 0; i < EEPROM.length(); i++) {
       EEPROM.update(i, 0);
@@ -1673,15 +1499,17 @@ void readButtons() {
 void volumeUpButton() {
   if (activeModifier != NULL)
     if (activeModifier->handleVolumeUp() == true)
-      return;
-#ifdef DEBUG
-  Serial.println(F("= volumeUp()"));
+    #ifdef DEBUG
+      Serial.println(F("Volume up locked"));
 #endif
+      return;
+
   if (volume < mySettings.maxVolume) {
     mp3.increaseVolume();
     volume++;
   }
 #ifdef DEBUG
+  Serial.print(F("volume Up: "));
   Serial.println(volume);
 #endif
 }
@@ -1689,16 +1517,17 @@ void volumeUpButton() {
 void volumeDownButton() {
   if (activeModifier != NULL)
     if (activeModifier->handleVolumeDown() == true)
+    #ifdef DEBUG
+      Serial.println(F("Volume down locked"));
+#endif
       return;
 
-#ifdef DEBUG
-  Serial.println(F("= volumeDown()"));
-#endif
   if (volume > mySettings.minVolume) {
     mp3.decreaseVolume();
     volume--;
   }
 #ifdef DEBUG
+  Serial.print(F("volume Down: "));
   Serial.println(volume);
 #endif
 }
@@ -1707,6 +1536,9 @@ void volumeDownButton() {
 void nextButton() {
   if (activeModifier != NULL)
     if (activeModifier->handleNextButton() == true)
+    #ifdef DEBUG
+      Serial.println(F("Next button locked"));
+#endif
       return;
 
   nextTrack(random(65536));
@@ -1714,10 +1546,11 @@ void nextButton() {
 }
 //////////////////////////////////////////////////////////////////////////
 void previousButton() {
-
-
   if (activeModifier != NULL)
     if (activeModifier->handlePreviousButton() == true)
+    #ifdef DEBUG
+      Serial.println(F("Previous button locked"));
+#endif
       return;
 
   previousTrack();
@@ -1745,13 +1578,13 @@ void playFolder() {
   switch (myFolder->mode) {
     case AudioDrama:
 #ifdef DEBUG
-      Serial.println(F("Hörspiel"));
+      Serial.println(F("Audio Drama"));
 #endif
       playTrack = random(1, numTracksInFolder + 1);
       break;
     case AudioDrama_Section:
 #ifdef DEBUG
-      Serial.println(F("Von-Bis Hörspiel"));
+      Serial.println(F("Audio Drama section"));
       Serial.print(myFolder->special);
       Serial.print(F(" to "));
       Serial.println(myFolder->special2);
@@ -1768,7 +1601,7 @@ void playFolder() {
       break;
     case Album_Section:
 #ifdef DEBUG
-      Serial.println(F("Von-Bis Album"));
+      Serial.println(F("Album section"));
       Serial.print(myFolder->special);
       Serial.print(F(" to "));
       Serial.println(myFolder->special2);
@@ -1779,17 +1612,13 @@ void playFolder() {
 
     case Party:
 #ifdef DEBUG
-      Serial.println(
-        F("Party"));
+      Serial.println(F("Party"));
 #endif
       shuffleQueue();
       playTrack = queue[0];
       break;
     case Party_Section:
-#ifdef DEBUG
-      Serial.println(
-        F("Von-Bis Party"));
-#endif
+
       firstTrack = myFolder->special;
       numTracksInFolder = myFolder->special2;
       shuffleQueue();
@@ -1798,7 +1627,7 @@ void playFolder() {
 
     case AudioBook:
 #ifdef DEBUG
-      Serial.println(F("Hörbuch"));
+      Serial.println(F("Audio Book"));
 #endif
       playTrack = readAudiobookMemory(myFolder->folder, myFolder->special3);
       if (playTrack == 0 || playTrack > numTracksInFolder) {
@@ -1807,8 +1636,7 @@ void playFolder() {
       break;
     case AudioBook_Section:
 #ifdef DEBUG
-      Serial.println(
-        F("Von-Bis Hörbuch"));
+      Serial.println(F("Audio Book section"));
 #endif
       firstTrack = myFolder->special;
       numTracksInFolder = myFolder->special2;
@@ -1823,16 +1651,14 @@ void playFolder() {
 
     case Single:
 #ifdef DEBUG
-      Serial.println(
-        F("Einzel"));
+      Serial.println(F("Single"));
 #endif
       playTrack = myFolder->special;
       break;
 
     case PuzzlePart:
 #ifdef DEBUG
-      Serial.println(
-        F("Puzzle"));
+      Serial.println(F("Puzzle Part"));
 #endif
       playTrack = myFolder->special;
       break;
@@ -1851,7 +1677,7 @@ void playFolder() {
     counter ++;
     if (counter >= 100) {
 #ifdef DEBUG
-      Serial.println(F("Track not starting.")) ;
+      Serial.println(F("Track not starting")) ;
 #endif
     }
   }
@@ -1859,7 +1685,7 @@ void playFolder() {
 //////////////////////////////////////////////////////////////////////////
 void playShortCut(uint8_t shortCut) {
 #ifdef DEBUG
-  Serial.print(F("ShortCut "));
+  Serial.print(F("Shortcut: "));
   Serial.println(shortCut);
 #endif
   if (mySettings.shortCuts[shortCut].folder != 0) {
@@ -1943,6 +1769,9 @@ void playShortCut(uint8_t shortCut) {
 void shutDown () {
   if (activeModifier != NULL)
     if (activeModifier->handleShutDown() == true)
+    #ifdef DEBUG
+      Serial.println(F("Shut down locked"));
+#endif
       return;
 
 #ifdef DEBUG
@@ -1955,10 +1784,9 @@ void shutDown () {
 #ifdef STARTUP_SOUND
   mp3.setVolume(mySettings.initVolume);
   delay(500);
-#ifdef DEBUG
-  Serial.println("Shut Down Sound");
-#endif
+
   mp3.playMp3FolderTrack(265);
+  delay(500);
   waitForTrackToFinish();
 #endif
 
@@ -2006,6 +1834,9 @@ void loop() {
 
       if (activeModifier != NULL)
         if (activeModifier->handlePause() == true)
+        #ifdef DEBUG
+      Serial.println(F("Pause locked"));
+#endif
           return;
       if (ignorePauseButton == false)
 
@@ -2783,6 +2614,9 @@ bool readCard(nfcTagObject * nfcTag) {
 
     if (activeModifier != NULL && tempCard.nfcFolderSettings.folder != 0) {
       if (activeModifier->handleRFID(&tempCard) == true) {
+        #ifdef DEBUG
+      Serial.println(F("RFID locked"));
+#endif
         return false;
       }
     }
@@ -3081,6 +2915,9 @@ void RotSwSet (uint8_t RotarySwitchPosition) {
       case 1: //Pause
         if (activeModifier != NULL)
           if (activeModifier->handlePause() == true)
+          #ifdef DEBUG
+      Serial.println(F("Pause locked"));
+#endif
             return;
         if (ignorePauseButton == false)
 
