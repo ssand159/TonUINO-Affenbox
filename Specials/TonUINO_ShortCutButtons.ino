@@ -646,7 +646,7 @@ MFRC522::StatusCode status;
 #define buttonUp A1
 #define buttonDown A2
 #define busyPin 4
-#define shutdownPin 7
+#define shutdownPin 8
 #define openAnalogPin A6
 
 #ifdef FIVEBUTTONS
