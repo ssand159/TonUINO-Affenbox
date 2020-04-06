@@ -159,9 +159,11 @@ void resetSettings() {
   mySettings.shortCuts[1].folder = 0;
   mySettings.shortCuts[2].folder = 0;
   mySettings.shortCuts[3].folder = 0;
+#ifdef SHORTCUTBUTTONS
   mySettings.shortCuts[4].folder = 0;
   mySettings.shortCuts[5].folder = 0;
   mySettings.shortCuts[6].folder = 0;     
+#endif
   mySettings.adminMenuLocked = 0;
   mySettings.adminMenuPin[0] = 1;
   mySettings.adminMenuPin[1] = 1;
