@@ -29,17 +29,21 @@ Own TonUINO Fork
 
 Mein eigener Fork der TonUINO DEV 2.1
 
-Funktionsumfang/ Änderungen
+Funktionsumfang/ Änderungen:
 
-- Start Up Sound und ShutDown Sound über ein define eingefügt.
+- Start Up Sound und ShutDown Sound über ein define eingefügt. Die Sounds werden nun im mp3 Ordner abgelegt: Start = 264; Shut Down = 265
 - Zu-/Abschalten des Lautsprechers um das Störgeräusch des DF Players beim Einschalten zu entfernen. Setzt eine zusätzliche Schaltung voraus.
 - Ausschalten über langen druck auf Pause Taste, setzt geeignete Hardware vorraus (z.B. Pololu Switch)
 - Serielle Ausgaben können über ein #define zu/abgeschaltete werden um Programmspeicher zu sparen.
 - Rotary Encoder KY 040 unterstützung zur Lautstärkeregelung
 - Drehschalter unterstützung um Ordner abzuspielen , Modifier auszuwählen oder für Systembefehle (Pause, Volume, ...)
+- Drehschalter über das Adminmenü konfigurierbar
 - Hörbuchmodus Von-Bis 
 - erweiterter Hörbuchspeicher um zusammen mit dem Hörbuchmodus Von-Bis mehrere Hörbücher in einem Ordner abzulegen
 - Spiele: Puzzle, Quiz, Button Smash
+- Pause bei entfernen des RFID Tags, über das Adminmenü auswählbar
+- Modifier können im EEPROM abgespeichert werden, um sie bei einem Reset zu reaktivieren. 
+
 
 
 HINWEIS: Bitte den mp3 Ordner erneuern!
