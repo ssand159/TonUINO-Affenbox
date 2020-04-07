@@ -20,7 +20,6 @@
 
 ///////// uncomment the below line to enable the function ////////////////
 //#define FIVEBUTTONS
-//#define CHECK_BATTERY
 #define DEBUG
 //#define PUSH_ON_OFF
 //#define STARTUP_SOUND
@@ -35,9 +34,9 @@
 #endif
 
 ///////// conifguration of the input and output pin //////////////////////
-#define buttonPause A0 //Default A0; 
-#define buttonUp A1 //Default A1; 
-#define buttonDown A2 //Default A2; 
+#define buttonPause A0 //Default A0; Pocket A2
+#define buttonUp A1 //Default A1; Pocket A0
+#define buttonDown A2 //Default A2; Pocket A1
 #define busyPin 4
 
 #define shutdownPin 7 //Default 7
@@ -56,39 +55,15 @@
 #define SpeakerOnPin 8
 #endif
 
-//#ifdef CHECK_BATTERY
-//#define LEDgreenPin 6
-//#define LEDredPin 5
-//#define batMeasPin A7
-//#endif
-
 #ifdef ROTARY_ENCODER
 #define ROTARY_ENCODER_PIN_A 5 //Default 5; 
 #define ROTARY_ENCODER_PIN_B 6 //Default 6; 
-//#define ROTARY_ENCODER_PIN_SUPPLY 8 //uncomment if you want to use an IO pin as supply
+#define ROTARY_ENCODER_PIN_SUPPLY 8 //uncomment if you want to use an IO pin as supply
 #endif
 
 #ifdef ROTARY_SWITCH
 #define ROTARY_SWITCH_PIN  A5
 #endif
-//////////////////////////////////////////////////////////////////////////
-
-///////// conifguration of the battery measurement ///////////////////////
-//#ifdef CHECK_BATTERY
-//#define refVoltage 1.08
-//#define pinSupply 1024.0
-//
-//#define batLevel_LEDyellowOn 3.5
-//#define batLevel_LEDyellowOff 3.7
-//
-//#define batLevel_LEDredOn 3.1
-//#define batLevel_LEDredOff 3.2
-//
-//#define batLevel_Empty 2.9
-//
-//#define Rone  9920.0 //6680.0
-//#define Rtwo  990.0 //987.0
-//#endif
 //////////////////////////////////////////////////////////////////////////
 
 ///////// conifguration of the rotary encoder ////////////////////////////
@@ -151,13 +126,10 @@ uint8_t RotSwCurrentPos = 0;
 unsigned long RotSwMillis = 0;
 uint8_t RotSwNewPos = 0;
 uint8_t RotSwActivePos = 0;
-//Array Slot [x,0] = Folder No., Array[x,1] = Play Mode, Array[x,2] = Special, Array[x,3] = Special2. If Folder = 0 then Mode = Modifier
-int8_t RotSwMap [ROTARY_SWITCH_POSITIONS][4];
 #endif
 
 typedef enum Enum_PlayMode
 {
-  ModifierMode = 0,
   AudioDrama = 1,
   Album = 2,
   Party = 3,
@@ -172,6 +144,7 @@ typedef enum Enum_PlayMode
 };
 typedef enum Enum_Modifier
 {
+  ModifierMode = 0,
   SleepTimerMod = 1,
   FreezeDanceMod = 2,
   LockedMod = 3,
@@ -186,30 +159,39 @@ typedef enum Enum_Modifier
 };
 typedef enum Enum_SystemControl
 {
+  SystemControl = 254,
   PauseSysCont = 1,
   VolumeSysCont = 2,
   ForwardSysCont = 3,
   BackwardSysCont = 4,
   ShutDownSysCont = 5,
-  RemoveModifierSysCont_6
+  RemoveModifierSysCont = 6
+};
+typedef enum Enum_AdminMenuOptions
+{
+  Exit = 0,
+  ResetCard = 1,
+  MaxVolume = 2,
+  MinVolume = 3,
+  InitVolume = 4,
+  EQ = 5,
+  CreateModifier = 6,
+  SetupShortCuts = 7,
+  SetupStandbyTimer = 8,
+  CreateFolderCards = 9,
+  InvertButtons = 10,
+  StopWhenCardAway = 11,
+  SetupRotarySwitch = 12,
+  ResetEEPROM = 13,
+  LockAdminMenu = 14
+};
+typedef enum Enum_PCS {
+  PCS_NO_CHANGE     = 0, // no change detected since last pollCard() call
+  PCS_NEW_CARD      = 1, // card with new UID detected (had no card or other card before)
+  PCS_CARD_GONE     = 2, // card is not reachable anymore
+  PCS_CARD_IS_BACK  = 3 // card was gone, and is now back again
 };
 
-
-//////////////////////////////////////////////////////////////////////////
-
-//////// battery check //////////////////////////////////////////////////
-//#ifdef CHECK_BATTERY
-//float Bat_Mean = 0.0;
-//float Bat_SqrMean = 0.0;
-//float Bat_VarMean = 0.0;
-//uint8_t Bat_N = 0;
-//uint8_t Bat_BatteryLoad = 0;
-//uint8_t batLevel_EmptyCounter = 0;
-//uint8_t batLevel_LEDyellowCounter = 0;
-//uint8_t batLevel_LEDredCounter = 0;
-//float batLevel_LEDyellow;
-//float batLevel_LEDred;
-//#endif
 //////////////////////////////////////////////////////////////////////////
 
 ///////// card cookie ////////////////////////////////////////////////////
@@ -253,9 +235,14 @@ struct adminSettings {
   bool locked;
   long standbyTimer;
   bool invertVolumeButtons;
-  folderSettings shortCuts[4];
+  folderSettings shortCuts[3];
+#ifdef ROTARY_SWITCH
+  folderSettings rotarySwitchSlots[ROTARY_SWITCH_POSITIONS];
+#endif
   uint8_t adminMenuLocked;
   uint8_t adminMenuPin[4];
+  folderSettings savedModifier;
+  bool stopWhenCardAway;
 };
 
 adminSettings mySettings;
@@ -273,6 +260,13 @@ void timerIsr();
 bool SetModifier (uint8_t tmpMode, uint8_t tmpSpecial1, uint8_t tmpSpecial2);
 void RotSwloop(uint8_t TriggerTime = 0);
 #endif
+
+static bool hasCard = false;
+static byte lastCardUid[4];
+static byte retries;
+static bool lastCardWasUL;
+static bool forgetLastCard = false;
+
 void shutDown ();
 static void nextTrack(uint16_t track);
 uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
@@ -314,7 +308,7 @@ class Mp3Notify {
       PrintlnSourceAction(source, "ready");
     }
     static void OnPlaySourceRemoved(DfMp3_PlaySources source) {
-      PrintlnSourceAction(source, "remove");
+      PrintlnSourceAction(source, "removed");
     }
 };
 
@@ -338,14 +332,14 @@ void shuffleQueue() {
     queue[i] = queue[j];
     queue[j] = t;
   }
-/*#ifdef DEBUG
-  Serial.println(F("Queue :"));
-  for (uint8_t x = 0; x < numTracksInFolder - firstTrack + 1 ; x++) {
-    Serial.print(x + 1);
-    Serial.print(". : ");
-    Serial.println(queue[x]);
-  }
-#endif*/
+  /*#ifdef DEBUG
+    Serial.println(F("Queue :"));
+    for (uint8_t x = 0; x < numTracksInFolder - firstTrack + 1 ; x++) {
+      Serial.print(x + 1);
+      Serial.print(". : ");
+      Serial.println(queue[x]);
+    }
+    #endif*/
 }
 //////////////////////////////////////////////////////////////////////////
 void writeSettingsToFlash() {
@@ -358,7 +352,7 @@ void writeSettingsToFlash() {
 //////////////////////////////////////////////////////////////////////////
 void resetSettings() {
 #ifdef DEBUG
-  Serial.println(F("reset settings"));
+  Serial.println(F("reset settings in EEPROM"));
 #endif
   mySettings.cookie = cardCookie;
   mySettings.version = 2;
@@ -372,13 +366,24 @@ void resetSettings() {
   mySettings.shortCuts[0].folder = 0;
   mySettings.shortCuts[1].folder = 0;
   mySettings.shortCuts[2].folder = 0;
-  mySettings.shortCuts[3].folder = 0;
   mySettings.adminMenuLocked = 0;
   mySettings.adminMenuPin[0] = 1;
   mySettings.adminMenuPin[1] = 1;
   mySettings.adminMenuPin[2] = 1;
   mySettings.adminMenuPin[3] = 1;
-
+  mySettings.savedModifier.folder = 0;
+  mySettings.savedModifier.mode = 0;
+  mySettings.stopWhenCardAway = false;
+#ifdef ROTARY_SWITCH
+  for (uint8_t i = 0; i <= ROTARY_SWITCH_POSITIONS - 1; i++) {
+    mySettings.rotarySwitchSlots[i].folder = 0;
+    mySettings.rotarySwitchSlots[i].mode = 0;
+    mySettings.rotarySwitchSlots[i].special = 0;
+    mySettings.rotarySwitchSlots[i].special2 = 0;
+    mySettings.rotarySwitchSlots[i].special3 = 0;
+    mySettings.rotarySwitchSlots[i].special4 = 0;
+  }
+#endif
   writeSettingsToFlash();
 }
 //////////////////////////////////////////////////////////////////////////
@@ -440,6 +445,10 @@ void loadSettingsFromFlash() {
   Serial.print(mySettings.adminMenuPin[1]);
   Serial.print(mySettings.adminMenuPin[2]);
   Serial.println(mySettings.adminMenuPin[3]);
+
+  Serial.print(F("Saved Modifier Mode: "));
+  Serial.println(mySettings.savedModifier.mode);
+
 #endif
 }
 
@@ -516,6 +525,9 @@ class Modifier {
     virtual bool handleRFID(nfcTagObject *newCard) {
       return false;
     }
+    virtual bool handleSaveModifier() {
+      return false;
+    }
     virtual uint8_t getActive() {
       return 0;
     }
@@ -549,9 +561,6 @@ class SleepTimer: public Modifier {
       Serial.println(minutes);
 #endif
       this->sleepAtMillis = millis() + minutes * 60000;
-      //      if (isPlaying())
-      //        mp3.playAdvertisement(302);
-      //      delay(500);
     }
     uint8_t getActive() {
       return SleepTimerMod;
@@ -634,7 +643,7 @@ class PuzzleGame: public Modifier {
 
     void Failure ()
     {
-      if (mode == PuzzlePart) {
+      if (mode == 1) {
         PartOneSaved = false;
       }
       PartTwoSaved = false;
@@ -1297,7 +1306,7 @@ static void previousTrack() {
 
     case Party:
     case Party_Section:
-      if (currentTrack != 1){
+      if (currentTrack != 1) {
         currentTrack = currentTrack - 1;
       }
       else {
@@ -1359,15 +1368,6 @@ void waitForTrackToFinish() {
   } while (isPlaying());
 }
 //////////////////////////////////////////////////////////////////////////
-//#ifdef CHECK_BATTERY
-//void setColor(int redValue, int greenValue, int blueValue) {
-//
-//  analogWrite(LEDredPin, redValue);
-//  analogWrite(LEDgreenPin, greenValue);
-//  //analogWrite(LEDbluePin, blueValue);
-//}
-//#endif
-//////////////////////////////////////////////////////////////////////////
 void setup() {
   Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
   // Dieser Hinweis darf nicht entfernt werden
@@ -1408,20 +1408,6 @@ void setup() {
 #endif
 
 #ifdef ROTARY_SWITCH
-  //              |Folder No.|                 |Mode|                               |Special|                  |Special2|
-  RotSwMap[0][0] =     -1;     RotSwMap[0][1] =  0;             RotSwMap[0][2] = 5;         RotSwMap[0][3] = 0;
-  RotSwMap[1][0] =     -1;     RotSwMap[1][1] =  0;             RotSwMap[1][2] = 15;         RotSwMap[1][3] = 0;
-  RotSwMap[2][0] =     3;     RotSwMap[2][1] =  0;             RotSwMap[2][2] = 0;         RotSwMap[2][3] = 0;
-  RotSwMap[3][0] =     4;     RotSwMap[3][1] =  0;             RotSwMap[3][2] = 0;         RotSwMap[3][3] = 0;
-  RotSwMap[4][0] =     5;     RotSwMap[4][1] =  0;             RotSwMap[4][2] = 0;         RotSwMap[4][3] = 0;
-  RotSwMap[5][0] =     6;     RotSwMap[5][1] =  0;             RotSwMap[5][2] = 0;         RotSwMap[5][3] = 0;
-  RotSwMap[6][0] =     7;     RotSwMap[6][1] =  0;             RotSwMap[6][2] = 0;         RotSwMap[6][3] = 0;
-  RotSwMap[7][0] =     8;     RotSwMap[7][1] =  0;             RotSwMap[7][2] = 0;         RotSwMap[7][3] = 0;
-  RotSwMap[8][0] =     0;     RotSwMap[8][1] =  2;       RotSwMap[8][2] = 0;         RotSwMap[8][3] = 0;
-  RotSwMap[9][0] =     0;     RotSwMap[9][1] =  8;        RotSwMap[9][2] = 1;         RotSwMap[9][3] = 0;
-  RotSwMap[10][0] =    -1;     RotSwMap[10][1] = 0;          RotSwMap[10][2] = 1;        RotSwMap[10][3] = 0;
-  RotSwMap[11][0] =    -1;     RotSwMap[11][1] = 0;      RotSwMap[11][2] = 5;        RotSwMap[11][3] = 5;
-
   RotSwCurrentPos = RotSwGetPosition();
   RotSwActivePos = RotSwCurrentPos;
   RotSwMillis = millis();
@@ -1445,13 +1431,13 @@ void setup() {
   // load Settings from EEPROM
   loadSettingsFromFlash();
 
+  // Set saved Modifier
+  if (mySettings.savedModifier.mode != 0)
+    SetModifier(mySettings.savedModifier);
+
   // activate standby timer
   setstandbyTimer();
 
-  // DFPlayer Mini initialisieren
-  //  mp3.begin();
-  //  // Zwei Sekunden warten bis der DFPlayer Mini initialisiert ist
-  //  delay(2000);
   volume = mySettings.initVolume;
   mp3.setVolume(volume);
   mp3.setEq(mySettings.eq - 1);
@@ -1492,9 +1478,6 @@ void setup() {
   digitalWrite(SpeakerOnPin, HIGH);
   delay(100);
 #endif
-
-  // Start Shortcut "at Startup"- e.g. Welcome Sound
-  playShortCut(3);
 
 #ifdef STARTUP_SOUND
   mp3.playMp3FolderTrack(264);
@@ -1644,14 +1627,14 @@ void playFolder() {
       Serial.println(F("Party"));
 #endif
       currentTrack = 1;
-      shuffleQueue();      
+      shuffleQueue();
       queueTrack = true;
       break;
     case Party_Section:
       currentTrack = 1;
       firstTrack = myFolder->special;
       numTracksInFolder = myFolder->special2;
-      shuffleQueue();      
+      shuffleQueue();
       queueTrack = true;
       break;
 
@@ -1741,70 +1724,6 @@ void playShortCut(uint8_t shortCut) {
   }
 }
 //////////////////////////////////////////////////////////////////////////
-//#ifdef CHECK_BATTERY
-//void batteryCheck () {
-//  float physValue;
-//
-//  physValue =  (((analogRead(batMeasPin) * refVoltage) / pinSupply) / (Rtwo / (Rone + Rtwo)));
-//
-//  Bat_Mean = Bat_Mean * Bat_N / (Bat_N + 1) + physValue / (Bat_N + 1);
-//  if ((Bat_N < 5) || (Bat_VarMean > 0.002)) {
-//    Bat_SqrMean = Bat_SqrMean * Bat_N / (Bat_N + 1) + physValue * physValue / (Bat_N + 1);
-//    Bat_VarMean = (Bat_SqrMean - Bat_Mean * Bat_Mean) / (Bat_N + 1);
-//    Bat_N = Bat_N + 1;
-//  }
-//  if (Bat_N > 10)  {
-//    if (Bat_Mean > batLevel_LEDyellow)    {
-//      batLevel_LEDyellowCounter = 0;
-//      batLevel_LEDyellow = batLevel_LEDyellowOn;
-//      setColor(0, 10, 0); // Green Color
-//      //#ifdef DEBUG
-//      //  Serial.println(F("= batteryCheck > Battery High"));
-//      //#endif
-//    }
-//    else if (Bat_Mean < batLevel_LEDyellow && Bat_Mean > batLevel_LEDred )    {
-//      if (batLevel_LEDyellowCounter >= 10)      {
-//        batLevel_LEDredCounter = 0;
-//        batLevel_LEDyellowCounter = 0;
-//        batLevel_LEDyellow = batLevel_LEDyellowOff;
-//        batLevel_LEDred = batLevel_LEDredOn;
-//        setColor(20, 10, 0); // Yellow Color
-//#ifdef DEBUG
-//        Serial.println(F("batteryCheck > Mid"));
-//#endif
-//      }
-//      else
-//        batLevel_LEDyellowCounter ++;
-//    }
-//
-//    else if (Bat_Mean < batLevel_LEDred && Bat_Mean > batLevel_Empty)    {
-//      if (batLevel_LEDredCounter >= 10)      {
-//        batLevel_EmptyCounter = 0;
-//        batLevel_LEDredCounter = 0;
-//        batLevel_LEDred = batLevel_LEDredOff;
-//        setColor(20, 0, 0); // Red Color
-//#ifdef DEBUG
-//        Serial.println(F("batteryCheck > Low"));
-//#endif
-//      }
-//      else
-//        batLevel_LEDredCounter ++;
-//    }
-//    else if (Bat_Mean <= batLevel_Empty)    {
-//      if (batLevel_EmptyCounter >= 10)      {
-//#ifdef DEBUG
-//        Serial.println(F("batteryCheck > Empty"));
-//#endif
-//        batLevel_EmptyCounter = 0;
-//        //shutDown();
-//      }
-//      else
-//        batLevel_EmptyCounter++;
-//    }
-//  }
-//}
-//#endif
-//////////////////////////////////////////////////////////////////////////
 void shutDown() {
   if (activeModifier != NULL) {
     if (activeModifier->handleShutDown() == true) {
@@ -1835,226 +1754,229 @@ void shutDown() {
 }
 //////////////////////////////////////////////////////////////////////////
 void loop() {
-  do {
-    checkStandbyAtMillis();
-    mp3.loop();
+  //  do {
+  checkStandbyAtMillis();
+  mp3.loop();
 
 #ifdef ROTARY_ENCODER
-    RotEncSetVolume();
+  RotEncSetVolume();
 #endif
 
-    //#ifdef CHECK_BATTERY
-    //    batteryCheck();
-    //#endif
+  //#ifdef CHECK_BATTERY
+  //    batteryCheck();
+  //#endif
 
 #ifdef ROTARY_SWITCH
-    RotSwloop(ROTARY_SWITCH_TRIGGER_TIME);
+  RotSwloop(ROTARY_SWITCH_TRIGGER_TIME);
 #endif
 
-    // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste
-    // doppelt belegt werden
-    readButtons();
+  // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste
+  // doppelt belegt werden
+  readButtons();
 
-    // Modifier : WIP!
-    if (activeModifier != NULL) {
-      activeModifier->loop();
-    }
+  // Modifier : WIP!
+  if (activeModifier != NULL) {
+    activeModifier->loop();
+  }
 
-    // admin menu
-    if ((pauseButton.pressedFor(LONG_PRESS) || upButton.pressedFor(LONG_PRESS) || downButton.pressedFor(LONG_PRESS)) && pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed()) {
-      mp3.pause();
-      do {
-        readButtons();
-      } while (pauseButton.isPressed() || upButton.isPressed() || downButton.isPressed());
+  // admin menu
+  if ((pauseButton.pressedFor(LONG_PRESS) || upButton.pressedFor(LONG_PRESS) || downButton.pressedFor(LONG_PRESS)) && pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed()) {
+    mp3.pause();
+    do {
       readButtons();
-      adminMenu();
-      break;
-    }
+    } while (pauseButton.isPressed() || upButton.isPressed() || downButton.isPressed());
+    readButtons();
+    adminMenu();
+    return;
+  }
 
-    if (pauseButton.wasReleased()) {
+  if (pauseButton.wasReleased()) {
 
-      if (activeModifier != NULL) {
-        if (activeModifier->handlePause() == true) {
+    if (activeModifier != NULL) {
+      if (activeModifier->handlePause() == true) {
 #ifdef DEBUG
-          Serial.println(F("Pause locked"));
+        Serial.println(F("Pause locked"));
 #endif
-          return;
-        }
+        return;
       }
-      if (ignorePauseButton == false)
+    }
+    if (ignorePauseButton == false)
 
-        if (isPlaying()) {
-          mp3.pause();
-          setstandbyTimer();
-        }
-        else if (knownCard) {
-          mp3.start();
-          disablestandbyTimer();
-        }
-      ignorePauseButton = false;
-    }
+      if (isPlaying()) {
+        mp3.pause();
+        setstandbyTimer();
+      }
+      else if (knownCard) {
+        mp3.start();
+        disablestandbyTimer();
+      }
+    ignorePauseButton = false;
+  }
 #ifdef PUSH_ON_OFF
-    else if (pauseButton.pressedFor(LONGER_PRESS) &&
-             ignorePauseButton == false) {
-      ignorePauseButton = true;
-      shutDown();
-    }
+  else if (pauseButton.pressedFor(LONGER_PRESS) &&
+           ignorePauseButton == false) {
+    ignorePauseButton = true;
+    shutDown();
+  }
 #endif
 
 #ifndef ROTARY_ENCODER
-    if (upButton.pressedFor(LONG_PRESS)) {
+  if (upButton.pressedFor(LONG_PRESS)) {
 
 #ifndef FIVEBUTTONS
-      if (isPlaying()) {
-        if (!mySettings.invertVolumeButtons) {
-          volumeUpButton();
-        }
-        else {
-          nextButton();
-        }
+    if (isPlaying()) {
+      if (!mySettings.invertVolumeButtons) {
+        volumeUpButton();
       }
       else {
-        playShortCut(1);
+        nextButton();
       }
-      ignoreUpButton = true;
-#endif
-    } else if (upButton.wasReleased()) {
-      if (!ignoreUpButton)
-        if (!mySettings.invertVolumeButtons) {
-          nextButton();
-        }
-        else {
-          volumeUpButton();
-        }
-      ignoreUpButton = false;
     }
-    if (downButton.pressedFor(LONG_PRESS)) {
+    else {
+      playShortCut(1);
+    }
+    ignoreUpButton = true;
+#endif
+  } else if (upButton.wasReleased()) {
+    if (!ignoreUpButton)
+      if (!mySettings.invertVolumeButtons) {
+        nextButton();
+      }
+      else {
+        volumeUpButton();
+      }
+    ignoreUpButton = false;
+  }
+  if (downButton.pressedFor(LONG_PRESS)) {
 #ifndef FIVEBUTTONS
-      if (isPlaying()) {
-        if (!mySettings.invertVolumeButtons) {
-          volumeDownButton();
-        }
-        else {
-          previousButton();
-        }
+    if (isPlaying()) {
+      if (!mySettings.invertVolumeButtons) {
+        volumeDownButton();
       }
       else {
-        playShortCut(2);
+        previousButton();
       }
-      ignoreDownButton = true;
-#endif
-    } else if (downButton.wasReleased()) {
-      if (!ignoreDownButton) {
-        if (!mySettings.invertVolumeButtons) {
-          previousButton();
-        }
-        else {
-          volumeDownButton();
-        }
-      }
-      ignoreDownButton = false;
     }
+    else {
+      playShortCut(2);
+    }
+    ignoreDownButton = true;
+#endif
+  } else if (downButton.wasReleased()) {
+    if (!ignoreDownButton) {
+      if (!mySettings.invertVolumeButtons) {
+        previousButton();
+      }
+      else {
+        volumeDownButton();
+      }
+    }
+    ignoreDownButton = false;
+  }
 
 
 #ifdef FIVEBUTTONS
-    if (buttonFour.wasReleased()) {
-      if (isPlaying()) {
-        if (!mySettings.invertVolumeButtons) {
-          volumeUpButton();
-        }
-        else {
-          nextButton();
-        }
+  if (buttonFour.wasReleased()) {
+    if (isPlaying()) {
+      if (!mySettings.invertVolumeButtons) {
+        volumeUpButton();
       }
       else {
-        playShortCut(1);
+        nextButton();
       }
     }
-    if (buttonFive.wasReleased()) {
-      if (isPlaying()) {
-        if (!mySettings.invertVolumeButtons) {
-          volumeDownButton();
-        }
-        else {
-          previousButton();
-        }
+    else {
+      playShortCut(1);
+    }
+  }
+  if (buttonFive.wasReleased()) {
+    if (isPlaying()) {
+      if (!mySettings.invertVolumeButtons) {
+        volumeDownButton();
       }
       else {
-        playShortCut(2);
+        previousButton();
       }
     }
+    else {
+      playShortCut(2);
+    }
+  }
 #endif
 
 #endif
 
 #ifdef ROTARY_ENCODER
-    if (upButton.pressedFor(LONG_PRESS)) {
+  if (upButton.pressedFor(LONG_PRESS)) {
+    if (isPlaying()) {
+      nextButton();
+    }
+
+    else {
+      playShortCut(1);
+    }
+    ignoreUpButton = true;
+  }
+
+
+  else if (upButton.wasReleased()) {
+    if (!ignoreUpButton)
       if (isPlaying()) {
         nextButton();
       }
+    ignoreUpButton = false;
+  }
 
-      else {
-        playShortCut(1);
-      }
-      ignoreUpButton = true;
+  if (downButton.pressedFor(LONG_PRESS)) {
+    if (isPlaying()) {
+      previousButton();
     }
 
-
-    else if (upButton.wasReleased()) {
-      if (!ignoreUpButton)
-        if (isPlaying()) {
-          nextButton();
-        }
-      ignoreUpButton = false;
+    else {
+      playShortCut(2);
     }
+    ignoreDownButton = true;
+  }
 
-    if (downButton.pressedFor(LONG_PRESS)) {
+
+  else if (downButton.wasReleased()) {
+    if (!ignoreDownButton)
       if (isPlaying()) {
         previousButton();
       }
-
-      else {
-        playShortCut(2);
-      }
-      ignoreDownButton = true;
-    }
-
-
-    else if (downButton.wasReleased()) {
-      if (!ignoreDownButton)
-        if (isPlaying()) {
-          previousButton();
-        }
-      ignoreDownButton = false;
-    }
+    ignoreDownButton = false;
+  }
 #endif
 
-    // Ende der Buttons
-  } while (!mfrc522.PICC_IsNewCardPresent());
+  handleCardReader();
 
-  // RFID Karte wurde aufgelegt
-
-  if (!mfrc522.PICC_ReadCardSerial())
-    return;
-
-  if (readCard(&myCard) == true) {
-    if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != 0 && myCard.nfcFolderSettings.mode != ModifierMode) {
-      playFolder();
-    }
-
-    // Neue Karte konfigurieren
-    else if (myCard.cookie != cardCookie) {
-      knownCard = false;
-      mp3.playMp3FolderTrack(300);
-      waitForTrackToFinish();
-      setupCard();
-    }
-  }
-  mfrc522.PICC_HaltA();
-  mfrc522.PCD_StopCrypto1();
+  //    // Ende der Buttons
+  //  } while (!mfrc522.PICC_IsNewCardPresent());
+  //
+  //  // RFID Karte wurde aufgelegt
+  //
+  //  if (!mfrc522.PICC_ReadCardSerial())
+  //    return;
+  //
+  //  if (readCard(&myCard) == true) {
+  //    if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != ModifierMode && myCard.nfcFolderSettings.mode != 0) {
+  //      playFolder();
+  //    }
+  //
+  //    // Neue Karte konfigurieren
+  //    else if (myCard.cookie != cardCookie) {
+  //      knownCard = false;
+  //      mp3.playMp3FolderTrack(300);
+  //      waitForTrackToFinish();
+  //      setupCard();
+  //    }
+  //  }
+  //  mfrc522.PICC_HaltA();
+  //  mfrc522.PCD_StopCrypto1();
 }
 //////////////////////////////////////////////////////////////////////////
 void adminMenu(bool fromCard = false) {
+  forgetLastCard = true;
   disablestandbyTimer();
   mp3.pause();
 #ifdef DEBUG
@@ -2104,69 +2026,43 @@ void adminMenu(bool fromCard = false) {
 #ifdef DEBUG
       Serial.println(c);
 #endif
-      uint8_t temp = voiceMenu(255, 0, 0, false);
-      if (temp != c) {
+      if (voiceMenu(255, 0, 0, false) != c)
         return;
-      }
     }
   }
-  int subMenu = voiceMenu(12, 900, 900, false, false, 0, true);
-  if (subMenu == 0) {
+
+  int subMenu = voiceMenu(14, 900, 900, false, false, 0, true);
+  if (subMenu == Exit)
     return;
-  }
-  if (subMenu == 1) {
+  if (subMenu == ResetCard) {
     resetCard();
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
   }
-  else if (subMenu == 2) {
+  else if (subMenu == MaxVolume) {
     // Maximum Volume
     mySettings.maxVolume = voiceMenu(30 - mySettings.minVolume, 930, mySettings.minVolume, false, false, mySettings.maxVolume - mySettings.minVolume) + mySettings.minVolume;
   }
-  else if (subMenu == 3) {
+  else if (subMenu == MinVolume) {
     // Minimum Volume
     mySettings.minVolume = voiceMenu(mySettings.maxVolume - 1, 931, 0, false, false, mySettings.minVolume);
   }
-  else if (subMenu == 4) {
+  else if (subMenu == InitVolume) {
     // Initial Volume
     mySettings.initVolume = voiceMenu(mySettings.maxVolume - mySettings.minVolume + 1, 932, mySettings.minVolume - 1, false, false, mySettings.initVolume - mySettings.minVolume + 1) + mySettings.minVolume - 1;
   }
-  else if (subMenu == 5) {
+  else if (subMenu == EQ) {
     // EQ
     mySettings.eq = voiceMenu(6, 920, 920, false, false, mySettings.eq);
     mp3.setEq(mySettings.eq - 1);
   }
-  else if (subMenu == 6) {
+  else if (subMenu == CreateModifier) {
     // create modifier card
     nfcTagObject tempCard;
     tempCard.cookie = cardCookie;
-    tempCard.version = 1;
-    tempCard.nfcFolderSettings.folder = 0;
-    tempCard.nfcFolderSettings.special = 0;
-    tempCard.nfcFolderSettings.special2 = 0;
-    tempCard.nfcFolderSettings.mode = voiceMenu(10, 966, 966, false, false, 0, true);
+    tempCard.version = 2;
 
-    if (tempCard.nfcFolderSettings.mode != ModifierMode) {
-      if (tempCard.nfcFolderSettings.mode == AudioDrama) {
-        switch (voiceMenu(4, 960, 960)) {
-          case 1: tempCard.nfcFolderSettings.special = 5; break;
-          case 2: tempCard.nfcFolderSettings.special = 15; break;
-          case 3: tempCard.nfcFolderSettings.special = 30; break;
-          case 4: tempCard.nfcFolderSettings.special = 60; break;
-        }
-      } else if (tempCard.nfcFolderSettings.mode == Album_Section) {
-        switch (voiceMenu(2, 1, 1)) {
-          case 1: tempCard.nfcFolderSettings.special = 0; break;
-          case 2: tempCard.nfcFolderSettings.special2 = 1; break;
-        }
-      }
-      else if (tempCard.nfcFolderSettings.mode == Party_Section) {
-        tempCard.nfcFolderSettings.special =  voiceMenu(99, 301, 0, true, 0, 0, true);
-      }
-      else if (tempCard.nfcFolderSettings.mode == AudioBook_Section) {
-        tempCard.nfcFolderSettings.special =  voiceMenu(99, 301, 0, true, 0, 0, true);
-        tempCard.nfcFolderSettings.special2 =  voiceMenu(30, 904, 0, true, 0, 0, true);
-      }
+    if (setupModifier(&tempCard.nfcFolderSettings)) {
       mp3.playMp3FolderTrack(800);
       do {
         readButtons();
@@ -2192,12 +2088,12 @@ void adminMenu(bool fromCard = false) {
       }
     }
   }
-  else if (subMenu == 7) {
-    uint8_t shortcut = voiceMenu(4, 940, 940);
+  else if (subMenu == SetupShortCuts) {
+    uint8_t shortcut = voiceMenu(3, 940, 940);
     setupFolder(&mySettings.shortCuts[shortcut - 1]);
     mp3.playMp3FolderTrack(400);
   }
-  else if (subMenu == 8) {
+  else if (subMenu == SetupStandbyTimer) {
     switch (voiceMenu(5, 960, 960)) {
       case 1: mySettings.standbyTimer = 5; break;
       case 2: mySettings.standbyTimer = 15; break;
@@ -2206,13 +2102,13 @@ void adminMenu(bool fromCard = false) {
       case 5: mySettings.standbyTimer = 0; break;
     }
   }
-  else if (subMenu == 9) {
+  else if (subMenu == CreateFolderCards) {
     // Create Cards for Folder
     // Ordner abfragen
     nfcTagObject tempCard;
     tempCard.cookie = cardCookie;
     tempCard.version = 1;
-    tempCard.nfcFolderSettings.mode = 4;
+    tempCard.nfcFolderSettings.mode = Single;
     tempCard.nfcFolderSettings.folder = voiceMenu(99, 301, 0, true);
     uint8_t special = voiceMenu(mp3.getFolderTrackCount(tempCard.nfcFolderSettings.folder), 321, 0,
                                 true, tempCard.nfcFolderSettings.folder);
@@ -2252,47 +2148,78 @@ void adminMenu(bool fromCard = false) {
       }
     }
   }
-  else if (subMenu == 10) {
+  else if (subMenu == InvertButtons) {
     // Invert Functions for Up/Down Buttons
-    int temp = voiceMenu(2, 933, 933, false);
-    if (temp == 2) {
-      mySettings.invertVolumeButtons = true;
-    }
-    else {
-      mySettings.invertVolumeButtons = false;
+    switch (voiceMenu(2, 933, 933, false)) {
+      case 1:
+        mySettings.invertVolumeButtons = false;
+        break;
+      case 2:
+        mySettings.invertVolumeButtons = true;
+        break;
     }
   }
-  else if (subMenu == 11) {
-#ifdef DEBUG
-    Serial.println(F("Reset > EEPROM wird gelöscht"));
+  else if (subMenu == StopWhenCardAway) {
+    switch (voiceMenu(2, 937, 933, false)) {
+      case 1:
+        mySettings.stopWhenCardAway = false;
+        break;
+      case 2:
+        mySettings.stopWhenCardAway = true;
+        break;
+    }
+  }
+  // lock admin menu
+  else if (subMenu == SetupRotarySwitch) {
+#ifdef ROTARY_SWITCH
+    uint8_t rotSwSlot = 0;
+    do {
+      rotSwSlot = voiceMenu(ROTARY_SWITCH_POSITIONS, 945, 0);
+      switch (voiceMenu(3, 948, 948)) {
+        case 1:
+          setupFolder(&mySettings.rotarySwitchSlots[rotSwSlot - 1]);
+          break;
+        case 2:
+          setupModifier(&mySettings.rotarySwitchSlots[rotSwSlot - 1]);
+          break;
+        case 3:
+          setupSystemControl(&mySettings.rotarySwitchSlots[rotSwSlot - 1]);
+          break;
+      }
+      mp3.playMp3FolderTrack(400);
+    } while (voiceMenu(2, 946, 933, false, false, 2, true) == 2);
 #endif
+#ifndef ROTARY_SWITCH
+    mp3.playMp3FolderTrack(947);
+#endif
+  }
+  else if (subMenu == ResetEEPROM) {
     for (int i = 0; i < EEPROM.length(); i++) {
       EEPROM.update(i, 0);
     }
     resetSettings();
     mp3.playMp3FolderTrack(999);
   }
-  // lock admin menu
-  else if (subMenu == 12) {
-    int temp = voiceMenu(4, 980, 980, false);
-    if (temp == 1) {
-      mySettings.adminMenuLocked = 0;
+  else if (subMenu == LockAdminMenu) {
+    switch (voiceMenu(4, 980, 980, false)) {
+      case 1:
+        mySettings.adminMenuLocked = 0;
+        break;
+      case 2:
+        mySettings.adminMenuLocked = 1;
+        break;
+      case 3:
+        int8_t pin[4];
+        mp3.playMp3FolderTrack(991);
+        if (askCode(pin)) {
+          memcpy(mySettings.adminMenuPin, pin, 4);
+          mySettings.adminMenuLocked = 2;
+        }
+        break;
+      case 4:
+        mySettings.adminMenuLocked = 3;
+        break;
     }
-    else if (temp == 2) {
-      mySettings.adminMenuLocked = 1;
-    }
-    else if (temp == 3) {
-      int8_t pin[4];
-      mp3.playMp3FolderTrack(991);
-      if (askCode(pin)) {
-        memcpy(mySettings.adminMenuPin, pin, 4);
-        mySettings.adminMenuLocked = 2;
-      }
-    }
-    else if (temp == 4) {
-      mySettings.adminMenuLocked = 3;
-    }
-
   }
   writeSettingsToFlash();
   setstandbyTimer();
@@ -2322,7 +2249,7 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
 #ifdef DEBUG
   Serial.print(F("voiceMenu "));
   Serial.print(numberOfOptions);
-  Serial.println(F("Options"));
+  Serial.println(F(" Options"));
 #endif
   do {
 #ifdef DEBUG
@@ -2343,8 +2270,7 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
       if (returnValue != 0) {
 #ifdef DEBUG
         Serial.print(F("= "));
-        Serial.print(returnValue);
-        Serial.println(F("=="));
+        Serial.println(returnValue);
 #endif
         return returnValue;
       }
@@ -2465,35 +2391,40 @@ bool setupFolder(folderSettings * theFolder) {
   //  // Hörbuchmodus > Fortschritt im EEPROM auf 1 setzen
   //  writeAudiobookMemory (myFolder->folder,myFolder->special3, 1);
 
-  // Einzelmodus > Datei abfragen
-  if (theFolder->mode == Single)
-    theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 320, 0,
-                                   true, theFolder->folder);
-  // Admin Funktionen
-  if (theFolder->mode == AdminMenu) {
-    theFolder->folder = 0;
-    theFolder->mode = 255;
-  }
-  // Spezialmodus Von-Bis
-  if (theFolder->mode == AudioDrama_Section || theFolder->mode == Album_Section || theFolder->mode == Party_Section || theFolder->mode == AudioBook_Section) {
-    theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 321, 0,
-                                   true, theFolder->folder);
-    theFolder->special2 = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 322, 0,
-                                    true, theFolder->folder, theFolder->special);
-  }
-  // Speicherplatz Hörbuch
-  if (theFolder->mode == AudioBook || theFolder->mode == AudioBook_Section) {
-    theFolder->special3 = voiceMenu(255, 325, 0,
-                                    false, 0, 0, true);
-  }
-
-  //Puzzle oder Quiz Karte
-  if (theFolder->mode == PuzzlePart ) {
-    theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 323, 0,
-                                   true, theFolder->folder);
-    theFolder->special2 = voiceMenu(255, 324, 0,
-                                    false, theFolder->folder);
-
+  switch (theFolder->mode) {
+    case Single:
+      theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 320, 0,
+                                     true, theFolder->folder);
+      break;
+    case AudioDrama_Section:
+    case Album_Section:
+    case Party_Section:
+    case AudioBook_Section:
+      theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 321, 0,
+                                     true, theFolder->folder);
+      theFolder->special2 = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 322, 0,
+                                      true, theFolder->folder, theFolder->special);
+      if (theFolder->mode == AudioBook_Section)
+        theFolder->special3 = voiceMenu(10, 325, 0,
+                                        false, 0, 0, true);
+      break;
+    case AdminMenu:
+      theFolder->folder = 0;
+      theFolder->mode = 255;
+      break;
+    case AudioBook:
+      theFolder->special3 = voiceMenu(10, 325, 0,
+                                      false, 0, 0, true);
+      break;
+    case PuzzlePart:
+      theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 323, 0,
+                                     true, theFolder->folder);
+      theFolder->special2 = voiceMenu(255, 324, 0,
+                                      false, theFolder->folder);
+      break;
+    default:
+      return false;
+      break;
   }
   return true;
 }
@@ -2511,6 +2442,7 @@ void setupCard() {
     do {
     } while (isPlaying());
     writeCard(newCard);
+    forgetLastCard = true;
   }
   delay(1000);
 }
@@ -2664,7 +2596,7 @@ bool readCard(nfcTagObject * nfcTag) {
       }
     }
     if (tempCard.nfcFolderSettings.folder == 0)
-      return SetModifier (tempCard.nfcFolderSettings.mode, tempCard.nfcFolderSettings.special, tempCard.nfcFolderSettings.special2);
+      return SetModifier (tempCard.nfcFolderSettings);
     else {
       memcpy(nfcTag, &tempCard, sizeof(nfcTagObject));
 #ifdef DEBUG
@@ -2873,109 +2805,151 @@ void RotSwloop(int TriggerTime) {
 }
 
 void RotSwSet (uint8_t RotarySwitchPosition) {
-  folderSettings myRotSw;
+  folderSettings myRotSw = mySettings.rotarySwitchSlots[RotarySwitchPosition - 1];
   RotSwActivePos = RotarySwitchPosition;
 #ifdef DEBUG
   Serial.print("RotSw active Pos ");
   Serial.println(RotSwActivePos);
 #endif
-
-  if (RotSwMap[RotarySwitchPosition - 1][0] > 0) {
-
-    myRotSw.folder = RotSwMap[RotarySwitchPosition - 1][0];
-    myRotSw.mode = RotSwMap[RotarySwitchPosition - 1][1];
-    myRotSw.special = RotSwMap[RotarySwitchPosition - 1][2];
-    myRotSw.special2 = RotSwMap[RotarySwitchPosition - 1][3];
-    myFolder = &myRotSw;
-    playFolder();
-
-  } else if (RotSwMap[RotarySwitchPosition - 1][0] == 0) {
-    SetModifier (RotSwMap[RotarySwitchPosition - 1][ 1], RotSwMap[RotarySwitchPosition - 1][2], RotSwMap[RotarySwitchPosition - 1][3]);
-  } else if (RotSwMap[RotarySwitchPosition - 1][0] == -1) {
-    switch (RotSwMap[RotarySwitchPosition - 1][1]) {
-      case 1: //Pause
-        if (activeModifier != NULL) {
-          if (activeModifier->handlePause() == true) {
+  if (!(myRotSw.folder == 0 && myRotSw.mode == 0)) {
+    switch (myRotSw.folder) {
+      case SystemControl:
+        switch (myRotSw.special) {
+          case PauseSysCont: //Pause
+            if (activeModifier != NULL) {
+              if (activeModifier->handlePause() == true) {
 #ifdef DEBUG
-            Serial.println(F("Pause locked"));
+                Serial.println(F("Pause locked"));
 #endif
-            return;
-          }
+                return;
+              }
+            }
+            if (ignorePauseButton == false)
+              if (isPlaying()) {
+                mp3.pause();
+                setstandbyTimer();
+              }
+            break;
+          case VolumeSysCont: //Volume
+            mp3.setVolume(myRotSw.special2);
+            break;
+          case ForwardSysCont:
+            nextButton();
+            break;
+          case BackwardSysCont:
+            previousButton();
+            break;
+          case ShutDownSysCont:
+            shutDown();
+          case RemoveModifierSysCont:
+            if (activeModifier != NULL)
+              RemoveModifier();
+            break;
         }
-        if (ignorePauseButton == false)
-
-          if (isPlaying()) {
-            mp3.pause();
-            setstandbyTimer();
-          }
         break;
-      case 2: //Volume
-        volume = RotSwMap[RotarySwitchPosition - 1][2];
-        mp3.setVolume(volume);
+      case ModifierMode:
+        SetModifier (myRotSw);
         break;
-      case 3: //Forward
-        nextButton();
-        break;
-      case 4: //Backward
-        previousButton();
-        break;
-      case 5: //ShutDown
-        shutDown();
-      case 6: //Remove Modifier
-        if (activeModifier != NULL)
-          RemoveModifier();
+      default:
+        myFolder = &myRotSw;
+        playFolder();
         break;
     }
+  }else {
+#ifdef DEBUG
+  Serial.println(F("RotSw Pos not configured."));
+#endif
+
   }
 }
 #endif
 //////////////////////////////////////////////////////////////////////////
+bool setupModifier(folderSettings * tmpFolderSettings) {
 
-bool SetModifier (uint8_t tmpMode, uint8_t tmpSpecial1, uint8_t tmpSpecial2) {
+  tmpFolderSettings->folder = ModifierMode;
+  tmpFolderSettings->mode = voiceMenu(10, 966, 966, false, false, 0, true);
+
+  if (tmpFolderSettings->mode != ModifierMode) {
+    if (tmpFolderSettings->mode == SleepTimerMod) {
+      switch (voiceMenu(4, 960, 960)) {
+        case 1: tmpFolderSettings->special = 5; break;
+        case 2: tmpFolderSettings->special = 15; break;
+        case 3: tmpFolderSettings->special = 30; break;
+        case 4: tmpFolderSettings->special = 60; break;
+      }
+    } else if (tmpFolderSettings->mode == PuzzleGameMod) {
+      //Save first part?
+      tmpFolderSettings->special = voiceMenu(2, 977, 933) - 1;
+    }
+    else if (tmpFolderSettings->mode == QuizGameMod) {
+      //Set Folder
+      tmpFolderSettings->special =  voiceMenu(99, 301, 0, true, 0, 0, true);
+    }
+    else if (tmpFolderSettings->mode == ButtonSmashMod) {
+      //Set Folder
+      tmpFolderSettings->special =  voiceMenu(99, 301, 0, true, 0, 0, true);
+      //Set Volume
+      tmpFolderSettings->special2 =  voiceMenu(30, 904, 0, true, 0, 0, true);
+    }
+
+    //Save Modifier in EEPROM?
+    tmpFolderSettings->special3 = voiceMenu(2, 978, 933) - 1;
+    return true;
+  }
+  return false;
+}
+
+bool SetModifier (folderSettings tmpFolderSettings) {
   if (activeModifier != NULL) {
-    if (activeModifier->getActive() == tmpMode) {
+    if (activeModifier->getActive() == tmpFolderSettings.mode) {
       return RemoveModifier();
     }
   }
-  if (tmpMode != ModifierMode && tmpMode != AdminMenuMod) {
+
+#ifdef DEBUG
+  Serial.print(F("set modifier: "));
+  Serial.println(tmpFolderSettings.mode);
+#endif
+
+  if (tmpFolderSettings.mode != 0 && tmpFolderSettings.mode != AdminMenuMod) {
     if (isPlaying()) {
       mp3.playAdvertisement(260);
     }
     else {
-      //          mp3.start();
-      //          delay(100);
-      //          mp3.playAdvertisement(260);
-      //          delay(100);
-      //          mp3.pause();
-      //mp3.pause();
-      //delay(500);
       mp3.playMp3FolderTrack(260);
-      //delay(1000);
       waitForTrackToFinish();
     }
   }
   delay(2000);
-  switch (tmpMode) {
+  switch (tmpFolderSettings.mode) {
     case 0:
     case 255:
       mfrc522.PICC_HaltA(); mfrc522.PCD_StopCrypto1(); adminMenu(true);  break;
-    case 1: activeModifier = new SleepTimer(tmpSpecial1); break;
+    case 1: activeModifier = new SleepTimer(tmpFolderSettings.special); break;
     case 2: activeModifier = new FreezeDance(); break;
     case 3: activeModifier = new Locked(); break;
     case 4: activeModifier = new ToddlerMode(); break;
     case 5: activeModifier = new KindergardenMode(); break;
     case 6: activeModifier = new RepeatSingleModifier(); break;
     case 7: activeModifier = new FeedbackModifier(); break;
-    case 8: activeModifier = new PuzzleGame(tmpSpecial1); break;
-    case 9: activeModifier = new QuizGame(tmpSpecial1); break;
-    case 10: activeModifier = new ButtonSmash(tmpSpecial1, tmpSpecial2); break;
+    case 8: activeModifier = new PuzzleGame(tmpFolderSettings.special); break;
+    case 9: activeModifier = new QuizGame(tmpFolderSettings.special); break;
+    case 10: activeModifier = new ButtonSmash(tmpFolderSettings.special, tmpFolderSettings.special2); break;
   }
-  //delay(2000);
+  if (tmpFolderSettings.special3 == 1) {
+    mySettings.savedModifier = tmpFolderSettings;
+    writeSettingsToFlash();
+  }
   return false;
 }
 
 bool RemoveModifier() {
   activeModifier = NULL;
+
+  mySettings.savedModifier.folder = 0;
+  mySettings.savedModifier.mode = 0;
+  writeSettingsToFlash();
+
 #ifdef DEBUG
   Serial.println(F("modifier removed"));
 #endif
@@ -2983,17 +2957,27 @@ bool RemoveModifier() {
     mp3.playAdvertisement(261);
   }
   else {
-    //            mp3.start();
-    //            delay(100);
-    //            mp3.playAdvertisement(261);
-    //            delay(100);
-    //            mp3.pause();
     mp3.pause();
     delay(500);
     mp3.playMp3FolderTrack(261);
     waitForTrackToFinish();
   }
-  //delay(2000);
+  return false;
+}
+
+bool setupSystemControl (folderSettings * tmpFolderSettings) {
+
+  tmpFolderSettings->mode = ModifierMode;
+  tmpFolderSettings->folder = SystemControl;
+  tmpFolderSettings->special = voiceMenu(6, 952, 952);
+
+  if (tmpFolderSettings->special != 0) {
+    if (tmpFolderSettings->special == VolumeSysCont) {
+      tmpFolderSettings->special2 = voiceMenu(mySettings.maxVolume - mySettings.minVolume + 1, 932, mySettings.minVolume - 1, false, false, mySettings.initVolume - mySettings.minVolume + 1) + mySettings.minVolume - 1;
+
+    }
+    return true;
+  }
   return false;
 }
 
@@ -3003,4 +2987,121 @@ uint8_t readAudiobookMemory (uint8_t folder, uint8_t memoryNumber) {
 
 void writeAudiobookMemory (uint8_t folder, uint8_t memoryNumber, uint8_t track) {
   EEPROM.update(folder + (99 * memoryNumber), track);
+}
+
+//Um festzustellen ob eine Karte entfernt wurde, muss der MFRC regelmäßig ausgelesen werden
+byte pollCard()
+{
+  const byte maxRetries = 2;
+
+  if (!hasCard)  {
+    if (mfrc522.PICC_IsNewCardPresent()) {
+      if (mfrc522.PICC_ReadCardSerial()) {
+#ifdef DEBUG
+        Serial.println(F("ReadCardSerial finished"));
+#endif
+        if (readCard(&myCard))  {
+          bool bSameUID = !memcmp(lastCardUid, mfrc522.uid.uidByte, 4);
+          if (bSameUID) {
+#ifdef DEBUG
+            Serial.println(F("same card"));
+#endif
+          }
+          else {
+#ifdef DEBUG
+            Serial.println(F("new card"));
+#endif
+          }
+          // store info about current card
+          memcpy(lastCardUid, mfrc522.uid.uidByte, 4);
+          lastCardWasUL = mfrc522.PICC_GetType(mfrc522.uid.sak) == MFRC522::PICC_TYPE_MIFARE_UL;
+
+          retries = maxRetries;
+          hasCard = true;
+          return bSameUID ? PCS_CARD_IS_BACK : PCS_NEW_CARD;
+        }
+        else {//readCard war nicht erfolgreich
+          mfrc522.PICC_HaltA();
+          mfrc522.PCD_StopCrypto1();
+#ifdef DEBUG
+          Serial.print(F("cant read card"));
+#endif
+        }
+      }
+    }
+    return PCS_NO_CHANGE;
+  }
+  else // hasCard
+  {
+    // perform a dummy read command just to see whether the card is in range
+    byte buffer[18];
+    byte size = sizeof(buffer);
+
+    if (mfrc522.MIFARE_Read(lastCardWasUL ? 8 : blockAddr, buffer, &size) != MFRC522::STATUS_OK) {
+      if (retries > 0)
+        retries--;
+      else {
+#ifdef DEBUG
+        Serial.println(F("card gone"));
+#endif
+        mfrc522.PICC_HaltA();
+        mfrc522.PCD_StopCrypto1();
+        hasCard = false;
+        return PCS_CARD_GONE;
+      }
+    }
+    else
+      retries = maxRetries;
+  }
+  return PCS_NO_CHANGE;
+}
+
+void handleCardReader()
+{
+  // poll card only every 200ms
+  static unsigned long lastCardPoll = 0;
+  unsigned long now = millis();
+
+  if (static_cast<unsigned long>(now - lastCardPoll) > 200)  {
+    lastCardPoll = now;
+    switch (pollCard()) {
+      case PCS_NEW_CARD:
+        onNewCard();
+        break;
+      case PCS_CARD_GONE:
+        if (mySettings.stopWhenCardAway) {
+          mp3.pause();
+          setstandbyTimer();
+        }
+        break;
+      case PCS_CARD_IS_BACK:
+        if (mySettings.stopWhenCardAway) {
+          //nur weiterspielen wenn vorher nicht konfiguriert wurde
+          if (!forgetLastCard) {
+            mp3.start();
+            disablestandbyTimer();
+          }
+          else
+            onNewCard();
+        }
+        break;
+    }
+  }
+}
+
+void onNewCard() {
+  forgetLastCard = false;
+  // make random a little bit more "random"
+  //randomSeed(millis() + random(1000));
+  if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != 0 && myCard.nfcFolderSettings.mode != 0) {
+    playFolder();
+  }
+
+  // Neue Karte konfigurieren
+  else if (myCard.cookie != cardCookie) {
+    knownCard = false;
+    mp3.playMp3FolderTrack(300);
+    waitForTrackToFinish();
+    setupCard();
+  }
 }

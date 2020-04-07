@@ -267,14 +267,14 @@
 0313_special_album.mp3|Spezialmodus Von-Bis, Album. Alle Dateien zwischen der Start und Enddatei wiedergeben.
 0314_special_party.mp3|Spezialmodus Von-Bis, Party. Alle Dateien zwischen der Start und Enddatei zufällig wiedergeben.
 0315_special_audio_book.mp3|Spezialmodus Von-Bis, Hörbuch. Alle Dateien zwischen der Start und Enddatei wiedergeben, sowie den Fortschritt speichern.
-0314_special_puzzle.mp3|Puzzle Teil. Wird für die SPiele Puzzle und Quiz benötigt. Spielt im Normalbetrieb die Audiodatei einzeln ab.
+0316_special_puzzle.mp3|Puzzle Teil. Wird für die SPiele Puzzle und Quiz benötigt. Spielt im Normalbetrieb die Audiodatei einzeln ab.
 0320_select_file.mp3|OK, wähle nun bitte die Datei mit den Lautstärketasten aus.
 0321_select_first_file.mp3|OK, wähle nun bitte die Startdatei mit den Lautstärketasten aus.
 0322_select_last_file.mp3|Wähle nun bitte die Enddatei mit den Lautstärketasten aus.
 0323_select_puzzle_audio.mp3|OK, wähle nun bitte die Audiodatei für das Puzzle Teil aus.
 0324_select_puzzle_no.mp3|Wähle nun bitte die Nummer des Puzzle Teils aus.
 0325_select_audio_book_slot.mp3|OK, wähle nun bitte die Nummer des Hörbuchspeichers für diesen Ordner aus. Wichtig wenn mehrere Hörbuchkarten für diesen Ordner erstellt werden.
-0400_ok.mp3|OK. Ich habe die Karte konfiguriert.
+0400_ok.mp3|OK. Ich habe die Einstellungen übernommen.
 0401_error.mp3|Oh weh! Das hat leider nicht geklappt!
 0800_waiting_for_card.mp3|Bitte lege nun die Karte auf!
 0802_reset_aborted.mp3|OK, ich habe den Vorgang abgebrochen.
@@ -289,8 +289,10 @@
 0908_standbytimer.mp3|Den Timer konfigurieren.
 0909_batch_cards.mp3|Einzelkarten für einen Ordner erstellen.
 0910_switch_volume.mp3|Funktion der Lautstärketasten umdrehen.
-0911_reset.mp3|Alle Einstellungen löschen.
-0912_admin_lock.mp3|Das Adminmenü absichern.
+0911_stopWhenCardAway.mp3|Stopp bei entfernter Karte.
+0912_configRotarySwitch.mp3|Konfigurieren des Drehschalters.
+0913_reset.mp3|Alle Einstellungen löschen.
+0914_admin_lock.mp3|Das Adminmenü absichern.
 0920_eq_intro.mp3|Bitte wähle eine Einstellung für den EQ mit den Lautstärketasten aus und bestätige sie mit der Pausetaste.
 0921_normal.mp3|Normal
 0922_pop.mp3|Pop
@@ -305,11 +307,26 @@
 0934_no.mp3|Nein.
 0935_yes.mp3|Ja.
 0936_batch_cards_intro.mp3|OK, bitte lege nun nacheinander die Karten auf die Box. Ich werde die jeweilige Nummer vorher ansagen, damit du nicht durcheinander kommst. Zum Abbrechen einfach eine der Lautstärketasten drücken!
+0937_stopWhenCardAway_intro.mp3|Möchtest du den Track stoppen wenn die Karte enfernt wird?
 0940_shortcut_into.mp3|Bitte wähle den Shortcut, den du konfigurieren möchtest, aus.
 0941_pause.mp3|Pausetaste
 0942_up.mp3|Vor- bzw. Lautertaste
 0943_down.mp3|Zurück- bzw. Leisertaste
 0944_startup.mp3|Shortcut beim Start festlegen
+0945_chooseRotarySwitchSlot.mp3|Welche Drehschalterposition soll konfiguriert werden?
+0946_repeatRotarySwitchkonfiguration.mp3|Soll eine weitere Drehschalterposition konfiguriert werden?
+0947_noRotarySwitch.mp3|Der Drehschalter kann nicht konfiguriert werden. Das define ist auskommentiert.
+0948_rotarySwitchSlotMode.mp3|Mit welcher Funktion soll die Drehschalterpostion belegt werden?
+0949_optionNormalPlayback.mp3|Wiedergabe von Dateien.
+0950_optionModifiers.mp3|Modifikation.
+0951_optionSystemControl.mp3|System Kontrolle.
+0952_systemControl.mp3|Wähle eine System Kontrolle.
+0953_pause.mp3|Pause
+0954_volume.mp3|Lautstärke festlegen.
+0955_forward.mp3|Nächster Titel.
+0956_backward.mp3|Vorheriger Titel.
+0957_shutDown.mp3|TonUINO ausschalten.
+0958_removeModifier.mp3|Modifikation entfernen.mp3
 0960_timer_intro.mp3|Nach wievielen Minuten soll der TonUINO ausgeschaltet werden?
 0961_timer_5.mp3|5 Minuten.
 0962_timer_15.mp3|15 Minuten.
@@ -327,6 +344,8 @@
 0974_modifier_puzzlegame.mp3|Puzzle Spiel. Ein Spiel, dass nach auflegen eines Puzzle Teils, das dazugehörige Gegenstück erwartet.
 0975_modifier_quiz.mp3|Quiz. Ein Spiel, dass aus dem gespeicherten Ordner eine zufällige Audiodatei abspielt und das Puzzlteil mit der selben Puzzle Teilnummer, wie die der Audiodatei, erwartet.
 0976_modifier_button_smash.mp3|Button Smash. Ein Spiel, dass nach jeder Aktion eine beliebige Audiodatei aus dem gespeicherten Ordner abspielt.
+0977_savePuzzlePart.mp3|Soll das erste Puzzle Teil gespeichert bleiben oder jedes Mal neu aufgelegt werden?
+0978_modifier_save.mp3|Soll diese Modifikation auch bei Neustart noch aktiv sein?
 0980_admin_lock_intro.mp3|Wähle bitte aus ob und wie das Adminmenü geschützt werden soll.
 0981_admin_lock_disabled.mp3|Kein Schutz. das Adminmenü kann jederzeit durch drücken von allen drei Tasten aktiviert werden.
 0982_admin_lock_card.mp3|Nur Adminkarte. das Adminmenü kann nur mit einer Adminkarte geöffnet werden. Eine neue Adminkarte kann jederzeit angelernt werden.
