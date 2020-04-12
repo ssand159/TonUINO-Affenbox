@@ -16,24 +16,24 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 
 
 1. Pause
-	a. Track pausiert; ok
-	b. Track spielt wieder an, wenn dieser pausiert ist; ok 
+	- Track pausiert; ok
+	- Track spielt wieder an, wenn dieser pausiert ist; ok 
 
 2. Up
-	a. nächster Track wird gespielt; ok
-	b. Lautstärke wird erhöht
+	- nächster Track wird gespielt; ok
+	- Lautstärke wird erhöht
 	
 3. Down
-	a.vorheriger Track wird gespielt; ok
-	b. Lautstärke wird verringert
+	- vorheriger Track wird gespielt; ok
+	- Lautstärke wird verringert
 
 4. dritter Button
-	a. nächster Track wird gespielt
-	b. Lautstärke wird erhöht
+	- nächster Track wird gespielt
+	- Lautstärke wird erhöht
 
 4. vierter Button
-	a. nächster Track wird gespielt
-	b. Lautstärke wird erhöht
+	- nächster Track wird gespielt
+	- Lautstärke wird erhöht
 
 5. Rotary Encoder
 	a. Lautstärker wird erhöht; ok
