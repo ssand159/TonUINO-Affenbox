@@ -36,14 +36,14 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 	- Lautstärke wird erhöht
 
 5. Rotary Encoder
-	a. Lautstärker wird erhöht; ok
-	b. Lautstärke wird verringert; ok
+	- Lautstärker wird erhöht; ok
+	- Lautstärke wird verringert; ok
 	c. Up & Down verändern die Lautstärke nicht, wenn Rotary Encoder eingebundenist; ok
 
 6. RFID
-	a. konfigurierte Karte wird richtig erkannt; ok
-	b. neue Karte mit ungültigem Cookie wird erkannt und Konfigurationsmenü wird gestartet; ok
-	c. Konfigurationsmenü funktionsweise; ok
+	a konfigurierte Karte wird richtig erkannt; ok
+	b neue Karte mit ungültigem Cookie wird erkannt und Konfigurationsmenü wird gestartet; ok
+	c Konfigurationsmenü funktionsweise; ok
 
 ## Abspielmodis
 
