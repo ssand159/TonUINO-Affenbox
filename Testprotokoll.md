@@ -38,94 +38,90 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 5. Rotary Encoder
 	- Lautstärker wird erhöht; ok
 	- Lautstärke wird verringert; ok
-	c. Up & Down verändern die Lautstärke nicht, wenn Rotary Encoder eingebundenist; ok
+	- Up & Down verändern die Lautstärke nicht, wenn Rotary Encoder eingebundenist; ok
 
 6. RFID
-	a konfigurierte Karte wird richtig erkannt; ok
-	b neue Karte mit ungültigem Cookie wird erkannt und Konfigurationsmenü wird gestartet; ok
-	c Konfigurationsmenü funktionsweise; ok
+	- konfigurierte Karte wird richtig erkannt; ok
+	- neue Karte mit ungültigem Cookie wird erkannt und Konfigurationsmenü wird gestartet; ok
+	- Konfigurationsmenü funktionsweise; ok
 
 ## Abspielmodis
 
 
 1. Hörspielmodus
-	a. Tag konfiguerieren; ok
-	b. Tag lesen; ok
-	c. korrektes abspielen; ok
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- korrektes abspielen; ok
 
 2. Album
-	a. Tag konfiguerieren; ok
-	b. Tag lesen; ok
-	c. korrektes abspielen; ok
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- korrektes abspielen; ok
 
 3. Party
-	a. Tag konfiguerieren; ok
-	b. Tag lesen; ok
-	c. korrektes abspielen; ok
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- korrektes abspielen; ok
 
 4. Single
-	a. Tag konfiguerieren; ok
-	b. Tag lesen; ok
-	c. korrektes abspielen; ok
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- korrektes abspielen; ok
 
 5. Hörbuch
-	a. Tag konfiguerieren; ok
-	b. Tag lesen; ok
-	c. korrektes abspielen; ok
-	d. letzter Track wurde gespeichert und gelesen; ok
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- korrektes abspielen; ok
+	- letzter Track wurde gespeichert und gelesen; ok
 
 6. Hörspielmodus von bis
-	a. Tag konfiguerieren; ok
-	b. Tag lesen; ok
-	c. korrektes abspielen; ok
-	d. Titel vor und zurück sind gesperrt; ok 
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- korrektes abspielen; ok
+	- Titel vor und zurück sind gesperrt; ok 
 
 7. Album von bis
-	a. Tag konfiguerieren; ok
-	b. Tag lesen; ok
-	c. korrektes abspielen; ok
-	d. Grenzen werden eingehalten; ok
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- korrektes abspielen; ok
+	- Grenzen werden eingehalten; ok
 
 8. Party von bis
-	a. Tag konfiguerieren; ok
-	b. Tag lesen; ok
-	c. korrektes abspielen; ok
-	d. Grenzen werden eingehalten; ok
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- korrektes abspielen; ok
+	- Grenzen werden eingehalten; ok
 
 9. Hörbuch von bis
-	a. Tag konfiguerieren; ok
-	b. Tag lesen; ok
-	c. korrektes abspielen; ok
-	d. Grenzen werden eingehalten; ok
-	d. letzter Track wurde gespeichert und gelesen; ok
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- korrektes abspielen; ok
+	- Grenzen werden eingehalten; ok
+	- letzter Track wurde gespeichert und gelesen; ok
 
 10. Puzzleteil
-	a. Tag konfiguerieren; ok
-	b. Tag lesen; ok
-	c. korrektes abspielen; ok
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- korrektes abspielen; ok
 
 
 ## Modifier
 
 
 1. Sleep Timer
-	a. Tag konfiguerieren
-	b. Tag lesen
-	c. Stop nach eingestellter Zeit
-		- 5min
-		- 15min	
-		- 30min
-		- 60min
+	- Tag konfiguerieren
+	- Tag lesen
+	- Stop nach eingestellter Zeit
 
 2. Stopp Tanz
-	a. Tag konfiguerieren
-	b. Tag lesen
-	c. Stopp nach angegebener Zeit
+	- Tag konfiguerieren
+	- Tag lesen
+	- Stopp nach angegebener Zeit
 
 3. Sperre
-	a. Tag konfiguerieren
-	b. Tag lesen
-	c. Funktionen gesperrt
+	- Tag konfiguerieren
+	- Tag lesen
+	- Funktionen gesperrt
 		- Pause Taste
 		- Up Taste
 		- Down Taste
@@ -136,9 +132,9 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 		- Drehschalter
 
 4. Kleinkind Modus
-	a. Tag konfiguerieren
-	b. Tag lesen
-	c. Funktionen gesperrt
+	- Tag konfiguerieren
+	- Tag lesen
+	- Funktionen gesperrt
 		- Pause Taste
 		- Up Taste
 		- Down Taste
@@ -148,14 +144,14 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 		- Drehschalter
 
 5. Wiederholen
-	a. Tag konfiguerieren
-	b. Tag lesen
-	c. Titel wird wiederholt
+	- Tag konfiguerieren
+	- Tag lesen
+	- Titel wird wiederholt
 
 6. Puzzlespiel
-	a. Tag konfiguerieren
-	b. Tag lesen
-	c. Spielablauf
+	- Tag konfiguerieren
+	- Tag lesen
+	- Spielablauf
 		- unterscheiden von Puzzleteilen und normalen Tags
 		- einzelnes abspielen eines Puzzleteils
 		- zweites inkorrektes Teil wird erkannt und Fehlersound wird gespielt
