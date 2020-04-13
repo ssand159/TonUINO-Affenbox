@@ -1095,10 +1095,7 @@ class KindergardenMode: public Modifier {
         this->cardQueued = false;
 
         myCard = nextCard;
-        if (&myCard.nfcFolderSettings > 255)
-          myFolder = &myCard.nfcFolderSettings - 255;
-        else
-          myFolder = &myCard.nfcFolderSettings;
+        myFolder = &myCard.nfcFolderSettings;
 #ifdef DEBUG
         Serial.println(myFolder->folder);
         Serial.println(myFolder->mode);
