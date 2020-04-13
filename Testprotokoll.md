@@ -111,7 +111,7 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 1. Sleep Timer
 	- Tag konfiguerieren; ok
 	- Tag lesen; ok
-	- Stop nach eingestellter Zeit
+	- Stop nach eingestellter Zeit; ok
 
 2. Stopp Tanz
 	- Tag konfiguerieren
