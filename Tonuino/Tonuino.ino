@@ -21,12 +21,12 @@
 ///////// uncomment the below line to enable the function ////////////////
 //#define FIVEBUTTONS
 #define DEBUG
-#define DEBUG_QUEUE
+//#define DEBUG_QUEUE
 //#define PUSH_ON_OFF
 //#define STARTUP_SOUND
 //#define SPEAKER_SWITCH
-#define ROTARY_ENCODER
-#define ROTARY_SWITCH
+//#define ROTARY_ENCODER
+//#define ROTARY_SWITCH
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef ROTARY_ENCODER
@@ -35,9 +35,9 @@
 #endif
 
 ///////// conifguration of the input and output pin //////////////////////
-#define buttonPause A2 //Default A0; Pocket A2
-#define buttonUp A0 //Default A1; Pocket A0
-#define buttonDown A1 //Default A2; Pocket A1
+#define buttonPause A0 //Default A0; Pocket A2
+#define buttonUp A1 //Default A1; Pocket A0
+#define buttonDown A2 //Default A2; Pocket A1
 #define busyPin 4
 
 #define shutdownPin 7 //Default 7
