@@ -132,11 +132,18 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 6. Modifikationskarte erstellen
 	- erkennt Karte; ok
         - Karte wird konfiguriert; ok
-	Bemerkung: Funktion einzelener Modifier unter "Modifier"
+
+	
+Bemerkung: Funktion einzelener Modifier unter "Modifier"
+
+7. 
 
 
 
 ## Modifier
+
+
+- Speichern und Laden der Modifier, wenn konfiguriert; ok
 
 
 1. Sleep Timer
@@ -150,9 +157,9 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 	- Stopp nach angegebener Zeit; ok
 
 3. Sperre
-	- Tag konfiguerieren
-	- Tag lesen
-	- Funktionen gesperrt
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- Funktionen gesperrt:
 		- Pause Taste; ok
 		- Up Taste; ok
 		- Down Taste; ok
@@ -163,23 +170,38 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 		- Drehschalter; n.ok
 
 4. Kleinkind Modus
-	- Tag konfiguerieren
-	- Tag lesen
-	- Funktionen gesperrt
-		- Pause Taste
-		- Up Taste
-		- Down Taste
-		- Taste 4
-		- Taste 5
-		- Rotary Encoder
-		- Drehschalter
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- Funktionen gesperrt:
+                - Pause Taste; ok
+                - Up Taste; ok
+                - Down Taste; ok                
+                - Taste 4
+                - Taste 5
+                - Rotary Encoder; n.ok
+                - Drehschalter; n.ok
+	- Funktionen freigegeben:
+		- RFID leser; ok
 
-5. Wiederholen
+7. Kita Modus
+	- Tag konfiguerieren; ok
+        - Tag lesen; ok
+        - Funktionen gesperrt:
+                - Pause Taste; ok
+                - Up Taste; ok
+                - Down Taste; ok
+                - Taste 4
+                - Taste 5
+                - Rotary Encoder; n.ok
+                - Drehschalter; n.ok
+
+
+6. Wiederholen
 	- Tag konfiguerieren
 	- Tag lesen
 	- Titel wird wiederholt
 
-6. Puzzlespiel
+7. Puzzlespiel
 	- Tag konfiguerieren
 	- Tag lesen
 	- Spielablauf
