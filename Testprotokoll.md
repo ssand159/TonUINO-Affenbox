@@ -136,9 +136,6 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 	
 Bemerkung: Funktion einzelener Modifier unter "Modifier"
 
-7. 
-
-
 
 ## Modifier
 
@@ -189,7 +186,7 @@ Bemerkung: Funktion einzelener Modifier unter "Modifier"
         - Funktionen gesperrt:
                 - Up Taste; ok
                 - Down Taste; ok
-	- Nächste Karte wird in Queue eingereiht und erst nach abspielen des aktuellen Tracks gesepielt; n.ok Bemerkung: neue Karte wird nicht korrekt wiedergegeben -> zufälliger Ordner.
+	- Nächste Karte wird in Queue eingereiht und erst nach abspielen des aktuellen Tracks gesepielt; n.ok Bemerkung: neue Karte wird nicht zuverlässig in die Queue aufgenommen.
 	- ShortCut wird nur gespielt und aktiviert, wenn kein Track läuft; n.ok
 
 
