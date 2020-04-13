@@ -104,6 +104,37 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 	- Tag lesen; ok
 	- korrektes abspielen; ok
 
+## Admin Menü
+
+- Aufruf des Admin Menü über drei Taste; ok
+- Aufruf über Tag; ok 
+
+1. Karte neu konfigurieren
+	- erkennt Karte; ok
+	- Karte wird konfiguriert; ok
+
+2. Maximale Lautstärke
+	- einstellen der Lautstärke; ok
+	- Lautstärke wird übernommen; ok
+
+3. Minimale Lautstärke
+	- einstellen der Lautstärke; ok
+        - Lautstärke wird übernommen; ok
+	
+4. Lautstärke bei Start
+	- einstellen der Lautstärke; ok
+        - Lautstärke wird übernommen; ok
+
+5. EQ Konfiguration 
+        - einstellen des EQ; ok
+        - EQ wird übernommen; ok
+
+6. Modifikationskarte erstellen
+	- erkennt Karte; ok
+        - Karte wird konfiguriert; ok
+	Bemerkung: Funktion einzelener Modifier unter ## Modifier
+
+
 
 ## Modifier
 
