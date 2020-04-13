@@ -132,7 +132,7 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 6. Modifikationskarte erstellen
 	- erkennt Karte; ok
         - Karte wird konfiguriert; ok
-	Bemerkung: Funktion einzelener Modifier unter ## Modifier
+	Bemerkung: Funktion einzelener Modifier unter "Modifier"
 
 
 
@@ -145,22 +145,22 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 	- Stop nach eingestellter Zeit; ok
 
 2. Stopp Tanz
-	- Tag konfiguerieren
-	- Tag lesen
-	- Stopp nach angegebener Zeit
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- Stopp nach angegebener Zeit; ok
 
 3. Sperre
 	- Tag konfiguerieren
 	- Tag lesen
 	- Funktionen gesperrt
-		- Pause Taste
-		- Up Taste
-		- Down Taste
-		- RFID leser
+		- Pause Taste; ok
+		- Up Taste; ok
+		- Down Taste; ok
+		- RFID leser; ok
 		- Taste 4
 		- Taste 5
-		- Rotary Encoder
-		- Drehschalter
+		- Rotary Encoder; n.ok
+		- Drehschalter; n.ok
 
 4. Kleinkind Modus
 	- Tag konfiguerieren
