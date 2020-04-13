@@ -187,13 +187,10 @@ Bemerkung: Funktion einzelener Modifier unter "Modifier"
 	- Tag konfiguerieren; ok
         - Tag lesen; ok
         - Funktionen gesperrt:
-                - Pause Taste; ok
                 - Up Taste; ok
                 - Down Taste; ok
-                - Taste 4
-                - Taste 5
-                - Rotary Encoder; n.ok
-                - Drehschalter; n.ok
+	- Nächste Karte wird in Queue eingereiht und erst nach abspielen des aktuellen Tracks gesepielt; n.ok Bemerkung: neue Karte wird nicht korrekt wiedergegeben -> zufälliger Ordner.
+	- ShortCut wird nur gespielt und aktiviert, wenn kein Track läuft; n.ok
 
 
 6. Wiederholen
