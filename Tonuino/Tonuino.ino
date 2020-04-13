@@ -479,7 +479,7 @@ void disablestandbyTimer() {
 }
 //////////////////////////////////////////////////////////////////////////
 void checkStandbyAtMillis() {
-  if (sleepAtMillis != 0 && millis > sleepAtMillis) {
+  if (sleepAtMillis != 0 && millis() > sleepAtMillis) {
 #ifdef DEBUG
     Serial.println(F("standby active"));
 #endif
@@ -587,7 +587,7 @@ class FreezeDance: public Modifier {
 
   public:
     void loop() {
-      if (this->nextStopAtMillis != 0 && millis > this->nextStopAtMillis) {
+      if (this->nextStopAtMillis != 0 && millis() > this->nextStopAtMillis) {
 #ifdef DEBUG
         Serial.println(F("FreezeDance > freeze"));
 #endif
