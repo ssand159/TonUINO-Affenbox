@@ -546,7 +546,7 @@ class SleepTimer: public Modifier {
 
   public:
     void loop() {
-      if (this->sleepAtMillis != 0 && millis > this->sleepAtMillis) {
+      if (this->sleepAtMillis != 0 && millis() > this->sleepAtMillis) {
 #ifdef DEBUG
         Serial.println(F("SleepTimer > sleep"));
 #endif
