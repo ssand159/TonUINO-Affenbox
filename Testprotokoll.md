@@ -10,6 +10,7 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 
 - Optionsnummer wird nicht wieder gegeben; ok
 - Falsche Ansage bei schnellem Optionswechsel; ok
+- Voice menü: sporadisch kein Menüführung bei angespielten Tracks
 
 
 ## Steurung
@@ -132,10 +133,44 @@ Jeder Punkt, der mit "ok" gekennzeichnet ist wurde validiert.
 6. Modifikationskarte erstellen
 	- erkennt Karte; ok
         - Karte wird konfiguriert; ok
-
-	
 Bemerkung: Funktion einzelener Modifier unter "Modifier"
 
+7. Shortcut erstellen
+	- Pause Taste; n.ok für Pause Taste ist kein Shortcut vorgesehen
+	- Up Taste; ok
+	- Down Taste; ok
+
+8. Timer
+	- Standby nach eingestellter Zeit; ok
+
+9. Einzelkarten konfigurieren
+	- erkennt Karte; ok
+	- Karte wird konfiguriert; ok
+
+10. Funktion Lautstärketaster umkehren
+	- Funktion wird umgekehrt; ok
+
+11. Stopp bei entfernter Karte
+	- Pause wenn karte weg; n.ok sporadisch wird dennoch next Track ausgeführt, vor allem bei Trackwechsel problematisch
+	- Fortsetzen wenn Karte wieder da; ok
+
+12. Konfigurieren des Drehschalters
+	- Nur festgelegte Positionen auswählbar; ok
+	- Auswahl der drei Modis: Wiedergabe, Modifikation, Systemsteuerung; ok
+		- Wiedergabe konfiugurieren; ok
+		- Wiedergabe abspielen; ok
+		- Modifikation konfigurieren; ok
+		- Modifikation ausführen; ok
+		- Systemsteuerung konfigureiern; ok
+		- Systembefehl Lautstärke ausführen; ok
+		- Systembefehl Pause ausführen; ok
+		- Systembefehl Modifikation entfernen; ok
+		- Systembefehl nächster Titel; n.ok Mode wird auf 0 gesetzt und blockiert so den Titelwechsel
+		- Systembefehl vorheriger Titel; n.ok Mode wird auf 0 gesetzt und blockiert so den Titelwechsel
+		- Systembefehl Shut Down; ok
+	- Möglichkeit mehrere Positionen zu konfigureiern; ok
+	- Unkonfigurierte Position wird abgelehnt; ok
+	- Annehmen der Position, erst nach Trigger Zeit; ok
 
 ## Modifier
 
@@ -191,9 +226,9 @@ Bemerkung: Funktion einzelener Modifier unter "Modifier"
 
 
 6. Wiederholen
-	- Tag konfiguerieren
-	- Tag lesen
-	- Titel wird wiederholt
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- Titel wird wiederholt; ok
 
 7. Puzzlespiel
 	- Tag konfiguerieren

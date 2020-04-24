@@ -316,7 +316,7 @@
 0945_chooseRotarySwitchSlot.mp3|Welche Drehschalterposition soll konfiguriert werden?
 0946_repeatRotarySwitchkonfiguration.mp3|Soll eine weitere Drehschalterposition konfiguriert werden?
 0947_noRotarySwitch.mp3|Der Drehschalter kann nicht konfiguriert werden. Das define ist auskommentiert.
-0948_rotarySwitchSlotMode.mp3|Mit welcher Funktion soll die Drehschalterpostion belegt werden?
+0948_rotarySwitchSlotMode.mp3|Mit welcher Funktion soll die Drehschalterposition belegt werden?
 0949_optionNormalPlayback.mp3|Wiedergabe von Dateien.
 0950_optionModifiers.mp3|Modifikation.
 0951_optionSystemControl.mp3|System Kontrolle.
@@ -326,7 +326,7 @@
 0955_forward.mp3|Nächster Titel.
 0956_backward.mp3|Vorheriger Titel.
 0957_shutDown.mp3|TonUINO ausschalten.
-0958_removeModifier.mp3|Modifikation entfernen.mp3
+0958_removeModifier.mp3|Modifikation entfernen.
 0960_timer_intro.mp3|Nach wievielen Minuten soll der TonUINO ausgeschaltet werden?
 0961_timer_5.mp3|5 Minuten.
 0962_timer_15.mp3|15 Minuten.
@@ -344,7 +344,7 @@
 0974_modifier_puzzlegame.mp3|Puzzle Spiel. Ein Spiel, dass nach auflegen eines Puzzle Teils, das dazugehörige Gegenstück erwartet.
 0975_modifier_quiz.mp3|Quiz. Ein Spiel, dass aus dem gespeicherten Ordner eine zufällige Audiodatei abspielt und das Puzzlteil mit der selben Puzzle Teilnummer, wie die der Audiodatei, erwartet.
 0976_modifier_button_smash.mp3|Button Smash. Ein Spiel, dass nach jeder Aktion eine beliebige Audiodatei aus dem gespeicherten Ordner abspielt.
-0977_savePuzzlePart.mp3|Soll das erste Puzzle Teil gespeichert bleiben oder jedes Mal neu aufgelegt werden?
+0977_savePuzzlePart.mp3|Soll das erste Puzzle Teil gespeichert bleiben? Dann Wähle Ja. Oder soll das erste Puzzleteil jedes Mal neu aufgelegt werden? Dann wähle Nein
 0978_modifier_save.mp3|Soll diese Modifikation auch bei Neustart noch aktiv sein?
 0980_admin_lock_intro.mp3|Wähle bitte aus ob und wie das Adminmenü geschützt werden soll.
 0981_admin_lock_disabled.mp3|Kein Schutz. das Adminmenü kann jederzeit durch drücken von allen drei Tasten aktiviert werden.

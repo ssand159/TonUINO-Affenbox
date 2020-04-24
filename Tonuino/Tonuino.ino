@@ -60,11 +60,12 @@
 #ifdef ROTARY_ENCODER
 #define ROTARY_ENCODER_PIN_A 5 //Default 5; 
 #define ROTARY_ENCODER_PIN_B 6 //Default 6; 
-#define ROTARY_ENCODER_PIN_SUPPLY 8 //uncomment if you want to use an IO pin as supply
+//#define ROTARY_ENCODER_PIN_SUPPLY 8 //uncomment if you want to use an IO pin as supply
 #endif
 
 #ifdef ROTARY_SWITCH
-#define ROTARY_SWITCH_PIN  A5
+#define ROTARY_SWITCH_PIN  A7
+//#define ROTARY_SWITCH_SUPPLY_PIN 6
 #endif
 //////////////////////////////////////////////////////////////////////////
 
@@ -290,9 +291,66 @@ class Mp3Notify {
   public:
     static void OnError(uint16_t errorCode) {
       // see DfMp3_Error for code meaning
-      Serial.println();
-      Serial.print("Com Error ");
-      Serial.println(errorCode);
+#ifdef DEBUG
+      switch (errorCode) {
+        case DfMp3_Error_Busy: {
+            Serial.print(F("busy"));
+            break;
+          }
+        case DfMp3_Error_Sleeping: {
+            Serial.print(F("sleep"));
+            break;
+          }
+        case DfMp3_Error_SerialWrongStack: {
+            Serial.print(F("serial stack"));
+            break;
+          }
+        case DfMp3_Error_CheckSumNotMatch: {
+            Serial.print(F("checksum"));
+            break;
+          }
+        case DfMp3_Error_FileIndexOut: {
+            Serial.print(F("file index"));
+            break;
+          }
+        case DfMp3_Error_FileMismatch: {
+            Serial.print(F("file mismatch"));
+            break;
+          }
+        case DfMp3_Error_Advertise: {
+            Serial.print(F("advertise"));
+            break;
+          }
+        case DfMp3_Error_RxTimeout: {
+            Serial.print(F("rx timeout"));
+            break;
+          }
+        case DfMp3_Error_PacketSize: {
+            Serial.print(F("packet size"));
+            break;
+          }
+        case DfMp3_Error_PacketHeader: {
+            Serial.print(F("packet header"));
+            break;
+          }
+        case DfMp3_Error_PacketChecksum: {
+            Serial.print(F("packet checksum"));
+            break;
+          }
+        case DfMp3_Error_General: {
+            Serial.print(F("general"));
+            break;
+          }
+        default: {
+            Serial.print(F("unknown"));
+            break;
+          }
+      }
+      Serial.println(F(" error"));
+#endif
+      //      Serial.println();
+      //      Serial.print("Com Error ");
+      //      Serial.println(errorCode);
     }
     static void PrintlnSourceAction(DfMp3_PlaySources source, const char* action) {
       if (source & DfMp3_PlaySources_Sd) Serial.print("SD ");
@@ -1142,8 +1200,13 @@ class RepeatSingleModifier: public Modifier {
       Serial.println(F("RepeatSingle > repeat track"));
 #endif
       delay(50);
-      if (isPlaying()) return true;
-      mp3.playFolderTrack(myFolder->folder, currentTrack);
+      if (isPlaying())
+        return true;
+      if (myFolder->mode != Party && myFolder->mode != Party_Section)
+        mp3.playFolderTrack(myFolder->folder, currentTrack);
+      else
+        mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
+
       _lastTrackFinished = 0;
       return true;
     }
@@ -1212,15 +1275,10 @@ static void nextTrack(uint16_t track) {
       return;
     }
   }
-  if (track == _lastTrackFinished) {
+   if (track == _lastTrackFinished || knownCard == false) {
     return;
   }
   _lastTrackFinished = track;
-
-  if (knownCard == false)
-    // Wenn eine neue Karte angelernt wird soll das Ende eines Tracks nicht
-    // verarbeitet werden
-    return;
 
   switch (myFolder->mode) {
     case Album:
@@ -1247,20 +1305,23 @@ static void nextTrack(uint16_t track) {
 
     case AudioBook:
     case AudioBook_Section:
-      if (currentTrack != numTracksInFolder){
+      if (currentTrack != numTracksInFolder) {
         currentTrack = currentTrack + 1;
-        writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack); }
+        writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
+      }
       else {
         writeAudiobookMemory (myFolder->folder, myFolder->special3, firstTrack);
         return;
-        }
-       
+      }
+
       setstandbyTimer();
       break;
 
     default:
 #ifdef DEBUG
       Serial.println(F("No next Track"));
+      Serial.print(F("Mode: "));
+      Serial.println(myFolder->mode);
 #endif
       setstandbyTimer();
       delay(500);
@@ -1321,6 +1382,8 @@ static void previousTrack() {
     default:
 #ifdef DEBUG
       Serial.println(F("No previous Track"));
+      Serial.print(F("Mode: "));
+      Serial.println(myFolder->mode);
 #endif
       setstandbyTimer();
       break;
@@ -1405,6 +1468,10 @@ void setup() {
 #endif
 
 #ifdef ROTARY_SWITCH
+#ifdef ROTARY_SWITCH_SUPPLY_PIN
+  pinMode(ROTARY_SWITCH_SUPPLY_PIN, OUTPUT);
+  digitalWrite(ROTARY_SWITCH_SUPPLY_PIN, HIGH);
+#endif
   RotSwCurrentPos = RotSwGetPosition();
   RotSwActivePos = RotSwCurrentPos;
   RotSwMillis = millis();
@@ -2186,7 +2253,7 @@ void adminMenu(bool fromCard = false) {
           break;
       }
       mp3.playMp3FolderTrack(400);
-    } while (voiceMenu(2, 946, 933, false, false, 2, true) == 2);
+    } while (voiceMenu(2, 946, 933, false, false, 1, true) == 2);
 #endif
 #ifndef ROTARY_SWITCH
     mp3.playMp3FolderTrack(947);
@@ -2883,7 +2950,7 @@ bool setupModifier(folderSettings * tmpFolderSettings) {
     }
 
     //Save Modifier in EEPROM?
-    tmpFolderSettings->special3 = voiceMenu(2, 978, 933) - 1;
+    tmpFolderSettings->special3 = voiceMenu(2, 978, 933, false, false, 1) - 1;
     return true;
   }
   return false;
@@ -3007,16 +3074,6 @@ byte pollCard()
 #endif
         if (readCard(&myCard))  {
           bool bSameUID = !memcmp(lastCardUid, mfrc522.uid.uidByte, 4);
-          if (bSameUID) {
-#ifdef DEBUG
-            Serial.println(F("same card"));
-#endif
-          }
-          else {
-#ifdef DEBUG
-            Serial.println(F("new card"));
-#endif
-          }
           // store info about current card
           memcpy(lastCardUid, mfrc522.uid.uidByte, 4);
           lastCardWasUL = mfrc522.PICC_GetType(mfrc522.uid.sak) == MFRC522::PICC_TYPE_MIFARE_UL;
@@ -3029,7 +3086,7 @@ byte pollCard()
           mfrc522.PICC_HaltA();
           mfrc522.PCD_StopCrypto1();
 #ifdef DEBUG
-          Serial.print(F("cant read card"));
+          Serial.println(F("cant read card"));
 #endif
         }
       }
@@ -3046,9 +3103,6 @@ byte pollCard()
       if (retries > 0)
         retries--;
       else {
-#ifdef DEBUG
-        Serial.println(F("card gone"));
-#endif
         mfrc522.PICC_HaltA();
         mfrc522.PCD_StopCrypto1();
         hasCard = false;
@@ -3063,26 +3117,36 @@ byte pollCard()
 
 void handleCardReader()
 {
-  // poll card only every 200ms
+  // poll card only every 100ms
   static unsigned long lastCardPoll = 0;
   unsigned long now = millis();
 
-  if (static_cast<unsigned long>(now - lastCardPoll) > 200)  {
+  if (static_cast<unsigned long>(now - lastCardPoll) > 100)  {
     lastCardPoll = now;
     switch (pollCard()) {
       case PCS_NEW_CARD:
+#ifdef DEBUG
+        Serial.println(F("new card"));
+#endif
         onNewCard();
         break;
       case PCS_CARD_GONE:
+#ifdef DEBUG
+        Serial.println(F("card gone"));
+#endif
         if (mySettings.stopWhenCardAway) {
+          knownCard = false;
           mp3.pause();
           setstandbyTimer();
         }
         break;
       case PCS_CARD_IS_BACK:
+#ifdef DEBUG
+        Serial.println(F("same card"));
+#endif
         if (mySettings.stopWhenCardAway) {
           //nur weiterspielen wenn vorher nicht konfiguriert wurde
-          if (!forgetLastCard) {
+          if (!forgetLastCard) {           
             mp3.start();
             disablestandbyTimer();
           }
@@ -3105,8 +3169,7 @@ void onNewCard() {
   }
 
   // Neue Karte konfigurieren
-  else if (myCard.cookie != cardCookie) {
-    knownCard = false;
+  else if (myCard.cookie != cardCookie) {    
     mp3.playMp3FolderTrack(300);
     waitForTrackToFinish();
     setupCard();
