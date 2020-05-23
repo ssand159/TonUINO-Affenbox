@@ -21,11 +21,11 @@
 ///////// uncomment the below line to enable the function ////////////////
 //#define FIVEBUTTONS
 #define DEBUG
-#define DEBUG_QUEUE
+//#define DEBUG_QUEUE
 //#define PUSH_ON_OFF
-//#define STARTUP_SOUND
+#define STARTUP_SOUND
 //#define SPEAKER_SWITCH
-#define ROTARY_ENCODER
+//#define ROTARY_ENCODER
 //#define ROTARY_SWITCH
 //#define POWER_ON_LED
 //////////////////////////////////////////////////////////////////////////
@@ -517,49 +517,7 @@ void loadSettingsFromFlash() {
 #endif
 }
 
-/// Funktionen für den Standby Timer (z.B. über Pololu-Switch oder Mosfet)
 
-void setstandbyTimer() {
-
-#ifdef DEBUG
-  Serial.println(F("set standby timer"));
-#endif
-  if (mySettings.standbyTimer != 0)
-    sleepAtMillis = millis() + (mySettings.standbyTimer * 60 * 1000);
-  else
-    sleepAtMillis = 0;
-#ifdef DEBUG
-  Serial.print(F("milis: "));
-  Serial.println(sleepAtMillis);
-#endif
-}
-//////////////////////////////////////////////////////////////////////////
-void disablestandbyTimer() {
-#ifdef DEBUG
-  Serial.println(F("disable standby timer"));
-#endif
-  sleepAtMillis = 0;
-}
-//////////////////////////////////////////////////////////////////////////
-void checkStandbyAtMillis() {
-  if (sleepAtMillis != 0 && millis() > sleepAtMillis) {
-#ifdef DEBUG
-    Serial.println(F("standby active"));
-#endif
-    // enter sleep state
-    // http://discourse.voss.earth/t/intenso-s10000-powerbank-automatische-abschaltung-software-only/805
-    // powerdown to 27mA (powerbank switches off after 30-60s)
-    mfrc522.PCD_AntennaOff();
-    mfrc522.PCD_SoftPowerDown();
-    mp3.sleep();
-
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    cli();  // Disable interrupts
-    sleep_mode();
-    shutDown();
-  }
-}
-//////////////////////////////////////////////////////////////////////////
 class Modifier {
   public:
     virtual void loop() {}
@@ -1164,13 +1122,13 @@ class ToddlerMode: public Modifier {
     virtual bool handleShortCut() {
       return true;
     }
-    
+
     ToddlerMode() {
-      #ifdef DEBUG
+#ifdef DEBUG
       Serial.println(F("ToddlerMode"));
 #endif
     }
- 
+
     uint8_t getActive() {
       return ToddlerModeMod ;
     }
@@ -1824,40 +1782,6 @@ void playShortCut(uint8_t shortCut) {
     Serial.println(F("not configured"));
 #endif
   }
-}
-//////////////////////////////////////////////////////////////////////////
-void shutDown() {
-  if (activeModifier != NULL) {
-    if (activeModifier->handleShutDown() == true) {
-#ifdef DEBUG
-      Serial.println(F("Shut down locked"));
-#endif
-      return;
-    }
-  }
-
-#ifdef DEBUG
-  Serial.println("Shut Down");
-#endif
-
-  mp3.pause();
-
-#ifdef POWER_ON_LED
-  digitalWrite(PowerOnLEDPin, Low);
-#endif
-
-  delay(500);
-
-#ifdef STARTUP_SOUND
-  mp3.setVolume(mySettings.initVolume);
-  delay(500);
-
-  mp3.playMp3FolderTrack(265);
-  delay(500);
-  waitForTrackToFinish();
-#endif
-
-  digitalWrite(shutdownPin, HIGH);
 }
 //////////////////////////////////////////////////////////////////////////
 void loop() {
@@ -3246,3 +3170,86 @@ void onNewCard() {
     setupCard();
   }
 }
+
+/// Funktionen für den Standby Timer (z.B. über Pololu-Switch oder Mosfet)
+
+void setstandbyTimer() {
+
+#ifdef DEBUG
+  Serial.println(F("set standby timer"));
+#endif
+  if (mySettings.standbyTimer != 0)
+    sleepAtMillis = millis() + (mySettings.standbyTimer * 60 * 1000);
+  else
+    sleepAtMillis = 0;
+#ifdef DEBUG
+  Serial.print(F("milis: "));
+  Serial.println(sleepAtMillis);
+#endif
+}
+//////////////////////////////////////////////////////////////////////////
+void disablestandbyTimer() {
+#ifdef DEBUG
+  Serial.println(F("disable standby timer"));
+#endif
+  sleepAtMillis = 0;
+}
+//////////////////////////////////////////////////////////////////////////
+void checkStandbyAtMillis() {
+  if (sleepAtMillis != 0 && millis() > sleepAtMillis) {
+#ifdef DEBUG
+    Serial.println(F("standby active"));
+#endif
+    // enter sleep state
+    // http://discourse.voss.earth/t/intenso-s10000-powerbank-automatische-abschaltung-software-only/805
+    // powerdown to 27mA (powerbank switches off after 30-60s)
+    shutDown();
+  }
+}
+//////////////////////////////////////////////////////////////////////////
+void shutDown() {
+  if (activeModifier != NULL) {
+    if (activeModifier->handleShutDown() == true) {
+#ifdef DEBUG
+      Serial.println(F("Shut down locked"));
+#endif
+      return;
+    }
+  }
+
+#ifdef DEBUG
+  Serial.println("Shut Down");
+#endif
+
+  mp3.pause();
+
+#ifdef POWER_ON_LED
+  digitalWrite(PowerOnLEDPin, Low);
+#endif
+
+  delay(500);
+
+#ifdef STARTUP_SOUND
+if (volume > mySettings.initVolume)
+    volume = mySettings.initVolume;
+    
+  mp3.setVolume(volume);
+  delay(500);
+
+  mp3.playMp3FolderTrack(265);
+  delay(500);
+  waitForTrackToFinish();
+#endif
+
+  digitalWrite(shutdownPin, HIGH);
+
+  mfrc522.PCD_AntennaOff();
+  mfrc522.PCD_SoftPowerDown();
+  mp3.sleep();
+
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  cli();  // Disable interrupts
+  sleep_mode();
+}
+
+//////////////////////////////////////////////////////////////////////////
