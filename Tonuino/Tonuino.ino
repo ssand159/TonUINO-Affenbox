@@ -21,12 +21,13 @@
 ///////// uncomment the below line to enable the function ////////////////
 //#define FIVEBUTTONS
 #define DEBUG
-//#define DEBUG_QUEUE
+#define DEBUG_QUEUE
 //#define PUSH_ON_OFF
 //#define STARTUP_SOUND
 //#define SPEAKER_SWITCH
-//#define ROTARY_ENCODER
+#define ROTARY_ENCODER
 //#define ROTARY_SWITCH
+//#define POWER_ON_LED
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef ROTARY_ENCODER
@@ -57,10 +58,14 @@
 #define SpeakerOnPin 8
 #endif
 
+#ifdef POWER_ON_LED
+#define PowerOnLEDPin 6
+#endif
+
 #ifdef ROTARY_ENCODER
 #define ROTARY_ENCODER_PIN_A 5 //Default 5; 
 #define ROTARY_ENCODER_PIN_B 6 //Default 6; 
-//#define ROTARY_ENCODER_PIN_SUPPLY 8 //uncomment if you want to use an IO pin as supply
+#define ROTARY_ENCODER_PIN_SUPPLY 8 //uncomment if you want to use an IO pin as supply
 #endif
 
 #ifdef ROTARY_SWITCH
@@ -573,16 +578,19 @@ class Modifier {
     virtual bool handlePreviousButton() {
       return false;
     }
-    virtual bool handleVolumeUp() {
+    virtual bool handleVolume() {
       return false;
     }
-    virtual bool handleVolumeDown() {
+    virtual bool handleShortCut() {
       return false;
     }
     virtual bool handleShutDown() {
       return false;
     }
     virtual bool handleRFID(nfcTagObject *newCard) {
+      return false;
+    }
+    virtual bool handleStopWhenCardAway() {
       return false;
     }
     virtual bool handleSaveModifier() {
@@ -780,6 +788,14 @@ class PuzzleGame: public Modifier {
       return true;
     }
 
+    virtual bool handleShutDown() {
+      return true;
+    }
+
+    virtual bool handleShortCut() {
+      return true;
+    }
+
     virtual bool handleRFID(nfcTagObject *newCard) {
 
       this->tmpCard = *newCard;
@@ -812,7 +828,9 @@ class PuzzleGame: public Modifier {
         return false;
       }
     }
-
+    virtual bool handleStopWhenCardAway() {
+      return true;
+    }
     uint8_t getActive() {
       return PuzzleGameMod;
     }
@@ -956,6 +974,14 @@ class QuizGame: public Modifier {
       return true;
     }
 
+    virtual bool handleShutDown() {
+      return true;
+    }
+
+    virtual bool handleShortCut() {
+      return true;
+    }
+
     virtual bool handleRFID(nfcTagObject * newCard) {
       this->tmpCard = *newCard;
       if (tmpCard.nfcFolderSettings.mode != PuzzlePart) {
@@ -980,7 +1006,9 @@ class QuizGame: public Modifier {
         return false;
       }
     }
-
+    virtual bool handleStopWhenCardAway() {
+      return true;
+    }
     uint8_t getActive() {
       return QuizGameMod;
     }
@@ -1056,24 +1084,26 @@ class ButtonSmash: public Modifier {
       return true;
     }
 
-    virtual bool handleVolumeUp() {
+    virtual bool handleVolume() {
       next();
       return true;
     }
-    virtual bool handleVolumeDown() {
-      next();
+
+    virtual bool handleShortCut() {
       return true;
     }
 
     virtual bool handleShutDown() {
-      next();
       return true;
     }
+
     virtual bool handleRFID(nfcTagObject * newCard) {
       next();
       return true;
     }
-
+    virtual bool handleStopWhenCardAway() {
+      return true;
+    }
     uint8_t getActive() {
       return ButtonSmashMod ;
     }
@@ -1090,15 +1120,17 @@ class Locked: public Modifier {
     virtual bool handlePreviousButton() {
       return true;
     }
-    virtual bool handleVolumeUp()   {
-      return true;
-    }
-    virtual bool handleVolumeDown() {
+    virtual bool handleVolume()   {
       return true;
     }
     virtual bool handleShutDown() {
       return true;
     }
+
+    virtual bool handleShortCut() {
+      return true;
+    }
+
     virtual bool handleRFID(nfcTagObject *newCard) {
       return true;
     }
@@ -1123,17 +1155,22 @@ class ToddlerMode: public Modifier {
     virtual bool handlePreviousButton() {
       return true;
     }
-    virtual bool handleVolumeUp()   {
-      return true;
-    }
-    virtual bool handleVolumeDown() {
+    virtual bool handleVolume()   {
       return true;
     }
     virtual bool handleShutDown() {
       return true;
     }
-    ToddlerMode(void) {
+    virtual bool handleShortCut() {
+      return true;
     }
+    
+    ToddlerMode() {
+      #ifdef DEBUG
+      Serial.println(F("ToddlerMode"));
+#endif
+    }
+ 
     uint8_t getActive() {
       return ToddlerModeMod ;
     }
@@ -1172,6 +1209,14 @@ class KindergardenMode: public Modifier {
     virtual bool handleShutDown() {
       return true;
     }
+
+    virtual bool handleShortCut() {
+      if (isPlaying())
+        return true;
+      else
+        return false;
+    }
+
     virtual bool handleRFID(nfcTagObject * newCard) { // lot of work to do!
 #ifdef DEBUG
       Serial.println(F("KindergardenMode > RFID queued"));
@@ -1219,49 +1264,23 @@ class RepeatSingleModifier: public Modifier {
       return RepeatSingleMod;
     }
 };
-//////////////////////////////////////////////////////////////////////////
-// An modifier can also do somethings in addition to the modified action
-// by returning false (not handled) at the end
-// This simple FeedbackModifier will tell the volume before changing it and
-// give some feedback once a RFID card is detected.
-class FeedbackModifier: public Modifier {
-  public:
-    virtual bool handleVolumeDown() {
-      if (volume > mySettings.minVolume) {
-        mp3.playAdvertisement(volume - 1);
-      }
-      else {
-        mp3.playAdvertisement(volume);
-      }
-      delay(500);
-#ifdef DEBUG
-      Serial.println(F("Feedback > VolDown"));
-#endif
-      return false;
-    }
-    virtual bool handleVolumeUp() {
-      if (volume < mySettings.maxVolume) {
-        mp3.playAdvertisement(volume + 1);
-      }
-      else {
-        mp3.playAdvertisement(volume);
-      }
-      delay(500);
-#ifdef DEBUG
-      Serial.println(F("Feedback >VolUp"));
-#endif
-      return false;
-    }
-    virtual bool handleRFID(nfcTagObject *newCard) {
-#ifdef DEBUG
-      Serial.println(F("Feedback > RFID"));
-#endif
-      return false;
-    }
-    uint8_t getActive() {
-      return FeedbackMod;
-    }
-};
+////////////////////////////////////////////////////////////////////////////
+//// An modifier can also do somethings in addition to the modified action
+//// by returning false (not handled) at the end
+//// This simple FeedbackModifier will tell the volume before changing it and
+//// give some feedback once a RFID card is detected.
+//class FeedbackModifier: public Modifier {
+//  public:
+//    virtual bool handleRFID(nfcTagObject *newCard) {
+//#ifdef DEBUG
+//      Serial.println(F("Feedback > RFID"));
+//#endif
+//      return false;
+//    }
+//    uint8_t getActive() {
+//      return FeedbackMod;
+//    }
+//};
 //////////////////////////////////////////////////////////////////////////
 // Leider kann das Modul selbst keine Queue abspielen, daher müssen wir selbst die Queue verwalten
 static void nextTrack(uint16_t track) {
@@ -1275,7 +1294,7 @@ static void nextTrack(uint16_t track) {
       return;
     }
   }
-   if (track == _lastTrackFinished || knownCard == false) {
+  if (track == _lastTrackFinished || knownCard == false) {
     return;
   }
   _lastTrackFinished = track;
@@ -1482,6 +1501,11 @@ void setup() {
   digitalWrite(SpeakerOnPin, LOW);
 #endif
 
+#ifdef POWER_ON_LED
+  pinMode(PowerOnLEDPin, OUTPUT);
+  digitalWrite(PowerOnLEDPin, LOW);
+#endif
+
   //#ifdef CHECK_BATTERY
   //  pinMode(LEDredPin, OUTPUT);
   //  pinMode(LEDgreenPin, OUTPUT);
@@ -1543,6 +1567,10 @@ void setup() {
   delay(100);
 #endif
 
+#ifdef POWER_ON_LED
+  digitalWrite(PowerOnLEDPin, HIGH);
+#endif
+
 #ifdef STARTUP_SOUND
   mp3.playMp3FolderTrack(264);
   delay(500);
@@ -1563,9 +1591,9 @@ void readButtons() {
 #ifndef ROTARY_ENCODER
 void volumeUpButton() {
   if (activeModifier != NULL) {
-    if (activeModifier->handleVolumeUp() == true) {
+    if (activeModifier->handleVolume() == true) {
 #ifdef DEBUG
-      Serial.println(F("Volume up locked"));
+      Serial.println(F("Volume locked"));
 #endif
       return;
     }
@@ -1583,9 +1611,9 @@ void volumeUpButton() {
 //////////////////////////////////////////////////////////////////////////
 void volumeDownButton() {
   if (activeModifier != NULL) {
-    if (activeModifier->handleVolumeDown() == true) {
+    if (activeModifier->handleVolume() == true) {
 #ifdef DEBUG
-      Serial.println(F("Volume down locked"));
+      Serial.println(F("Volume locked"));
 #endif
       return;
     }
@@ -1776,6 +1804,14 @@ void playShortCut(uint8_t shortCut) {
   Serial.print(F("Shortcut: "));
   Serial.println(shortCut);
 #endif
+  if (activeModifier != NULL) {
+    if (activeModifier->handleShortCut() == true) {
+#ifdef DEBUG
+      Serial.println(F("Shortcut locked"));
+#endif
+      return;
+    }
+  }
   if (mySettings.shortCuts[shortCut].folder != 0) {
     myFolder = &mySettings.shortCuts[shortCut];
     playFolder();
@@ -1805,6 +1841,11 @@ void shutDown() {
 #endif
 
   mp3.pause();
+
+#ifdef POWER_ON_LED
+  digitalWrite(PowerOnLEDPin, Low);
+#endif
+
   delay(500);
 
 #ifdef STARTUP_SOUND
@@ -2805,6 +2846,7 @@ bool checkTwo ( uint8_t a[], uint8_t b[] ) {
 //////////////////////////////////////////////////////////////////////////
 #ifdef ROTARY_ENCODER
 void RotEncSetVolume () {
+
   RotEncPos += encoder.getValue();
 
   if ((RotEncPos >= RotEncOldEncPos + 2) || (RotEncPos <= RotEncOldEncPos - 2))  {
@@ -2827,7 +2869,16 @@ void RotEncSetVolume () {
     else   {
       volume = RotEncPos;
     }
+    if (activeModifier != NULL) {
+      if (activeModifier->handleVolume() == true) {
+        return;
+      }
+    }
     mp3.setVolume(volume);
+#ifdef DEBUG
+    Serial.print(F("volume: "));
+    Serial.println(volume);
+#endif
   }
 }
 
@@ -2908,6 +2959,14 @@ void RotSwSet (uint8_t RotarySwitchPosition) {
         SetModifier (myRotSw);
         break;
       default:
+        if (activeModifier != NULL) {
+          if (activeModifier->handleShortCut() == true) {
+#ifdef DEBUG
+            Serial.println(F("Shortcut locked"));
+#endif
+            return;
+          }
+        }
         myFolder = &myRotSw;
         playFolder();
         break;
@@ -2934,23 +2993,27 @@ bool setupModifier(folderSettings * tmpFolderSettings) {
         case 3: tmpFolderSettings->special = 30; break;
         case 4: tmpFolderSettings->special = 60; break;
       }
+      tmpFolderSettings->special2 = 0x00;
     } else if (tmpFolderSettings->mode == PuzzleGameMod) {
       //Save first part?
       tmpFolderSettings->special = voiceMenu(2, 977, 933) - 1;
+      tmpFolderSettings->special2 = 0x00;
     }
     else if (tmpFolderSettings->mode == QuizGameMod) {
       //Set Folder
       tmpFolderSettings->special =  voiceMenu(99, 301, 0, true, 0, 0, true);
+      tmpFolderSettings->special2 = 0x00;
     }
     else if (tmpFolderSettings->mode == ButtonSmashMod) {
       //Set Folder
       tmpFolderSettings->special =  voiceMenu(99, 301, 0, true, 0, 0, true);
       //Set Volume
-      tmpFolderSettings->special2 =  voiceMenu(30, 904, 0, true, 0, 0, true);
+      tmpFolderSettings->special2 =  voiceMenu(30, 904, false, false, 0);
     }
 
     //Save Modifier in EEPROM?
-    tmpFolderSettings->special3 = voiceMenu(2, 978, 933, false, false, 1) - 1;
+    tmpFolderSettings->special3 = voiceMenu(2, 978, 933, false, false, 0) - 1;
+    tmpFolderSettings->special4 = 0x00;
     return true;
   }
   return false;
@@ -2988,7 +3051,7 @@ bool SetModifier (folderSettings tmpFolderSettings) {
     case 4: activeModifier = new ToddlerMode(); break;
     case 5: activeModifier = new KindergardenMode(); break;
     case 6: activeModifier = new RepeatSingleModifier(); break;
-    case 7: activeModifier = new FeedbackModifier(); break;
+    //    case 7: activeModifier = new FeedbackModifier(); break;
     case 8: activeModifier = new PuzzleGame(tmpFolderSettings.special); break;
     case 9: activeModifier = new QuizGame(tmpFolderSettings.special); break;
     case 10: activeModifier = new ButtonSmash(tmpFolderSettings.special, tmpFolderSettings.special2); break;
@@ -3117,11 +3180,18 @@ byte pollCard()
 
 void handleCardReader()
 {
+  bool tmpStopWhenCardAway = true;
+
   // poll card only every 100ms
   static unsigned long lastCardPoll = 0;
   unsigned long now = millis();
 
   if (static_cast<unsigned long>(now - lastCardPoll) > 100)  {
+    if (activeModifier != NULL)
+      tmpStopWhenCardAway = mySettings.stopWhenCardAway && !activeModifier->handleStopWhenCardAway();
+    else
+      tmpStopWhenCardAway = mySettings.stopWhenCardAway;
+
     lastCardPoll = now;
     switch (pollCard()) {
       case PCS_NEW_CARD:
@@ -3134,7 +3204,7 @@ void handleCardReader()
 #ifdef DEBUG
         Serial.println(F("card gone"));
 #endif
-        if (mySettings.stopWhenCardAway) {
+        if (tmpStopWhenCardAway) {
           knownCard = false;
           mp3.pause();
           setstandbyTimer();
@@ -3144,9 +3214,10 @@ void handleCardReader()
 #ifdef DEBUG
         Serial.println(F("same card"));
 #endif
-        if (mySettings.stopWhenCardAway) {
+        if (tmpStopWhenCardAway) {
+
           //nur weiterspielen wenn vorher nicht konfiguriert wurde
-          if (!forgetLastCard) {           
+          if (!forgetLastCard) {
             mp3.start();
             disablestandbyTimer();
           }
@@ -3169,7 +3240,7 @@ void onNewCard() {
   }
 
   // Neue Karte konfigurieren
-  else if (myCard.cookie != cardCookie) {    
+  else if (myCard.cookie != cardCookie) {
     mp3.playMp3FolderTrack(300);
     waitForTrackToFinish();
     setupCard();

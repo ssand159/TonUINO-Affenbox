@@ -198,8 +198,9 @@ Bemerkung: Funktion einzelener Modifier unter "Modifier"
 		- RFID leser; ok
 		- Taste 4
 		- Taste 5
-		- Rotary Encoder; n.ok
-		- Drehschalter; n.ok
+		- Volume; ok
+		- Shortcuts; ok
+Bemerkung: Wenn Funktion "Stopp wenn Karte weg" aktiv ist, ist es unmöglich einen Track laufen zu lassen.
 
 4. Kleinkind Modus
 	- Tag konfiguerieren; ok
@@ -210,8 +211,8 @@ Bemerkung: Funktion einzelener Modifier unter "Modifier"
                 - Down Taste; ok                
                 - Taste 4
                 - Taste 5
-                - Rotary Encoder; n.ok
-                - Drehschalter; n.ok
+		- Volume; ok
+		- Shortcuts; ok
 	- Funktionen freigegeben:
 		- RFID leser; ok
 
@@ -222,7 +223,7 @@ Bemerkung: Funktion einzelener Modifier unter "Modifier"
                 - Up Taste; ok
                 - Down Taste; ok
 	- Nächste Karte wird in Queue eingereiht und erst nach abspielen des aktuellen Tracks gesepielt; n.ok Bemerkung: neue Karte wird nicht zuverlässig in die Queue aufgenommen.
-	- ShortCut wird nur gespielt und aktiviert, wenn kein Track läuft; n.ok
+	- ShortCut wird nur gespielt und aktiviert, wenn kein Track läuft; ok
 
 
 6. Wiederholen
@@ -230,20 +231,48 @@ Bemerkung: Funktion einzelener Modifier unter "Modifier"
 	- Tag lesen; ok
 	- Titel wird wiederholt; ok
 
-7. Puzzlespiel
-	- Tag konfiguerieren
-	- Tag lesen
+7. Feedback
+	Bemerkung: wird entfernt.
+
+8. Puzzlespiel
+	- Tag konfiguerieren, ok
+	- Tag lesen; ok
 	- Spielablauf
-		- unterscheiden von Puzzleteilen und normalen Tags
-		- einzelnes abspielen eines Puzzleteils
-		- zweites inkorrektes Teil wird erkannt und Fehlersound wird gespielt
-		- zweites korrektes Teil wird erkannt und Erfolgssound wird gespielt
-		- neues erstes Teil wird abgespielt
-		- Pause wiederholt erstes Teil
-		- Up Taste iste gesperrt
-		- Down Taste ist gesperrt
+		- unterscheiden von Puzzleteilen und normalen Tags, ok
+		- einzelnes abspielen eines Puzzleteils; ok
+		- zweites inkorrektes Teil wird erkannt und Fehlersound wird gespielt; ok 
+		- zweites korrektes Teil wird erkannt und Erfolgssound wird gespielt; ok 
+		- neues erstes Teil wird abgespielt; ok
+		- erstes Teil bleibt gespeichert, wenn Funktion aktiv; ok 
+		- Pause Taste wiederholt erstes Teil, wenn nichts gespielt wird.; ok
+		- Up Taste ist gesperrt; ok
+		- Down Taste ist gesperrt; ok
+		- Up & Down Taster gleichzeitig drücken, löschen das erste Teil; ok
 		- Taste 4 ist gesperrt
 		- Taste 5 ist gesperrt
-		- Modifier & Playback Shortcuts sind gesperrt
+		- Shortcuts gesperrt; ok
 
+9. Quiz
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- Spielablauf
+		- unterscheiden von Puzzleteilen und normalen Tags, ok
+		- einzelnes abspielen eines Puzzleteils; ok
+		- Zufällige Wiedergabe, der Frage; ok
+		- Inkorrektes Teil wird erkannt und Fehlersound wird gespielt; ok 
+		- Korrektes Teil wird erkannt und Erfolgssound wird gespielt; ok
+		- neues Frage wird abgespielt; ok
+		- Pause Taste wiederholt erstes Teil, wenn nichts gespielt wird.; ok
+		- Up Taste ist gesperrt; ok
+		- Down Taste ist gesperrt; ok
+		- Up & Down Taster gleichzeitig drücken, löschen die aktuelle Frage; ok
+		- Taste 4 ist gesperrt
+		- Taste 5 ist gesperrt
+		- Shortcuts gesperrt; ok
+
+10. Button Smash
+	- Tag konfiguerieren; ok
+	- Tag lesen; ok
+	- Spielablauf:
+		Bei jeder Nutzeraktion: Zufälliges Abspielen eines Tracks im hinterlegten Ordner, statt der eigentlichen Funktion der Aktion; ok
 
