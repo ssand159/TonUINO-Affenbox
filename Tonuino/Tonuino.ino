@@ -22,9 +22,9 @@
 //#define FIVEBUTTONS
 #define DEBUG
 //#define DEBUG_QUEUE
-//#define PUSH_ON_OFF
+#define PUSH_ON_OFF
 #define STARTUP_SOUND
-//#define SPEAKER_SWITCH
+#define SPEAKER_SWITCH
 //#define ROTARY_ENCODER
 //#define ROTARY_SWITCH
 //#define POWER_ON_LED
@@ -72,6 +72,12 @@
 #define ROTARY_SWITCH_PIN  A7
 //#define ROTARY_SWITCH_SUPPLY_PIN 6
 #endif
+//////////////////////////////////////////////////////////////////////////
+
+////////// NFC Gain //////////////////////////////////////////////////////
+//#define NFCgain_max   // Maximale Empfindlichkeit
+#define NFCgain_avg   // Mittlere Empfindlichkeit
+//#define NFCgain_min   // Minimale Empfindlichkeit 
 //////////////////////////////////////////////////////////////////////////
 
 ///////// conifguration of the rotary encoder ////////////////////////////
@@ -552,6 +558,9 @@ class Modifier {
       return false;
     }
     virtual bool handleSaveModifier() {
+      return false;
+    }
+    virtual bool handleAdminMenu() {
       return false;
     }
     virtual uint8_t getActive() {
@@ -1048,13 +1057,19 @@ class ButtonSmash: public Modifier {
     }
 
     virtual bool handleShortCut() {
+      next();
       return true;
     }
 
     virtual bool handleShutDown() {
+      next();
       return true;
     }
-
+    
+    virtual bool handleAdminMenu() {
+      next();
+      return true;
+    }
     virtual bool handleRFID(nfcTagObject * newCard) {
       next();
       return true;
@@ -1086,6 +1101,9 @@ class Locked: public Modifier {
     }
 
     virtual bool handleShortCut() {
+      return true;
+    }
+    virtual bool handleAdminMenu() {      
       return true;
     }
 
@@ -1120,6 +1138,9 @@ class ToddlerMode: public Modifier {
       return true;
     }
     virtual bool handleShortCut() {
+      return true;
+    }
+    virtual bool handleAdminMenu() {      
       return true;
     }
 
@@ -1165,6 +1186,9 @@ class KindergardenMode: public Modifier {
       return true;
     }
     virtual bool handleShutDown() {
+      return true;
+    }
+    virtual bool handleAdminMenu() {      
       return true;
     }
 
@@ -1497,6 +1521,19 @@ void setup() {
   for (byte i = 0; i < 6; i++) {
     key.keyByte[i] = 0xFF;
   }
+  
+#ifdef NFCgain_min
+  mfrc522.PCD_SetAntennaGain(mfrc522.RxGain_min);
+  Serial.println(F("=== mfrc522-> RxGain_min === "));
+#endif
+#ifdef NFCgain_avg
+  mfrc522.PCD_SetAntennaGain(mfrc522.RxGain_avg);
+  Serial.println(F("=== mfrc522-> RxGain_avg === "));
+#endif
+#ifdef NFCgain_max
+  mfrc522.PCD_SetAntennaGain(mfrc522.RxGain_max);
+  Serial.println(F("=== mfrc522-> RxGain_max === "));
+#endif
 
   pinMode(buttonPause, INPUT_PULLUP);
   pinMode(buttonUp, INPUT_PULLUP);
@@ -2007,6 +2044,14 @@ void loop() {
 }
 //////////////////////////////////////////////////////////////////////////
 void adminMenu(bool fromCard = false) {
+  if (activeModifier != NULL) {
+    if (activeModifier->handleAdminMenu() == true) {
+#ifdef DEBUG
+      Serial.println(F("Admin Menu locked"));
+#endif
+      return;
+    }
+  }
   forgetLastCard = true;
   disablestandbyTimer();
   mp3.pause();
@@ -2297,6 +2342,7 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
       mp3.playMp3FolderTrack(802);
       delay(300);
       ignorePauseButton = true;
+      checkStandbyAtMillis();
       return defaultValue;
     }
     if (pauseButton.wasReleased()) {
@@ -2961,7 +3007,7 @@ bool SetModifier (folderSettings tmpFolderSettings) {
     }
     else {
       mp3.playMp3FolderTrack(260);
-      waitForTrackToFinish();
+      delay(1300);
     }
   }
   delay(2000);
@@ -3004,7 +3050,7 @@ bool RemoveModifier() {
     mp3.pause();
     delay(500);
     mp3.playMp3FolderTrack(261);
-    waitForTrackToFinish();
+    delay(1300);
   }
   return false;
 }
@@ -3174,9 +3220,12 @@ void onNewCard() {
 /// Funktionen für den Standby Timer (z.B. über Pololu-Switch oder Mosfet)
 
 void setstandbyTimer() {
-
 #ifdef DEBUG
   Serial.println(F("set standby timer"));
+#endif
+#ifdef SPEAKER_SWITCH
+  digitalWrite(SpeakerOnPin, LOW);
+  delay(100);
 #endif
   if (mySettings.standbyTimer != 0)
     sleepAtMillis = millis() + (mySettings.standbyTimer * 60 * 1000);
@@ -3191,6 +3240,10 @@ void setstandbyTimer() {
 void disablestandbyTimer() {
 #ifdef DEBUG
   Serial.println(F("disable standby timer"));
+#endif
+#ifdef SPEAKER_SWITCH
+  digitalWrite(SpeakerOnPin, HIGH);
+  delay(100);
 #endif
   sleepAtMillis = 0;
 }
@@ -3221,7 +3274,7 @@ void shutDown() {
   Serial.println("Shut Down");
 #endif
 
-  mp3.pause();
+mp3.pause();
 
 #ifdef POWER_ON_LED
   digitalWrite(PowerOnLEDPin, Low);
@@ -3237,11 +3290,16 @@ if (volume > mySettings.initVolume)
   delay(500);
 
   mp3.playMp3FolderTrack(265);
-  delay(500);
-  waitForTrackToFinish();
+  delay(1500);
+  //waitForTrackToFinish();
 #endif
 
-  digitalWrite(shutdownPin, HIGH);
+#ifdef SPEAKER_SWITCH
+  digitalWrite(SpeakerOnPin, LOW);
+  delay(100);
+#endif
+
+  digitalWrite(shutdownPin, HIGH);  
 
   mfrc522.PCD_AntennaOff();
   mfrc522.PCD_SoftPowerDown();
