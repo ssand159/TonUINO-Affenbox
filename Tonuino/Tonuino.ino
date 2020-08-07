@@ -22,9 +22,9 @@
 //#define FIVEBUTTONS
 #define DEBUG
 //#define DEBUG_QUEUE
-#define PUSH_ON_OFF
-#define STARTUP_SOUND
-#define SPEAKER_SWITCH
+//#define PUSH_ON_OFF
+//#define STARTUP_SOUND
+//#define SPEAKER_SWITCH
 //#define ROTARY_ENCODER
 //#define ROTARY_SWITCH
 //#define POWER_ON_LED
@@ -38,7 +38,7 @@
 ///////// conifguration of the input and output pin //////////////////////
 #define buttonPause A0 //Default A0; Pocket A2
 #define buttonUp A1 //Default A1; Pocket A0
-#define buttonDown A2 //Default A2; Pocket A1
+#define buttonDown 2 //Default A2; Pocket A1
 #define busyPin 4
 
 #define shutdownPin 7 //Default 7
@@ -1276,23 +1276,31 @@ static void nextTrack(uint16_t track) {
       return;
     }
   }
+
   if (track == _lastTrackFinished || knownCard == false) {
     return;
   }
-  _lastTrackFinished = track;
+_lastTrackFinished = track;
 
   switch (myFolder->mode) {
     case Album:
-    case Album_Section:
-      if (currentTrack != numTracksInFolder)
+      if (currentTrack < numTracksInFolder)
         currentTrack = currentTrack + 1;
-      else
+      else{
         setstandbyTimer();
+        return;}
+      break;
+    case Album_Section:
+      if (currentTrack < numTracksInFolder - firstTrack + 1)
+        currentTrack = currentTrack + 1;
+      else{
+        setstandbyTimer();
+        return;}
       break;
 
     case Party:
     case Party_Section:
-      if (currentTrack != numTracksInFolder - firstTrack + 1) {
+      if (currentTrack < numTracksInFolder - firstTrack + 1) {
         currentTrack = currentTrack + 1;
       }
       else {
@@ -1305,8 +1313,7 @@ static void nextTrack(uint16_t track) {
       break;
 
     case AudioBook:
-    case AudioBook_Section:
-      if (currentTrack != numTracksInFolder) {
+      if (currentTrack < numTracksInFolder) {
         currentTrack = currentTrack + 1;
         writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
       }
@@ -1316,6 +1323,21 @@ static void nextTrack(uint16_t track) {
       }
 
       setstandbyTimer();
+      return;
+      break;
+    case AudioBook_Section:
+      if (currentTrack < numTracksInFolder - firstTrack + 1) {
+        currentTrack = currentTrack + 1;
+        writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
+        return;
+      }
+      else {
+        writeAudiobookMemory (myFolder->folder, myFolder->special3, firstTrack);
+        return;
+      }
+
+      setstandbyTimer();
+      return;
       break;
 
     default:
@@ -1342,6 +1364,8 @@ static void nextTrack(uint16_t track) {
   }
   else {
     mp3.playFolderTrack(myFolder->folder, currentTrack);
+
+      
 #ifdef DEBUG
     Serial.println(currentTrack);
 #endif
@@ -1355,6 +1379,9 @@ static void previousTrack() {
 
   switch (myFolder->mode) {
     case Album:
+     if (currentTrack > 1)
+        currentTrack = currentTrack - 1;
+      break;
     case Album_Section:
       if (currentTrack > firstTrack)
         currentTrack = currentTrack - 1;
@@ -1372,6 +1399,13 @@ static void previousTrack() {
       break;
 
     case AudioBook:
+     if (currentTrack > 1)
+        currentTrack = currentTrack - 1;
+
+      // Fortschritt im EEPROM abspeichern
+      writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
+      break;
+
     case AudioBook_Section:
       if (currentTrack > firstTrack)
         currentTrack = currentTrack - 1;
@@ -1387,6 +1421,7 @@ static void previousTrack() {
       Serial.println(myFolder->mode);
 #endif
       setstandbyTimer();
+      return;
       break;
   }
 
@@ -1419,12 +1454,10 @@ void waitForTrackToFinish() {
   unsigned long currentTime = millis();
 #define TIMEOUT 1000
   do {
-    delay(50);
     mp3.loop();
   } while (!isPlaying() && millis() < currentTime + TIMEOUT);
-  delay(300);
+  delay(800);
   do {
-    delay(50);
     mp3.loop();
   } while (isPlaying());
 }
