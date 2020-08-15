@@ -1319,25 +1319,21 @@ _lastTrackFinished = track;
       }
       else {
         writeAudiobookMemory (myFolder->folder, myFolder->special3, firstTrack);
+        setstandbyTimer();
         return;
       }
 
-      setstandbyTimer();
-      return;
       break;
     case AudioBook_Section:
       if (currentTrack < numTracksInFolder - firstTrack + 1) {
         currentTrack = currentTrack + 1;
         writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
-        return;
       }
       else {
-        writeAudiobookMemory (myFolder->folder, myFolder->special3, firstTrack);
+        writeAudiobookMemory (myFolder->folder, myFolder->special3, firstTrack);        
+        setstandbyTimer();
         return;
       }
-
-      setstandbyTimer();
-      return;
       break;
 
     default:
