@@ -38,7 +38,7 @@
 ///////// conifguration of the input and output pin //////////////////////
 #define buttonPause A0 //Default A0; Pocket A2
 #define buttonUp A1 //Default A1; Pocket A0
-#define buttonDown 2 //Default A2; Pocket A1
+#define buttonDown A2 //Default A2; Pocket A1
 #define busyPin 4
 
 #define shutdownPin 7 //Default 7
