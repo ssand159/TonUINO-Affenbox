@@ -3217,6 +3217,7 @@ void handleCardReader()
 
           //nur weiterspielen wenn vorher nicht konfiguriert wurde
           if (!forgetLastCard) {
+            knownCard = true;
             mp3.start();
             disablestandbyTimer();
           }
