@@ -1278,9 +1278,6 @@ static void nextTrack(uint16_t track) {
   }
 
   if (track == _lastTrackFinished || knownCard == false) {
-        #ifdef DEBUG
-      Serial.println(F("_lastTrackFinished"));
-#endif
     return;
   }
 _lastTrackFinished = track;
@@ -1290,7 +1287,6 @@ _lastTrackFinished = track;
       if (currentTrack < numTracksInFolder)
         currentTrack = currentTrack + 1;
       else{
-        currentTrack = 0;
         setstandbyTimer();
         return;}
       break;
@@ -1298,7 +1294,6 @@ _lastTrackFinished = track;
       if (currentTrack < numTracksInFolder - firstTrack + 1)
         currentTrack = currentTrack + 1;
       else{
-        currentTrack = firstTrack-1;
         setstandbyTimer();
         return;}
       break;
@@ -1309,7 +1304,7 @@ _lastTrackFinished = track;
         currentTrack = currentTrack + 1;
       }
       else {
-        currentTrack = 0;
+        currentTrack = 1;
         //// Wenn am Ende der Queue neu gemischt werden soll bitte die Zeilen wieder aktivieren
         //     Serial.println(F("Ende der Queue > mische neu"));
         //     shuffleQueue();
@@ -1357,8 +1352,6 @@ _lastTrackFinished = track;
   Serial.print("next track: ");
 #endif
 
-    disablestandbyTimer();
-    
   if (queueTrack) {
     mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
 #ifdef DEBUG
@@ -1384,14 +1377,10 @@ static void previousTrack() {
     case Album:
      if (currentTrack > 1)
         currentTrack = currentTrack - 1;
-      else
-          currentTrack = 1;
       break;
     case Album_Section:
       if (currentTrack > firstTrack)
-          currentTrack = currentTrack - 1;
-      else
-        currentTrack = firstTrack;
+        currentTrack = currentTrack - 1;
       break;
 
     case Party:
@@ -1436,7 +1425,6 @@ static void previousTrack() {
   Serial.print("previous track: ");
 #endif
 
-disablestandbyTimer();
   if (queueTrack) {
     mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
 #ifdef DEBUG
@@ -1675,6 +1663,7 @@ void nextButton() {
       return;
     }
   }
+
   nextTrack(random(65536));
   delay(300);
 }
@@ -1688,6 +1677,7 @@ void previousButton() {
       return;
     }
   }
+
   previousTrack();
   delay(300);
 }
@@ -1851,7 +1841,7 @@ void playShortCut(uint8_t shortCut) {
   if (mySettings.shortCuts[shortCut].folder != 0) {
     myFolder = &mySettings.shortCuts[shortCut];
     playFolder();
-    //disablestandbyTimer();
+    disablestandbyTimer();
     //delay(1000);
   }
   else
@@ -2017,33 +2007,44 @@ void loop() {
 
 #ifdef ROTARY_ENCODER
   if (upButton.pressedFor(LONG_PRESS)) {
-    if (!isPlaying())
+    if (isPlaying()) {
+      nextButton();
+    }
+
+    else {
       playShortCut(1);
- 
+    }
     ignoreUpButton = true;
   }
 
+
   else if (upButton.wasReleased()) {
     if (!ignoreUpButton)
+      if (isPlaying()) {
         nextButton();
-        
+      }
     ignoreUpButton = false;
   }
 
   if (downButton.pressedFor(LONG_PRESS)) {
-    if (!isPlaying()) {
+    if (isPlaying()) {
+      previousButton();
+    }
+
+    else {
       playShortCut(2);
     }
     ignoreDownButton = true;
   }
 
+
   else if (downButton.wasReleased()) {
     if (!ignoreDownButton)
+      if (isPlaying()) {
         previousButton();
-
+      }
     ignoreDownButton = false;
   }
-  
 #endif
 
   handleCardReader();
