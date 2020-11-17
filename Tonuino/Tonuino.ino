@@ -429,7 +429,7 @@ void resetSettings() {
   mySettings.version = 2;
   mySettings.maxVolume = 25;
   mySettings.minVolume = 1;
-  mySettings.initVolume = 1;
+  mySettings.initVolume = 8;
   mySettings.eq = 1;
   mySettings.locked = false;
   mySettings.standbyTimer = 0;
@@ -1278,7 +1278,7 @@ static void nextTrack(uint16_t track) {
   }
 
   if (track == _lastTrackFinished || knownCard == false) {
-        #ifdef DEBUG
+#ifdef DEBUG
       Serial.println(F("_lastTrackFinished"));
 #endif
     return;
@@ -1353,11 +1353,11 @@ _lastTrackFinished = track;
       break;
   }
 
+disablestandbyTimer();
+
 #ifdef DEBUG
   Serial.print("next track: ");
 #endif
-
-    disablestandbyTimer();
     
   if (queueTrack) {
     mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
@@ -1379,6 +1379,8 @@ _lastTrackFinished = track;
 //////////////////////////////////////////////////////////////////////////
 static void previousTrack() {
   bool queueTrack = false;
+  
+_lastTrackFinished = 0;
 
   switch (myFolder->mode) {
     case Album:
@@ -1432,11 +1434,14 @@ static void previousTrack() {
       break;
   }
 
+disablestandbyTimer();
+
+
+
 #ifdef DEBUG
   Serial.print("previous track: ");
 #endif
 
-disablestandbyTimer();
   if (queueTrack) {
     mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
 #ifdef DEBUG
@@ -1487,8 +1492,7 @@ void setup() {
   // Busy Pin
   pinMode(busyPin, INPUT);
   mp3.begin();
-  delay(2000);
-  mp3.loop();
+
 
   // Wert für randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
   uint32_t ADC_LSB;
@@ -1549,9 +1553,6 @@ void setup() {
   // activate standby timer
   setstandbyTimer();
 
-  volume = mySettings.initVolume;
-  mp3.setVolume(volume);
-  mp3.setEq(mySettings.eq - 1);
 
   // NFC Leser initialisieren
   SPI.begin();        // Init SPI bus
@@ -1606,6 +1607,13 @@ void setup() {
 #ifdef POWER_ON_LED
   digitalWrite(PowerOnLEDPin, HIGH);
 #endif
+
+
+  delay(3000);
+  mp3.loop();
+  volume = mySettings.initVolume;
+  mp3.setVolume(volume);
+  mp3.setEq(mySettings.eq - 1);
 
 #ifdef STARTUP_SOUND
   mp3.playMp3FolderTrack(264);
@@ -3307,8 +3315,13 @@ void shutDown() {
 
 mp3.pause();
 
+#ifdef SPEAKER_SWITCH
+  digitalWrite(SpeakerOnPin, HIGH);
+  delay(100);
+#endif
+
 #ifdef POWER_ON_LED
-  digitalWrite(PowerOnLEDPin, Low);
+  digitalWrite(PowerOnLEDPin, LOW);
 #endif
 
   delay(500);
