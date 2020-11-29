@@ -1913,6 +1913,12 @@ void loop() {
     return;
   }
 
+//Lösche Hörbuchspeicher nach sehr langem Druck von Up & Down Button, vorrausgesetzt ein Hörbuch ist aktiv
+  if((upButton.pressedFor(LONGER_PRESS) || downButton.pressedFor(LONGER_PRESS)) && !pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed()) {
+    if (myFolder->mode == AudioDrama || myFolder->mode == AudioDrama_Section){
+      writeAudiobookMemory (myFolder->folder, myFolder->special3, 0);   
+    }
+  }
   if (pauseButton.wasReleased()) {
 
     if (activeModifier != NULL) {
