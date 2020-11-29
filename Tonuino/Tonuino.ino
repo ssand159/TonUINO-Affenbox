@@ -12,7 +12,6 @@
     | | | . |   |  |  |-   -| | | |  |  |
     |_| |___|_|_|_____|_____|_|___|_____|
     TonUINO Version 2.1
-
     created by Thorsten Voß and licensed under GNU/GPL.
     Information and contribution at https://tonuino.de.
     Fork by Marco Schulz
@@ -28,6 +27,7 @@
 //#define ROTARY_ENCODER
 //#define ROTARY_SWITCH
 //#define POWER_ON_LED
+//#define FADING_LED //Experimentell, nur in Verbindung mit POWER_ON_LED 
 //////////////////////////////////////////////////////////////////////////
 
 #ifdef ROTARY_ENCODER
@@ -1229,10 +1229,12 @@ class RepeatSingleModifier: public Modifier {
       delay(50);
       if (isPlaying())
         return true;
-      if (myFolder->mode != Party && myFolder->mode != Party_Section)
-        mp3.playFolderTrack(myFolder->folder, currentTrack);
-      else
+            if (myFolder->mode == Party || myFolder->mode == Party_Section){
         mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
+      }
+      else{
+        mp3.playFolderTrack(myFolder->folder, currentTrack);
+      }
 
       _lastTrackFinished = 0;
       return true;
@@ -1887,6 +1889,10 @@ void loop() {
   RotSwloop(ROTARY_SWITCH_TRIGGER_TIME);
 #endif
 
+#ifdef POWER_ON_LED && FADING_LED
+  fadeStatusLed(isPlaying());
+#endif
+
   // Buttons werden nun über JS_Button gehandelt, dadurch kann jede Taste
   // doppelt belegt werden
   readButtons();
@@ -1930,8 +1936,9 @@ void loop() {
     ignorePauseButton = false;
   }
 #ifdef PUSH_ON_OFF
-  else if (pauseButton.pressedFor(LONGER_PRESS) &&
-           ignorePauseButton == false) {
+  else if (pauseButton.pressedFor(LONGER_PRESS) && 
+          (!upButton.isPressed() || !downButton.isPressed()) && 
+          ignorePauseButton == false) {
     ignorePauseButton = true;
     shutDown();
   }
@@ -2482,6 +2489,7 @@ bool setupFolder(folderSettings * theFolder) {
 #ifdef DEBUG
       Serial.println(F("Single"));
 #endif
+      //Einzeltrack in special speichern
       theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 320, 0,
                                      true, theFolder->folder);
       break;
@@ -2492,10 +2500,12 @@ bool setupFolder(folderSettings * theFolder) {
 #ifdef DEBUG
       Serial.println(F("Section"));
 #endif
+      //Von (special), Bis (special2) speichern
       theFolder->special = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 321, 0,
                                      true, theFolder->folder);
       theFolder->special2 = voiceMenu(mp3.getFolderTrackCount(theFolder->folder), 322, 0,
                                       true, theFolder->folder, theFolder->special);
+      //Speicherplatz für das Hörbuch wählen
       if (theFolder->mode == AudioBook_Section)
         theFolder->special3 = voiceMenu(10, 325, 0,
                                         false, 0, 0, true);
@@ -2511,7 +2521,8 @@ bool setupFolder(folderSettings * theFolder) {
 #ifdef DEBUG
       Serial.println(F("AudioBook"));
 #endif
-      theFolder->special3 = voiceMenu(10, 325, 0,
+      //Speicherplatz für das Hörbuch wählen
+      theFolder->special3 = voiceMenu(8, 325, 0,
                                       false, 0, 0, true);
       break;
     case PuzzlePart:
@@ -3117,7 +3128,8 @@ uint8_t readAudiobookMemory (uint8_t folder, uint8_t memoryNumber) {
   Serial.println(folder);
 #endif
 
-  return EEPROM.read(folder + (99 * memoryNumber));
+  //return EEPROM.read(folder + (99 * memoryNumber));
+  return EEPROM.read((folder - 1) + ((memoryNumber * 100) + 50));
 }
 
 void writeAudiobookMemory (uint8_t folder, uint8_t memoryNumber, uint8_t track) {
@@ -3129,7 +3141,8 @@ void writeAudiobookMemory (uint8_t folder, uint8_t memoryNumber, uint8_t track) 
   Serial.print(F(" in memory No. "));
   Serial.println(memoryNumber);
 #endif
-  EEPROM.update(folder + (99 * memoryNumber), track);
+  //EEPROM.update(folder + (99 * memoryNumber), track);
+  EEPROM.update((folder - 1) + ((memoryNumber * 100) + 50), track);
 }
 
 //Um festzustellen ob eine Karte entfernt wurde, muss der MFRC regelmäßig ausgelesen werden
@@ -3332,10 +3345,10 @@ if (volume > mySettings.initVolume)
     
   mp3.setVolume(volume);
   delay(500);
-
-  mp3.playMp3FolderTrack(265);
-  delay(1500);
-  //waitForTrackToFinish();
+  
+  knownCard = false;
+  mp3.playMp3FolderTrack(265);  
+  waitForTrackToFinish();
 #endif
 
 #ifdef SPEAKER_SWITCH
@@ -3355,3 +3368,41 @@ if (volume > mySettings.initVolume)
 }
 
 //////////////////////////////////////////////////////////////////////////
+#ifdef POWER_ON_LED && FADING_LED
+// fade in/out status led while beeing idle, during playback set to full brightness
+void fadeStatusLed(bool isPlaying) {
+static bool statusLedDirection = false;
+static int16_t statusLedValue = 255;
+static uint64_t statusLedOldMillis;
+static int16_t statusLedDeltaValuePause = 100;
+static int16_t statusLedDeltaValuePlay = 10;
+static int16_t statusLedDeltaValue = 10;
+
+if (isPlaying) {
+statusLedDeltaValue = statusLedDeltaValuePlay;
+}
+else{
+statusLedDeltaValue = statusLedDeltaValuePause;
+}
+uint64_t statusLedNewMillis = millis();
+if (statusLedNewMillis - statusLedOldMillis >= 100) {
+statusLedOldMillis = statusLedNewMillis;
+if (statusLedDirection) {
+statusLedValue += statusLedDeltaValue;
+if (statusLedValue >= 255) {
+statusLedValue = 255;
+statusLedDirection = !statusLedDirection;
+}
+}
+else {
+statusLedValue -= statusLedDeltaValue;
+if (statusLedValue <= 0) {
+statusLedValue = 0;
+statusLedDirection = !statusLedDirection;
+}
+}
+analogWrite(PowerOnLEDPin, statusLedValue);
+}
+}
+/////////////////////
+#endif
