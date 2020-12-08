@@ -26,6 +26,7 @@
 //#define SPEAKER_SWITCH
 //#define ROTARY_ENCODER
 //#define ROTARY_SWITCH
+//#define ROBOTDYN_3X4 //ROTARY_SWITCH muss zusätzlich aktiviert sein
 //#define POWER_ON_LED
 //#define FADING_LED //Experimentell, nur in Verbindung mit POWER_ON_LED
 //#define DEVELOPER_MODE //Löscht den EEPROM bei jedem Start
@@ -3154,16 +3155,46 @@ void playFolder() {
 
 #ifdef ROTARY_SWITCH
   uint8_t RotSwGetPosition () {
-    const float analogValue = (analogRead(ROTARY_SWITCH_PIN) * ROTARY_SWITCH_REF_VOLTAGE) / 1024.0;
-
+    const float analogValue = (analogRead(ROTARY_SWITCH_PIN) * (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0);
+#ifndef ROBOTDYN_3X4
     for (uint8_t x = (0 + ROTARY_SWITCH_RES_TO_GND); x <= (ROTARY_SWITCH_POSITIONS + ROTARY_SWITCH_RES_TO_GND - ROTARY_SWITCH_RES_TO_VCC); x++)
     {
       if (analogValue >= (RotSwStepMin * x) && analogValue <= (RotSwStepMax * x)) {
         return ((x + 1) - ROTARY_SWITCH_RES_TO_GND);
       }
     }
+#endif   
+#ifdef ROBOTDYN_3X4
+ 
+     if (analogValue < 450* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = -1;
+    } else if (analogValue < 500* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 11;
+    } else if (analogValue < 525* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 0;
+    } else if (analogValue < 555* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 10;
+    } else if (analogValue < 585* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 9;
+    } else if (analogValue < 620* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 8;
+    } else if (analogValue < 660* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 7;
+    } else if (analogValue < 705* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 6;
+    } else if (analogValue < 760* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 5;
+    } else if (analogValue < 820* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 4;
+    } else if (analogValue < 890* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 3;
+    } else if (analogValue < 976* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+        return = 2;
+    } else {
+        return = 1;
+    }
+#endif   
   }
-
   void RotSwloop(int TriggerTime) {
 uint8_t currentPos;
 currentPos = RotSwGetPosition();
