@@ -1,3 +1,4 @@
+#include "Configuration.h"
 #include <DFMiniMp3.h>
 #include <EEPROM.h>
 #include <JC_Button.h>
@@ -5,7 +6,10 @@
 #include <SPI.h>
 #include <SoftwareSerial.h>
 #include <avr/sleep.h>
-
+#ifdef ROTARY_ENCODER
+#include <TimerOne.h>
+#include <ClickEncoder.h>
+#endif
 /*
    _____         _____ _____ _____ _____
   |_   _|___ ___|  |  |     |   | |     |
@@ -16,89 +20,7 @@
     Information and contribution at https://tonuino.de.
     Fork by Marco Schulz
 */
-
-///////// uncomment the below line to enable the function ////////////////
-//#define FIVEBUTTONS
-#define DEBUG //Debug Ausgaben in der Konsole
-//#define DEBUG_QUEUE //Debug Ausgabe der Queue
-//#define PUSH_ON_OFF //Ein Ausschalten des TonUINO
-//#define STARTUP_SOUND
-//#define SPEAKER_SWITCH
-//#define ROTARY_ENCODER
-//#define ANALOG_INPUT //old ROTARY_SWITCH
-//#define ROBOTDYN_3X4 //Ersetzt die Auswertung des ANALOG_INPUT, durch eine für die Robotdyn 3x4 Matrixtastatur angepasste. ANALOG_INPUT muss zusätzlich aktiviert sein!
-//#define POWER_ON_LED
-//#define FADING_LED //Experimentell, nur in Verbindung mit POWER_ON_LED
-//#define DEVELOPER_MODE //Löscht den EEPROM bei jedem Start
-//////////////////////////////////////////////////////////////////////////
-
-#ifdef ROTARY_ENCODER
-#include <TimerOne.h>
-#include <ClickEncoder.h>
-#endif
-
-///////// conifguration of the input and output pin //////////////////////
-#define buttonPause A0 //Default A0; Pocket A2
-#define buttonUp A1 //Default A1; Pocket A0
-#define buttonDown A2 //Default A2; Pocket A1
-#define busyPin 4
-
-#define shutdownPin 7 //Default 7
-
-#define openAnalogPin A7 //Default A7
-
-#ifdef FIVEBUTTONS
-#define buttonFourPin A3
-#define buttonFivePin A4
-#endif
-
-#define LONG_PRESS 1000
-#define LONGER_PRESS 2000
-#define LONGEST_PRESS 5000
-
-#ifdef SPEAKER_SWITCH
-#define SpeakerOnPin 8
-#endif
-
-#ifdef POWER_ON_LED
-#define PowerOnLEDPin 6
-#endif
-
-//////////////////////////////////////////////////////////////////////////
-
-////////// NFC Gain //////////////////////////////////////////////////////
-//#define NFCgain_max   // Maximale Empfindlichkeit
-#define NFCgain_avg   // Mittlere Empfindlichkeit
-//#define NFCgain_min   // Minimale Empfindlichkeit
-//////////////////////////////////////////////////////////////////////////
-
-///////// conifguration of the rotary encoder ////////////////////////////
-#ifdef ROTARY_ENCODER
-#define ROTARY_ENCODER_PIN_A 5 //Default 5; 
-#define ROTARY_ENCODER_PIN_B 6 //Default 6; 
-#define ROTARY_ENCODER_PIN_SUPPLY 8 //uncomment if you want to use an IO pin as supply
-#define ROTARY_ENCODER_STEPS 4
-#endif
-//////////////////////////////////////////////////////////////////////////
-
-///////// conifguration of the rotary switch ////////////////////////////
-#ifdef ANALOG_INPUT
-#define ANALOG_INPUT_PIN  A6
-//#define ANALOG_INPUT_SUPPLY_PIN 6 //Der Referenzpegel kann auch von einem freien Output Pin kommen
-#define ANALOG_INPUT_POSITIONS 10
-#define ANALOG_INPUT_TOLERNACE 0.15
-#define ANALOG_INPUT_REF_VOLTAGE 5.0
-#define ANALOG_INPUT_RES_TO_GND 1 //Anzahl Widerstände zwischen der erten Stufe und GND
-#define ANALOG_INPUT_RES_TO_VCC 1 //Anzahl Widerstände zwischen der letzten Stufe und VCC
- const  float AnaInStepMin = (ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_GND)) - ((ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_VCC))*ANALOG_INPUT_TOLERNACE);
- const  float AnaInStepMax = (ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_VCC)) + ((ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_VCC))*ANALOG_INPUT_TOLERNACE);
-#define ANALOG_INPUT_TRIGGER_TIME 2000
-#endif
-//////////////////////////////////////////////////////////////////////////
-
 ///////// MFRC522 ////////////////////////////////////////////////////////
-#define RST_PIN 9                 // Configurable, see typical pin layout above
-#define SS_PIN 10                 // Configurable, see typical pin layout above
 MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522
 MFRC522::MIFARE_Key key;
 bool successRead;
@@ -106,6 +28,27 @@ uint8_t sector = 1;
 uint8_t blockAddr = 4;
 uint8_t trailerBlock = 7;
 MFRC522::StatusCode status;
+//////////////////////////////////////////////////////////////////////////
+
+///////// card cookie ////////////////////////////////////////////////////
+static const uint32_t cardCookie = 322417479;
+//////////////////////////////////////////////////////////////////////////
+
+///////// this object stores nfc tag data ///////////////////////////////
+struct folderSettings {
+  uint8_t folder;
+  uint8_t mode;
+  uint8_t special;
+  uint8_t special2;
+  uint8_t special3;
+  uint8_t special4;
+};
+
+struct nfcTagObject {
+  uint32_t cookie;
+  uint8_t version;
+  folderSettings nfcFolderSettings;
+};
 //////////////////////////////////////////////////////////////////////////
 
 ///////// setup buttons //////////////////////////////////////////////////
@@ -133,13 +76,16 @@ ClickEncoder encoder(ROTARY_ENCODER_PIN_A, ROTARY_ENCODER_PIN_B, ROTARY_ENCODER_
 #endif
 //////////////////////////////////////////////////////////////////////////
 
-//////// rotary encoder /////////////////////////////////////////////////
+//////// analog input /////////////////////////////////////////////////
 #ifdef ANALOG_INPUT
 uint8_t AnaInCurrentPos = 0;
 unsigned long AnaInMillis = 0;
 uint8_t AnaInNewPos = 0;
 uint8_t AnaInActivePos = 0;
+const  float AnaInStepMin = (ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_GND)) - ((ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_VCC))*ANALOG_INPUT_TOLERNACE);
+const  float AnaInStepMax = (ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_VCC)) + ((ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_VCC))*ANALOG_INPUT_TOLERNACE);
 #endif
+//////////////////////////////////////////////////////////////////////////
 
 typedef enum Enum_PlayMode
 {
@@ -208,9 +154,6 @@ typedef enum Enum_PCS {
 
 //////////////////////////////////////////////////////////////////////////
 
-///////// card cookie ////////////////////////////////////////////////////
-static const uint32_t cardCookie = 322417479;
-//////////////////////////////////////////////////////////////////////////
 
 ///////// DFPlayer Mini //////////////////////////////////////////////////
 SoftwareSerial mySoftwareSerial(2, 3); // RX, TX
@@ -221,22 +164,6 @@ uint8_t queue[255];
 uint8_t volume;
 //////////////////////////////////////////////////////////////////////////
 
-///////// this object stores nfc tag data ///////////////////////////////
-struct folderSettings {
-  uint8_t folder;
-  uint8_t mode;
-  uint8_t special;
-  uint8_t special2;
-  uint8_t special3;
-  uint8_t special4;
-};
-
-struct nfcTagObject {
-  uint32_t cookie;
-  uint8_t version;
-  folderSettings nfcFolderSettings;
-};
-//////////////////////////////////////////////////////////////////////////
 
 ///////// admin settings stored in eeprom ///////////////////////////////
 struct adminSettings {
@@ -3154,7 +3081,7 @@ void playFolder() {
 #endif
 
 #ifdef ANALOG_INPUT
-  uint8_t AnaInGetPosition () {
+  int8_t AnaInGetPosition () {
     const float analogValue = (analogRead(ANALOG_INPUT_PIN) * (ANALOG_INPUT_REF_VOLTAGE) / 1024.0);
 #ifndef ROBOTDYN_3X4
     for (uint8_t x = (0 + ANALOG_INPUT_RES_TO_GND); x <= (ANALOG_INPUT_POSITIONS + ANALOG_INPUT_RES_TO_GND - ANALOG_INPUT_RES_TO_VCC); x++)
@@ -3164,34 +3091,33 @@ void playFolder() {
       }
     }
 #endif   
-#ifdef ROBOTDYN_3X4
- 
-     if (analogValue < 450* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = -1;
-    } else if (analogValue < 500* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 11;
-    } else if (analogValue < 525* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 0;
-    } else if (analogValue < 555* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 10;
-    } else if (analogValue < 585* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 9;
-    } else if (analogValue < 620* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 8;
-    } else if (analogValue < 660* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 7;
-    } else if (analogValue < 705* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 6;
-    } else if (analogValue < 760* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 5;
-    } else if (analogValue < 820* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 4;
-    } else if (analogValue < 890* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 3;
-    } else if (analogValue < 976* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
-        return = 2;
+#ifdef ROBOTDYN_3X4 
+     if (analogValue < 450 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  -1;
+    } else if (analogValue < 500 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  11;
+    } else if (analogValue < 525 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  0;
+    } else if (analogValue < 555 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  10;
+    } else if (analogValue < 585 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  9;
+    } else if (analogValue < 620 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  8;
+    } else if (analogValue < 660 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  7;
+    } else if (analogValue < 705 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  6;
+    } else if (analogValue < 760 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  5;
+    } else if (analogValue < 820 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  4;
+    } else if (analogValue < 890 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  3;
+    } else if (analogValue < 976 * (ANALOG_INPUT_REF_VOLTAGE / 1024.0)) {
+        return  2;
     } else {
-        return = 1;
+        return  1;
     }
 #endif   
   }
