@@ -25,8 +25,8 @@
 //#define STARTUP_SOUND
 //#define SPEAKER_SWITCH
 //#define ROTARY_ENCODER
-//#define ROTARY_SWITCH
-//#define ROBOTDYN_3X4 //ROTARY_SWITCH muss zusätzlich aktiviert sein
+//#define ANALOG_INPUT //old ROTARY_SWITCH
+//#define ROBOTDYN_3X4 //Ersetzt die Auswertung des ANALOG_INPUT, durch eine für die Robotdyn 3x4 Matrixtastatur angepasste. ANALOG_INPUT muss zusätzlich aktiviert sein!
 //#define POWER_ON_LED
 //#define FADING_LED //Experimentell, nur in Verbindung mit POWER_ON_LED
 //#define DEVELOPER_MODE //Löscht den EEPROM bei jedem Start
@@ -82,17 +82,17 @@
 //////////////////////////////////////////////////////////////////////////
 
 ///////// conifguration of the rotary switch ////////////////////////////
-#ifdef ROTARY_SWITCH
-#define ROTARY_SWITCH_PIN  A6
-//#define ROTARY_SWITCH_SUPPLY_PIN 6
-#define ROTARY_SWITCH_POSITIONS 10
-#define ROTARY_SWITCH_TOLERNACE 0.15
-#define ROTARY_SWITCH_REF_VOLTAGE 5.0
-#define ROTARY_SWITCH_RES_TO_GND 1 //Anzahl Widerstände zwischen der erten Stufe und GND
-#define ROTARY_SWITCH_RES_TO_VCC 1 //Anzahl Widerstände zwischen der letzten Stufe und VCC
- const  float RotSwStepMin = (ROTARY_SWITCH_REF_VOLTAGE/(ROTARY_SWITCH_POSITIONS+ROTARY_SWITCH_RES_TO_GND+ROTARY_SWITCH_RES_TO_GND)) - ((ROTARY_SWITCH_REF_VOLTAGE/(ROTARY_SWITCH_POSITIONS+ROTARY_SWITCH_RES_TO_GND+ROTARY_SWITCH_RES_TO_VCC))*ROTARY_SWITCH_TOLERNACE);
- const  float RotSwStepMax = (ROTARY_SWITCH_REF_VOLTAGE/(ROTARY_SWITCH_POSITIONS+ROTARY_SWITCH_RES_TO_GND+ROTARY_SWITCH_RES_TO_VCC)) + ((ROTARY_SWITCH_REF_VOLTAGE/(ROTARY_SWITCH_POSITIONS+ROTARY_SWITCH_RES_TO_GND+ROTARY_SWITCH_RES_TO_VCC))*ROTARY_SWITCH_TOLERNACE);
-#define ROTARY_SWITCH_TRIGGER_TIME 2000
+#ifdef ANALOG_INPUT
+#define ANALOG_INPUT_PIN  A6
+//#define ANALOG_INPUT_SUPPLY_PIN 6 //Der Referenzpegel kann auch von einem freien Output Pin kommen
+#define ANALOG_INPUT_POSITIONS 10
+#define ANALOG_INPUT_TOLERNACE 0.15
+#define ANALOG_INPUT_REF_VOLTAGE 5.0
+#define ANALOG_INPUT_RES_TO_GND 1 //Anzahl Widerstände zwischen der erten Stufe und GND
+#define ANALOG_INPUT_RES_TO_VCC 1 //Anzahl Widerstände zwischen der letzten Stufe und VCC
+ const  float AnaInStepMin = (ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_GND)) - ((ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_VCC))*ANALOG_INPUT_TOLERNACE);
+ const  float AnaInStepMax = (ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_VCC)) + ((ANALOG_INPUT_REF_VOLTAGE/(ANALOG_INPUT_POSITIONS+ANALOG_INPUT_RES_TO_GND+ANALOG_INPUT_RES_TO_VCC))*ANALOG_INPUT_TOLERNACE);
+#define ANALOG_INPUT_TRIGGER_TIME 2000
 #endif
 //////////////////////////////////////////////////////////////////////////
 
@@ -134,11 +134,11 @@ ClickEncoder encoder(ROTARY_ENCODER_PIN_A, ROTARY_ENCODER_PIN_B, ROTARY_ENCODER_
 //////////////////////////////////////////////////////////////////////////
 
 //////// rotary encoder /////////////////////////////////////////////////
-#ifdef ROTARY_SWITCH
-uint8_t RotSwCurrentPos = 0;
-unsigned long RotSwMillis = 0;
-uint8_t RotSwNewPos = 0;
-uint8_t RotSwActivePos = 0;
+#ifdef ANALOG_INPUT
+uint8_t AnaInCurrentPos = 0;
+unsigned long AnaInMillis = 0;
+uint8_t AnaInNewPos = 0;
+uint8_t AnaInActivePos = 0;
 #endif
 
 typedef enum Enum_PlayMode
@@ -250,8 +250,8 @@ struct adminSettings {
   long standbyTimer;
   bool invertVolumeButtons;
   folderSettings shortCuts[3];
-#ifdef ROTARY_SWITCH
-  folderSettings rotarySwitchSlots[ROTARY_SWITCH_POSITIONS];
+#ifdef ANALOG_INPUT
+  folderSettings rotarySwitchSlots[ANALOG_INPUT_POSITIONS];
 #endif
   uint8_t adminMenuLocked;
   uint8_t adminMenuPin[4];
@@ -270,9 +270,9 @@ static uint8_t _lastTrackFinished;
 #ifdef ROTARY_ENCODER
 void timerIsr();
 #endif
-#ifdef ROTARY_SWITCH
+#ifdef ANALOG_INPUT
 bool SetModifier (uint8_t tmpMode, uint8_t tmpSpecial1, uint8_t tmpSpecial2);
-void RotSwloop(uint8_t TriggerTime = 0);
+void AnaInloop(uint8_t TriggerTime = 0);
 #endif
 
 static bool hasCard = false;
@@ -447,8 +447,8 @@ void resetSettings() {
   mySettings.savedModifier.special2 = 0;//Default: 0
   mySettings.savedModifier.mode = 0;//Default: 0
   mySettings.stopWhenCardAway = false;
-#ifdef ROTARY_SWITCH
-  for (uint8_t i = 0; i <= ROTARY_SWITCH_POSITIONS - 1; i++) {
+#ifdef ANALOG_INPUT
+  for (uint8_t i = 0; i <= ANALOG_INPUT_POSITIONS - 1; i++) {
     mySettings.rotarySwitchSlots[i].folder = 0;
     mySettings.rotarySwitchSlots[i].mode = 0;
     mySettings.rotarySwitchSlots[i].special = 0;
@@ -1724,14 +1724,14 @@ void setup() {
 #endif
 #endif
 
-#ifdef ROTARY_SWITCH
-#ifdef ROTARY_SWITCH_SUPPLY_PIN
-  pinMode(ROTARY_SWITCH_SUPPLY_PIN, OUTPUT);
-  digitalWrite(ROTARY_SWITCH_SUPPLY_PIN, HIGH);
+#ifdef ANALOG_INPUT
+#ifdef ANALOG_INPUT_SUPPLY_PIN
+  pinMode(ANALOG_INPUT_SUPPLY_PIN, OUTPUT);
+  digitalWrite(ANALOG_INPUT_SUPPLY_PIN, HIGH);
 #endif
-  RotSwCurrentPos = RotSwGetPosition();
-  RotSwActivePos = RotSwCurrentPos;
-  RotSwMillis = millis();
+  AnaInCurrentPos = AnaInGetPosition();
+  AnaInActivePos = AnaInCurrentPos;
+  AnaInMillis = millis();
 #endif
 
 #ifdef SPEAKER_SWITCH
@@ -2122,8 +2122,8 @@ void playFolder() {
     //    batteryCheck();
     //#endif
 
-#ifdef ROTARY_SWITCH
-    RotSwloop(ROTARY_SWITCH_TRIGGER_TIME);
+#ifdef ANALOG_INPUT
+    AnaInloop(ANALOG_INPUT_TRIGGER_TIME);
 #endif
 
 #ifdef POWER_ON_LED && FADING_LED
@@ -2535,25 +2535,25 @@ void playFolder() {
     }
     // lock admin menu
     else if (subMenu == SetupRotarySwitch) {
-#ifdef ROTARY_SWITCH
-      uint8_t rotSwSlot = 0;
+#ifdef ANALOG_INPUT
+      uint8_t AnaInSlot = 0;
       do {
-        rotSwSlot = voiceMenu(ROTARY_SWITCH_POSITIONS, 945, 0);
+        AnaInSlot = voiceMenu(ANALOG_INPUT_POSITIONS, 945, 0);
         switch (voiceMenu(3, 948, 948)) {
           case 1:
-            setupFolder(&mySettings.rotarySwitchSlots[rotSwSlot - 1]);
+            setupFolder(&mySettings.rotarySwitchSlots[AnaInSlot - 1]);
             break;
           case 2:
-            setupModifier(&mySettings.rotarySwitchSlots[rotSwSlot - 1]);
+            setupModifier(&mySettings.rotarySwitchSlots[AnaInSlot - 1]);
             break;
           case 3:
-            setupSystemControl(&mySettings.rotarySwitchSlots[rotSwSlot - 1]);
+            setupSystemControl(&mySettings.rotarySwitchSlots[AnaInSlot - 1]);
             break;
         }
         mp3.playMp3FolderTrack(400);
       } while (voiceMenu(2, 946, 933, false, false, 1, true) == 2);
 #endif
-#ifndef ROTARY_SWITCH
+#ifndef ANALOG_INPUT
       mp3.playMp3FolderTrack(947);
 #endif
     }
@@ -3153,73 +3153,73 @@ void playFolder() {
   }
 #endif
 
-#ifdef ROTARY_SWITCH
-  uint8_t RotSwGetPosition () {
-    const float analogValue = (analogRead(ROTARY_SWITCH_PIN) * (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0);
+#ifdef ANALOG_INPUT
+  uint8_t AnaInGetPosition () {
+    const float analogValue = (analogRead(ANALOG_INPUT_PIN) * (ANALOG_INPUT_REF_VOLTAGE) / 1024.0);
 #ifndef ROBOTDYN_3X4
-    for (uint8_t x = (0 + ROTARY_SWITCH_RES_TO_GND); x <= (ROTARY_SWITCH_POSITIONS + ROTARY_SWITCH_RES_TO_GND - ROTARY_SWITCH_RES_TO_VCC); x++)
+    for (uint8_t x = (0 + ANALOG_INPUT_RES_TO_GND); x <= (ANALOG_INPUT_POSITIONS + ANALOG_INPUT_RES_TO_GND - ANALOG_INPUT_RES_TO_VCC); x++)
     {
-      if (analogValue >= (RotSwStepMin * x) && analogValue <= (RotSwStepMax * x)) {
-        return ((x + 1) - ROTARY_SWITCH_RES_TO_GND);
+      if (analogValue >= (AnaInStepMin * x) && analogValue <= (AnaInStepMax * x)) {
+        return ((x + 1) - ANALOG_INPUT_RES_TO_GND);
       }
     }
 #endif   
 #ifdef ROBOTDYN_3X4
  
-     if (analogValue < 450* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+     if (analogValue < 450* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = -1;
-    } else if (analogValue < 500* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 500* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 11;
-    } else if (analogValue < 525* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 525* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 0;
-    } else if (analogValue < 555* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 555* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 10;
-    } else if (analogValue < 585* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 585* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 9;
-    } else if (analogValue < 620* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 620* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 8;
-    } else if (analogValue < 660* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 660* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 7;
-    } else if (analogValue < 705* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 705* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 6;
-    } else if (analogValue < 760* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 760* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 5;
-    } else if (analogValue < 820* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 820* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 4;
-    } else if (analogValue < 890* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 890* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 3;
-    } else if (analogValue < 976* (ROTARY_SWITCH_REF_VOLTAGE) / 1024.0)) {
+    } else if (analogValue < 976* (ANALOG_INPUT_REF_VOLTAGE) / 1024.0)) {
         return = 2;
     } else {
         return = 1;
     }
 #endif   
   }
-  void RotSwloop(int TriggerTime) {
+  void AnaInloop(int TriggerTime) {
 uint8_t currentPos;
-currentPos = RotSwGetPosition();
-    if (RotSwCurrentPos != currentPos) {
-      RotSwCurrentPos = currentPos;
+currentPos = AnaInGetPosition();
+    if (AnaInCurrentPos != currentPos) {
+      AnaInCurrentPos = currentPos;
 
       if (TriggerTime > 0)
-        RotSwMillis = millis();
+        AnaInMillis = millis();
 
-    } else if ((millis() > (RotSwMillis + TriggerTime))  && (RotSwCurrentPos != RotSwActivePos)) {
-      RotSwSet(RotSwCurrentPos);
+    } else if ((millis() > (AnaInMillis + TriggerTime))  && (AnaInCurrentPos != AnaInActivePos)) {
+      AnaInSet(AnaInCurrentPos);
     }
   }
 
-  void RotSwSet (uint8_t RotarySwitchPosition) {
-    folderSettings myRotSw = mySettings.rotarySwitchSlots[RotarySwitchPosition - 1];
-    RotSwActivePos = RotarySwitchPosition;
+  void AnaInSet (uint8_t RotarySwitchPosition) {
+    folderSettings myAnaIn = mySettings.rotarySwitchSlots[RotarySwitchPosition - 1];
+    AnaInActivePos = RotarySwitchPosition;
 #ifdef DEBUG
-    Serial.print("RotSw active Pos ");
-    Serial.println(RotSwActivePos);
+    Serial.print("AnaIn active Pos ");
+    Serial.println(AnaInActivePos);
 #endif
-    if (!(myRotSw.folder == 0 && myRotSw.mode == 0)) {
-      switch (myRotSw.folder) {
+    if (!(myAnaIn.folder == 0 && myAnaIn.mode == 0)) {
+      switch (myAnaIn.folder) {
         case SystemControl:
-          switch (myRotSw.special) {
+          switch (myAnaIn.special) {
             case PauseSysCont: //Pause
               if (activeModifier != NULL) {
                 if (activeModifier->handlePause() == true) {
@@ -3236,7 +3236,7 @@ currentPos = RotSwGetPosition();
                 }
               break;
             case VolumeSysCont: //Volume
-              mp3.setVolume(myRotSw.special2);
+              mp3.setVolume(myAnaIn.special2);
               break;
             case ForwardSysCont:
               nextButton();
@@ -3253,7 +3253,7 @@ currentPos = RotSwGetPosition();
           }
           break;
         case ModifierMode:
-          SetModifier (myRotSw);
+          SetModifier (myAnaIn);
           break;
         default:
           if (activeModifier != NULL) {
@@ -3264,13 +3264,13 @@ currentPos = RotSwGetPosition();
               return;
             }
           }
-          myFolder = &myRotSw;
+          myFolder = &myAnaIn;
           playFolder();
           break;
       }
     } else {
 #ifdef DEBUG
-      Serial.println(F("RotSw Pos not configured."));
+      Serial.println(F("AnaIn Pos not configured."));
 #endif
 
     }
