@@ -1,37 +1,57 @@
 ///////// uncomment the below line to enable the function ////////////////
-//#define FIVEBUTTONS
+
+#define AiO
+
+/////!! NICHT ENTFERNEN!!/////
+#if not defined AiO
+#define VERSION_TONUINO 2.1
+#else
+#define VERSION_TONUINO 2.2
+#endif
+//////////////////////////////
+
+//#define FIVEBUTTONS 
 #define DEBUG //Debug Ausgaben in der Konsole
 //#define DEBUG_QUEUE //Debug Ausgabe der Queue
-//#define PUSH_ON_OFF //Ein Ausschalten des TonUINO
-//#define STARTUP_SOUND
-//#define SPEAKER_SWITCH
-//#define ROTARY_ENCODER
-//#define ANALOG_INPUT //old ROTARY_SWITCH
-//#define ROBOTDYN_3X4 //Ersetzt die Auswertung des ANALOG_INPUT, durch eine für die Robotdyn 3x4 Matrixtastatur angepasste. ANALOG_INPUT muss zusätzlich aktiviert sein!
-//#define POWER_ON_LED
-//#define FADING_LED //Experimentell, nur in Verbindung mit POWER_ON_LED
 //#define DEVELOPER_MODE //Löscht den EEPROM bei jedem Start
+
+#define PUSH_ON_OFF //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
+
+#if not defined AiO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
+#define SPEAKER_SWITCH
+#endif
+
+#if not defined AiO //!Aktuell sind nur Grundfunktionen mit der AiO kompatibel!
+#define ROTARY_ENCODER
+#define ANALOG_INPUT //old ROTARY_SWITCH
+//#define ROBOTDYN_3X4 //Ersetzt die Auswertung des ANALOG_INPUT, durch eine für die Robotdyn 3x4 Matrixtastatur angepasste. ANALOG_INPUT muss zusätzlich aktiviert sein!
+#define POWER_ON_LED
+#if defined POWER_ON_LED
+#define FADING_LED //ungetestet, nur in Verbindung mit POWER_ON_LED
+#endif
+#define IRREMOTE
+#endif
 //////////////////////////////////////////////////////////////////////////
 
 ///////// conifguration of the input and output pins //////////////////////
 #define buttonPause A0 //Default A0; Pocket A2
-#define buttonUp A1 //Default A1; Pocket A0
-#define buttonDown A2 //Default A2; Pocket A1
+#define buttonUp A2 //Default A1; AiO A2; Pocket A0
+#define buttonDown A1 //Default A2; AiO A1; Pocket A1
 #define busyPin 4
 
-#define shutdownPin 7 //Default 7
+#define shutdownPin 7 //Default 7; AiO 7
 
 #define openAnalogPin A7 //Default A7, muss ein unbelegeter, analoger Eingang sein
 
 #ifdef FIVEBUTTONS
-#define buttonFourPin A3
-#define buttonFivePin A4
+#define buttonFourPin A4 //Default A3; AiO A4
+#define buttonFivePin A3 //Default A4; AiO A3
 #endif
 
 #define RST_PIN 9                 // Configurable, see typical pin layout above
 #define SS_PIN 10                 // Configurable, see typical pin layout above
 
-#ifdef SPEAKER_SWITCH
+#if defined SPEAKER_SWITCH ^ defined AiO
 #define SpeakerOnPin 8
 #endif
 
@@ -42,6 +62,10 @@
 #ifdef ANALOG_INPUT
 #define ANALOG_INPUT_PIN  A6
 //#define ANALOG_INPUT_SUPPLY_PIN 6 //Der Referenzpegel kann auch von einem freien Output Pin kommen
+#endif
+
+#if defined IRREMOTE
+#define irReceiverPin 5                    // pin used for the ir receiver
 #endif
 
 #ifdef ROTARY_ENCODER
@@ -71,7 +95,7 @@
 
 ///////// conifguration of the analog input ////////////////////////////
 #ifdef ANALOG_INPUT
-#define ANALOG_INPUT_POSITIONS 10
+#define ANALOG_INPUT_POSITIONS 12
 #define ANALOG_INPUT_TOLERNACE 0.15
 #define ANALOG_INPUT_REF_VOLTAGE 5.0
 #define ANALOG_INPUT_RES_TO_GND 1 //Anzahl Widerstände zwischen der erten Stufe und GND
