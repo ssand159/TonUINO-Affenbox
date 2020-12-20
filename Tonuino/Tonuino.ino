@@ -2408,7 +2408,7 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
         Serial.println(returnValue);
 #endif
         mp3.pause();
-        waitForTrackToFinish();
+        //waitForTrackToFinish();
         return returnValue;
       }
     }
@@ -2442,7 +2442,7 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
 #endif
       mp3.playMp3FolderTrack(messageOffset + returnValue);
       if (preview) {
-        waitForTrackToFinish();
+        //waitForTrackToFinish();
         if (previewFromFolder == 0) {
           mp3.playFolderTrack(returnValue, 1);
         } else {
@@ -3096,6 +3096,8 @@ bool SetModifier (folderSettings tmpFolderSettings) {
 bool RemoveModifier() {
   activeModifier = NULL;
 
+  _lastTrackFinished = 0;
+  
   mySettings.savedModifier.folder = 0;
   mySettings.savedModifier.mode = 0;
   writeSettingsToFlash();
