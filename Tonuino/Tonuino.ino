@@ -22,7 +22,7 @@
 #define DEBUG
 //#define DEBUG_QUEUE
 //#define PUSH_ON_OFF
-//#define STARTUP_SOUND
+#define STARTUP_SOUND
 //#define SPEAKER_SWITCH
 //#define ROTARY_ENCODER
 //#define ROTARY_SWITCH
@@ -59,7 +59,7 @@
 #endif
 
 #ifdef POWER_ON_LED
-#define PowerOnLEDPin 6
+#define PowerOnLEDPin 5
 #endif
 
 #ifdef ROTARY_ENCODER
@@ -125,6 +125,8 @@ bool ignoreButtonFour = false;
 bool ignoreButtonFive = false;
 #endif
 //////////////////////////////////////////////////////////////////////////
+
+const uint8_t folderMemoryCount = 8;
 
 //////// rotary encoder /////////////////////////////////////////////////
 #ifdef ROTARY_ENCODER
@@ -414,11 +416,65 @@ void shuffleQueue() {
 }
 //////////////////////////////////////////////////////////////////////////
 void writeSettingsToFlash() {
-#ifdef DEBUG
-  Serial.println(F("write settings to flash"));
+int address = sizeof(myFolder->folder) * 99 * folderMemoryCount;
+#if defined DEBUG
+  Serial.print(F("write settings to flash at adress "));
+  Serial.println(address);
 #endif
-  int address = sizeof(myFolder->folder) * 100;
   EEPROM.put(address, mySettings);
+}
+//////////////////////////////////////////////////////////////////////////
+void loadSettingsFromFlash() {
+ int address = sizeof(myFolder->folder) * 99 * folderMemoryCount;
+ EEPROM.get(address, mySettings);
+
+#if defined DEBUG
+  Serial.print(F("settings in flash at address "));
+  Serial.println(address);
+#endif
+
+  if (mySettings.cookie != cardCookie)
+    resetSettings();
+  migrateSettings(mySettings.version);
+
+#ifdef DEBUG
+  Serial.print(F("Version: "));
+  Serial.println(mySettings.version);
+
+  Serial.print(F("Max Vol: "));
+  Serial.println(mySettings.maxVolume);
+
+  Serial.print(F("Min Vole: "));
+  Serial.println(mySettings.minVolume);
+
+  Serial.print(F("Init Vol: "));
+  Serial.println(mySettings.initVolume);
+
+  Serial.print(F("EQ: "));
+  Serial.println(mySettings.eq);
+
+  Serial.print(F("Locked: "));
+  Serial.println(mySettings.locked);
+
+  Serial.print(F("Sleep Timer: "));
+  Serial.println(mySettings.standbyTimer);
+
+  Serial.print(F("Inverted Vol Buttons: "));
+  Serial.println(mySettings.invertVolumeButtons);
+
+  Serial.print(F("Admin Menu locked: "));
+  Serial.println(mySettings.adminMenuLocked);
+
+  Serial.print(F("Admin Menu Pin: "));
+  Serial.print(mySettings.adminMenuPin[0]);
+  Serial.print(mySettings.adminMenuPin[1]);
+  Serial.print(mySettings.adminMenuPin[2]);
+  Serial.println(mySettings.adminMenuPin[3]);
+
+  Serial.print(F("Saved Modifier Mode: "));
+  Serial.println(mySettings.savedModifier.mode);
+
+#endif
 }
 //////////////////////////////////////////////////////////////////////////
 void resetSettings() {
@@ -472,57 +528,6 @@ void migrateSettings(int oldVersion) {
     writeSettingsToFlash();
   }
 }
-//////////////////////////////////////////////////////////////////////////
-void loadSettingsFromFlash() {
-#ifdef DEBUG
-  Serial.println(F("load settings from flash"));
-#endif
-  int address = sizeof(myFolder->folder) * 100;
-  EEPROM.get(address, mySettings);
-  if (mySettings.cookie != cardCookie)
-    resetSettings();
-  migrateSettings(mySettings.version);
-
-#ifdef DEBUG
-  Serial.print(F("Version: "));
-  Serial.println(mySettings.version);
-
-  Serial.print(F("Max Vol: "));
-  Serial.println(mySettings.maxVolume);
-
-  Serial.print(F("Min Vole: "));
-  Serial.println(mySettings.minVolume);
-
-  Serial.print(F("Init Vol: "));
-  Serial.println(mySettings.initVolume);
-
-  Serial.print(F("EQ: "));
-  Serial.println(mySettings.eq);
-
-  Serial.print(F("Locked: "));
-  Serial.println(mySettings.locked);
-
-  Serial.print(F("Sleep Timer: "));
-  Serial.println(mySettings.standbyTimer);
-
-  Serial.print(F("Inverted Vol Buttons: "));
-  Serial.println(mySettings.invertVolumeButtons);
-
-  Serial.print(F("Admin Menu locked: "));
-  Serial.println(mySettings.adminMenuLocked);
-
-  Serial.print(F("Admin Menu Pin: "));
-  Serial.print(mySettings.adminMenuPin[0]);
-  Serial.print(mySettings.adminMenuPin[1]);
-  Serial.print(mySettings.adminMenuPin[2]);
-  Serial.println(mySettings.adminMenuPin[3]);
-
-  Serial.print(F("Saved Modifier Mode: "));
-  Serial.println(mySettings.savedModifier.mode);
-
-#endif
-}
-
 
 class Modifier {
   public:
@@ -1889,7 +1894,7 @@ void loop() {
   RotSwloop(ROTARY_SWITCH_TRIGGER_TIME);
 #endif
 
-#ifdef POWER_ON_LED && FADING_LED
+#if defined POWER_ON_LED ^ defined FADING_LED
   fadeStatusLed(isPlaying());
 #endif
 
@@ -2513,7 +2518,7 @@ bool setupFolder(folderSettings * theFolder) {
                                       true, theFolder->folder, theFolder->special);
       //Speicherplatz für das Hörbuch wählen
       if (theFolder->mode == AudioBook_Section)
-        theFolder->special3 = voiceMenu(10, 325, 0,
+        theFolder->special3 = voiceMenu(folderMemoryCount, 325, 0,
                                         false, 0, 0, true);
       break;
     case AdminMenu:
@@ -3127,19 +3132,29 @@ bool setupSystemControl (folderSettings * tmpFolderSettings) {
 }
 
 uint8_t readAudiobookMemory (uint8_t folder, uint8_t memoryNumber) {
-#ifdef DEBUG
+  uint16_t address = (folder - 1)  + ((memoryNumber - 1) * 99);
+if (memoryNumber > 0) {
+      
+#if defined DEBUG
   Serial.print(F("read memory No. "));
   Serial.print(memoryNumber);
   Serial.print(F(" of folder No. "));
   Serial.println(folder);
+  Serial.print(F("at address "));
+  Serial.println(address);
 #endif
 
-  //return EEPROM.read(folder + (99 * memoryNumber));
-  return EEPROM.read((folder - 1) + ((memoryNumber * 100) + 50));
+   return EEPROM.read(address);
+
+} else 
+  return 1;
 }
 
 void writeAudiobookMemory (uint8_t folder, uint8_t memoryNumber, uint8_t track) {
-#ifdef DEBUG
+  uint16_t address = (folder - 1)  + ((memoryNumber - 1) * 99);
+if (memoryNumber > 0) {
+   
+#if defined DEBUG
   Serial.print(F("write track No. "));
   Serial.print(track);
   Serial.print(F(" of folder No. "));
@@ -3147,8 +3162,11 @@ void writeAudiobookMemory (uint8_t folder, uint8_t memoryNumber, uint8_t track) 
   Serial.print(F(" in memory No. "));
   Serial.println(memoryNumber);
 #endif
-  //EEPROM.update(folder + (99 * memoryNumber), track);
-  EEPROM.update((folder - 1) + ((memoryNumber * 100) + 50), track);
+
+  EEPROM.update(address, track);
+
+} else 
+  return;
 }
 
 //Um festzustellen ob eine Karte entfernt wurde, muss der MFRC regelmäßig ausgelesen werden
@@ -3374,7 +3392,7 @@ if (volume > mySettings.initVolume)
 }
 
 //////////////////////////////////////////////////////////////////////////
-#ifdef POWER_ON_LED && FADING_LED
+#if defined POWER_ON_LED ^ defined FADING_LED
 // fade in/out status led while beeing idle, during playback set to full brightness
 void fadeStatusLed(bool isPlaying) {
 static bool statusLedDirection = false;
