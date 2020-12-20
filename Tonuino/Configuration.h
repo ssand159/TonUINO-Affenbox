@@ -11,25 +11,20 @@
 //////////////////////////////
 
 //#define FIVEBUTTONS 
-#define DEBUG //Debug Ausgaben in der Konsole
-//#define DEBUG_QUEUE //Debug Ausgabe der Queue
-//#define DEVELOPER_MODE //Löscht den EEPROM bei jedem Start
+//#define DEBUG           //Debug Ausgaben in der Konsole
+//#define DEBUG_QUEUE   //Debug Ausgabe der Queue
+//#define EEPROM_DELETE //Löscht den EEPROM bei jedem Start
 
-#define PUSH_ON_OFF //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
+#define PUSH_ON_OFF     //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
+#define SPEAKER_SWITCH  //mit AiO nicht mehr nötig, da standardmäßig vorhanden
 
-#if not defined AiO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
-#define SPEAKER_SWITCH
-#endif
-
-#if not defined AiO //!Aktuell sind nur Grundfunktionen mit der AiO kompatibel!
-#define ROTARY_ENCODER
-#define ANALOG_INPUT //old ROTARY_SWITCH
-//#define ROBOTDYN_3X4 //Ersetzt die Auswertung des ANALOG_INPUT, durch eine für die Robotdyn 3x4 Matrixtastatur angepasste. ANALOG_INPUT muss zusätzlich aktiviert sein!
-#define POWER_ON_LED
-#if defined POWER_ON_LED
-#define FADING_LED //ungetestet, nur in Verbindung mit POWER_ON_LED
-#endif
-#define IRREMOTE
+#if not defined AiO     //!Aktuell sind nur Grundfunktionen mit der AiO kompatibel!
+//#define ANALOG_INPUT  //old ROTARY_SWITCH
+//#define ROTARY_ENCODER
+//#define ROBOTDYN_3X4  //Ersetzt die Auswertung des ANALOG_INPUT, durch eine für die Robotdyn 3x4 Matrixtastatur angepasste. ANALOG_INPUT muss zusätzlich aktiviert sein!
+//#define POWER_ON_LED
+//#define FADING_LED    //ungetestet, nur in Verbindung mit POWER_ON_LED
+//#define IRREMOTE
 #endif
 //////////////////////////////////////////////////////////////////////////
 
@@ -51,7 +46,7 @@
 #define RST_PIN 9                 // Configurable, see typical pin layout above
 #define SS_PIN 10                 // Configurable, see typical pin layout above
 
-#if defined SPEAKER_SWITCH ^ defined AiO
+#if defined SPEAKER_SWITCH || defined AiO
 #define SpeakerOnPin 8
 #endif
 
@@ -60,7 +55,7 @@
 #endif
 
 #ifdef ANALOG_INPUT
-#define ANALOG_INPUT_PIN  A6
+#define ANALOG_INPUT_PIN  A4
 //#define ANALOG_INPUT_SUPPLY_PIN 6 //Der Referenzpegel kann auch von einem freien Output Pin kommen
 #endif
 
@@ -95,7 +90,7 @@
 
 ///////// conifguration of the analog input ////////////////////////////
 #ifdef ANALOG_INPUT
-#define ANALOG_INPUT_POSITIONS 12
+#define ANALOG_INPUT_POSITIONS 16
 #define ANALOG_INPUT_TOLERNACE 0.15
 #define ANALOG_INPUT_REF_VOLTAGE 5.0
 #define ANALOG_INPUT_RES_TO_GND 1 //Anzahl Widerstände zwischen der erten Stufe und GND
