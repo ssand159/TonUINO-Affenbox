@@ -1,6 +1,6 @@
 ///////// uncomment the below line to enable the function ////////////////
 
-#define AiO
+//#define AiO
 
 /////!! NICHT ENTFERNEN!!/////
 #if not defined AiO
@@ -11,7 +11,7 @@
 //////////////////////////////
 
 //#define FIVEBUTTONS 
-//#define DEBUG           //Debug Ausgaben in der Konsole
+#define DEBUG           //Debug Ausgaben in der Konsole
 //#define DEBUG_QUEUE   //Debug Ausgabe der Queue
 //#define EEPROM_DELETE //Löscht den EEPROM bei jedem Start
 
@@ -30,8 +30,8 @@
 
 ///////// conifguration of the input and output pins //////////////////////
 #define buttonPause A0 //Default A0; Pocket A2
-#define buttonUp A2 //Default A1; AiO A2; Pocket A0
-#define buttonDown A1 //Default A2; AiO A1; Pocket A1
+#define buttonUp A1 //Default A1; AiO A2; Pocket A0
+#define buttonDown A2 //Default A2; AiO A1; Pocket A1
 #define busyPin 4
 
 #define shutdownPin 7 //Default 7; AiO 7

@@ -242,7 +242,7 @@ static bool forgetLastCard = false;
 
 void shutDown ();
 static void nextTrack(uint8_t track);
-uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
+uint8_t voiceMenu(uint16_t numberOfOptions, uint16_t startMessage, int messageOffset,
                   bool preview = false, int previewFromFolder = 0, int defaultValue = 0, bool exitWithLongPress = false);
 bool isPlaying();
 bool checkTwo ( uint8_t a[], uint8_t b[] );
@@ -2191,7 +2191,7 @@ void loop() {
   }
 #if defined PUSH_ON_OFF || defined AiO
   else if (pauseButton.pressedFor(LONGER_PRESS) &&
-           (!upButton.isPressed() || !downButton.isPressed()) &&
+          !upButton.isPressed() && !downButton.isPressed() &&
            ignorePauseButton == false) {
     ignorePauseButton = true;
     shutDown();
@@ -2612,7 +2612,7 @@ void adminMenu(bool fromCard = false) {
     EEPROM_update(i, 0);
   }
 #else
-    for (int i = 0; i < EEPROM.length(; i++) {
+    for (int i = 0; i < EEPROM.length(); i++) {
       EEPROM.update(i, 0); 
     }
 #endif  
@@ -2660,7 +2660,7 @@ bool askCode(uint8_t *code) {
   return true;
 }
 //////////////////////////////////////////////////////////////////////////
-uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
+uint8_t voiceMenu(uint16_t numberOfOptions, uint16_t startMessage, int messageOffset,
                   bool preview = false, int previewFromFolder = 0, int defaultValue = 0, bool exitWithLongPress = false) {
   uint8_t returnValue = defaultValue;
   uint8_t returnValueOld = returnValue;
@@ -2695,7 +2695,7 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
         Serial.println(returnValue);
 #endif
         mp3.pause();
-        waitForTrackToFinish();
+        //waitForTrackToFinish();
         return returnValue;
       }
     }
@@ -2729,7 +2729,7 @@ uint8_t voiceMenu(int numberOfOptions, int startMessage, int messageOffset,
 #endif
       mp3.playMp3FolderTrack(messageOffset + returnValue);
       if (preview) {
-        waitForTrackToFinish();
+        //waitForTrackToFinish();
         if (previewFromFolder == 0) {
           mp3.playFolderTrack(returnValue, 1);
         } else {
@@ -3448,7 +3448,9 @@ bool SetModifier (folderSettings * tmpFolderSettings) {
 }
 bool RemoveModifier() {
   activeModifier = NULL;
-
+  
+  _lastTrackFinished = 0;
+  
   mySettings.savedModifier.folder = 0;
   mySettings.savedModifier.mode = 0;
   writeSettingsToFlash();
