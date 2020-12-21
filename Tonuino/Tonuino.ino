@@ -1799,7 +1799,7 @@ void setup() {
     Serial.println(F("Delete EEPROM"));
 #endif
 #if defined AiO
-  for (int i = 0; i < EEPROM.size(); i++) {
+  for (int i = 0; i < 1020; i++) {
     EEPROM_update(i, 0);
   }
 #else
@@ -1816,7 +1816,7 @@ void setup() {
   Serial.println(F("Delete EEPROM"));
 #endif
 #if defined AiO
-  for (int i = 0; i < EEPROM.size(); i++) {
+  for (int i = 0; i < 1020; i++) {
     EEPROM_update(i, 0);
   }
 #else
@@ -2608,7 +2608,7 @@ void adminMenu(bool fromCard = false) {
   }
   else if (subMenu == ResetEEPROM) {
 #if defined AiO
-  for (int i = 0; i < EEPROM.size(); i++) {
+  for (int i = 0; i < 1020; i++) {
     EEPROM_update(i, 0);
   }
 #else
