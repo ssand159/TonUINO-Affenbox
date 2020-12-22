@@ -1918,12 +1918,29 @@ void loop() {
     return;
   }
 
-//Lösche Hörbuchspeicher nach sehr langem Druck von Up & Down Button, vorrausgesetzt ein Hörbuch ist aktiv
-  if((upButton.pressedFor(LONGER_PRESS) || downButton.pressedFor(LONGER_PRESS)) && !pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed()) {
-    if (myFolder->mode == AudioDrama || myFolder->mode == AudioDrama_Section){
-      writeAudiobookMemory (myFolder->folder, myFolder->special3, 0);   
+/Springe zum ersten Titel zurück
+  if ((upButton.pressedFor(LONGER_PRESS) || downButton.pressedFor(LONGER_PRESS)) && !pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed()) {
+    mp3.pause();
+    do {
+      readButtons();
+    } while (upButton.isPressed() || downButton.isPressed());
+    readButtons();
+#if defined DEBUG
+    Serial.println(F("back to first track"));
+#endif
+    if (currentTrack != firstTrack) {
+      currentTrack = firstTrack;
+      if (myFolder->special3 != 0) {
+#if defined DEBUG
+        Serial.println(F("reset memory"));
+#endif
+      writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
+      }      
     }
+    playFolder();
+    return;
   }
+  
   if (pauseButton.wasReleased()) {
 
     if (activeModifier != NULL) {
