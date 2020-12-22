@@ -1,11 +1,11 @@
 /* ToDo:
- * EEPROM Verwendung genau berrechnen und erweiteter Hörbuchspeicher an hintere EEPROM Speicher adressieren  
- * Eingabeerkennung und Methoden auslagern für mehr Variabilität
- * The Quest fertig stellen 
- * 
- * 
- * 
- */
+   EEPROM Verwendung genau berrechnen und erweiteter Hörbuchspeicher an hintere EEPROM Speicher adressieren
+   Eingabeerkennung und Methoden auslagern für mehr Variabilität
+   The Quest fertig stellen
+
+
+
+*/
 
 
 #include "Configuration.h"
@@ -55,6 +55,8 @@ MFRC522::StatusCode status;
 ///////// card cookie ////////////////////////////////////////////////////
 static const uint32_t cardCookie = 322417479;
 //////////////////////////////////////////////////////////////////////////
+
+static const uint16_t EEPROM_size = 1020;
 
 ///////// setup buttons //////////////////////////////////////////////////
 Button pauseButton(buttonPause);
@@ -379,9 +381,9 @@ void writeSettingsToFlash() {
   Serial.println(address);
 #endif
 #if defined AiO
-    EEPROM_put(address, mySettings);
+  EEPROM_put(address, mySettings);
 #else
-EEPROM.put(address, mySettings);
+  EEPROM.put(address, mySettings);
 #endif
 
 }
@@ -389,9 +391,9 @@ EEPROM.put(address, mySettings);
 void loadSettingsFromFlash() {
   int address = sizeof(myFolder->folder) * 99 * folderMemoryCount;
 #if defined AiO
-    EEPROM_get(address, mySettings);
+  EEPROM_get(address, mySettings);
 #else
-    EEPROM.get(address, mySettings);
+  EEPROM.get(address, mySettings);
 #endif
 #if defined DEBUG
   Serial.print(F("settings in flash at address "));
@@ -399,7 +401,7 @@ void loadSettingsFromFlash() {
 #endif
   if (mySettings.cookie != cardCookie)
     resetSettings();
-    migrateSettings(mySettings.version);
+  migrateSettings(mySettings.version);
 
 #if defined DEBUG
   Serial.print(F("Version "));
@@ -456,7 +458,7 @@ void resetSettings() {
   mySettings.invertVolumeButtons = false;
 #else
   mySettings.invertVolumeButtons = true;
-#endif  
+#endif
   mySettings.shortCuts[0].folder = 0;
   mySettings.shortCuts[1].folder = 0;
   mySettings.shortCuts[2].folder = 0;
@@ -925,7 +927,7 @@ class QuizGame: public Modifier {
     }
 
     virtual bool handleRFID(nfcTagObject * newCard) {
-      
+
       if (newCard->nfcFolderSettings.mode != PuzzlePart) {
 #if defined DEBUG
         Serial.println(F("QuizGame > no valid part"));
@@ -1644,19 +1646,19 @@ bool isPlaying() {
 }
 //////////////////////////////////////////////////////////////////////////
 void waitForTrackToFinish() {
-/* unsigned long currentTime = millis();
-#define TIMEOUT 1000
-  do {
-    mp3.loop();
-  } while (!isPlaying() && millis() < currentTime + TIMEOUT);
-  delay(800);
-  do {
-    mp3.loop();
-  } while (isPlaying());
-*/
-unsigned long waitForTrackToFinishMillis = millis();
+  /* unsigned long currentTime = millis();
+    #define TIMEOUT 1000
+    do {
+      mp3.loop();
+    } while (!isPlaying() && millis() < currentTime + TIMEOUT);
+    delay(800);
+    do {
+      mp3.loop();
+    } while (isPlaying());
+  */
+  unsigned long waitForTrackToFinishMillis = millis();
 
-  delay(500);
+  delay(250);
   while (!isPlaying()) {
     if (millis() - waitForTrackToFinishMillis >= 10000) break;
   }
@@ -1679,7 +1681,7 @@ void setup() {
   digitalWrite(shutdownPin, LOW);
 #endif
 
-#if defined AiO 
+#if defined AiO
   // verstärker aus
   pinMode(8, OUTPUT);
   digitalWrite(8, HIGH);
@@ -1799,14 +1801,14 @@ void setup() {
     Serial.println(F("Delete EEPROM"));
 #endif
 #if defined AiO
-  for (int i = 0; i < 1020; i++) {
-    EEPROM_update(i, 0);
-  }
+    for (int i = 0; i < EEPROM_size; i++) {
+      EEPROM_update(i, 0);
+    }
 #else
     for (int i = 0; i < EEPROM.length(); i++) {
-      EEPROM.update(i, 0); 
+      EEPROM.update(i, 0);
     }
-#endif  
+#endif
     loadSettingsFromFlash();
   }
 #endif
@@ -1816,18 +1818,18 @@ void setup() {
   Serial.println(F("Delete EEPROM"));
 #endif
 #if defined AiO
-  for (int i = 0; i < 1020; i++) {
+  for (int i = 0; i < EEPROM_size; i++) {
     EEPROM_update(i, 0);
   }
 #else
-    for (int i = 0; i < EEPROM.length(); i++) {
-      EEPROM.update(i, 0); 
-    }
-#endif  
+  for (int i = 0; i < EEPROM.length(); i++) {
+    EEPROM.update(i, 0);
+  }
+#endif
   loadSettingsFromFlash();
 #endif
 
-#if defined AiO 
+#if defined AiO
   // verstärker an
   digitalWrite(8, LOW);
   delay(100);
@@ -1978,11 +1980,11 @@ void playFolder() {
       Serial.println(F("Album"));
 #endif
       if (myFolder->special3 == 0)
-        currentTrack = 1;
+        currentTrack = firstTrack;
       else {
         currentTrack = readAudiobookMemory(myFolder->folder, myFolder->special3) + 1;
         if (currentTrack == 0 || currentTrack > numTracksInFolder) {
-          currentTrack = 1;
+          currentTrack = firstTrack;
         }
         writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
       }
@@ -2014,12 +2016,12 @@ void playFolder() {
 #if defined DEBUG
       Serial.println(F("Party"));
 #endif
-      currentTrack = 1;
+      currentTrack = firstTrack;
       shuffleQueue();
       queueTrack = true;
       break;
     case Party_Section:
-      currentTrack = 1;
+      currentTrack = firstTrack;
       firstTrack = myFolder->special;
       numTracksInFolder = myFolder->special2;
       shuffleQueue();
@@ -2032,7 +2034,7 @@ void playFolder() {
 #endif
       currentTrack = readAudiobookMemory(myFolder->folder, myFolder->special3);
       if (currentTrack == 0 || currentTrack > numTracksInFolder) {
-        currentTrack = 1;
+        currentTrack = firstTrack;
       }
       break;
     case AudioBook_Section:
@@ -2161,13 +2163,29 @@ void loop() {
     return;
   }
 
-  //Lösche Hörbuchspeicher nach sehr langem Druck von Up & Down Button, vorrausgesetzt ein Hörbuch ist aktiv
+  //Springe zum ersten Titel zurück
   if ((upButton.pressedFor(LONGER_PRESS) || downButton.pressedFor(LONGER_PRESS)) && !pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed()) {
-    if (myFolder->mode == AudioDrama || myFolder->mode == AudioDrama_Section) {
-      writeAudiobookMemory (myFolder->folder, myFolder->special3, 0);
+    mp3.pause();
+    do {
+      readButtons();
+    } while (upButton.isPressed() || downButton.isPressed());
+    readButtons();
+#if defined DEBUG
+    Serial.println(F("back to first track"));
+#endif
+    if (currentTrack != firstTrack) {
+      currentTrack = firstTrack;
+      if (myFolder->special3 != 0) {
+#if defined DEBUG
+        Serial.println(F("reset memory"));
+#endif
+      writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
+      }      
     }
+    playFolder();
+    return;
   }
-  if (pauseButton.wasReleased()) {
+  if (pauseButton.wasReleased() && !upButton.isPressed() && !downButton.isPressed()) {
 
     if (activeModifier != NULL) {
       if (activeModifier->handlePause() == true) {
@@ -2191,7 +2209,7 @@ void loop() {
   }
 #if defined PUSH_ON_OFF || defined AiO
   else if (pauseButton.pressedFor(LONGER_PRESS) &&
-          !upButton.isPressed() && !downButton.isPressed() &&
+           !upButton.isPressed() && !downButton.isPressed() &&
            ignorePauseButton == false) {
     ignorePauseButton = true;
     shutDown();
@@ -2199,7 +2217,7 @@ void loop() {
 #endif
 
 #ifndef ROTARY_ENCODER
-  if (upButton.pressedFor(LONG_PRESS)) {
+  if (upButton.pressedFor(LONG_PRESS) && !pauseButton.isPressed() && !downButton.isPressed()) {
 
 #ifndef FIVEBUTTONS
     if (isPlaying()) {
@@ -2225,7 +2243,7 @@ void loop() {
       }
     ignoreUpButton = false;
   }
-  if (downButton.pressedFor(LONG_PRESS)) {
+  if (downButton.pressedFor(LONG_PRESS) && !pauseButton.isPressed() && !upButton.isPressed()) {
 #ifndef FIVEBUTTONS
     if (isPlaying()) {
       if (!mySettings.invertVolumeButtons) {
@@ -2285,7 +2303,7 @@ void loop() {
 #endif
 
 #if defined ROTARY_ENCODER
-  if (upButton.pressedFor(LONG_PRESS)) {
+  if (upButton.pressedFor(LONG_PRESS) && !pauseButton.isPressed() && !downButton.isPressed()) {
     if (!isPlaying())
       playShortCut(1);
 
@@ -2299,7 +2317,7 @@ void loop() {
     ignoreUpButton = false;
   }
 
-  if (downButton.pressedFor(LONG_PRESS)) {
+  if (downButton.pressedFor(LONG_PRESS) && !pauseButton.isPressed() && !upButton.isPressed()) {
     if (!isPlaying()) {
       playShortCut(2);
     }
@@ -2317,29 +2335,6 @@ void loop() {
 
   handleCardReader();
 
-  //    // Ende der Buttons
-  //  } while (!mfrc522.PICC_IsNewCardPresent());
-  //
-  //  // RFID Karte wurde aufgelegt
-  //
-  //  if (!mfrc522.PICC_ReadCardSerial())
-  //    return;
-  //
-  //  if (readCard(&myCard) == true) {
-  //    if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != ModifierMode && myCard.nfcFolderSettings.mode != 0) {
-  //      playFolder();
-  //    }
-  //
-  //    // Neue Karte konfigurieren
-  //    else if (myCard.cookie != cardCookie) {
-  //      knownCard = false;
-  //      mp3.playMp3FolderTrack(300);
-  //      waitForTrackToFinish();
-  //      setupCard();
-  //    }
-  //  }
-  //  mfrc522.PICC_HaltA();
-  //  mfrc522.PCD_StopCrypto1();
 }
 //////////////////////////////////////////////////////////////////////////
 void adminMenu(bool fromCard = false) {
@@ -2567,55 +2562,55 @@ void adminMenu(bool fromCard = false) {
     mp3.playMp3FolderTrack(947);
 #endif
   }
-    else if (subMenu == SetupIRRemote) {
+  else if (subMenu == SetupIRRemote) {
 #if defined IRREMOTE
 #if defined DEBUG
-      Serial.println(F("learn remote"));
+    Serial.println(F("learn remote"));
 #endif
-      for (uint8_t i = 0; i < 7; i++) {
-        mp3.playMp3FolderTrack(951 + i);
-        waitForTrackToFinish();
-        // clear ir receive buffer
-        irReceiver.resume();
-        // wait for ir signal
-        while (!irReceiver.decode(&irReading)) {
-        }
-        // on NEC encoding 0xFFFFFFFF means the button is held down, we ignore this
-        if (!(irReading.decode_type == NEC && irReading.value == 0xFFFFFFFF)) {
-          // convert irReading.value from 32bit to 16bit
-          uint16_t irRemoteCode = (irReading.value & 0xFFFF);
-#if defined DEBUG
-          Serial.print(F("ir code: 0x"));
-          Serial.print(irRemoteCode <= 0x0010 ? "0" : "");
-          Serial.print(irRemoteCode <= 0x0100 ? "0" : "");
-          Serial.print(irRemoteCode <= 0x1000 ? "0" : "");
-          Serial.println(irRemoteCode, HEX);
-#endif
-          preference.irRemoteUserCodes[i] = irRemoteCode;
-        }
-        // key was held down on NEC encoding, repeat last question
-        else {
-          i--;
-        }
-        mp3.loop();
-      }
-      preferences(WRITE);
-      mp3.playMp3FolderTrack(901);
+    for (uint8_t i = 0; i < 7; i++) {
+      mp3.playMp3FolderTrack(951 + i);
       waitForTrackToFinish();
+      // clear ir receive buffer
+      irReceiver.resume();
+      // wait for ir signal
+      while (!irReceiver.decode(&irReading)) {
+      }
+      // on NEC encoding 0xFFFFFFFF means the button is held down, we ignore this
+      if (!(irReading.decode_type == NEC && irReading.value == 0xFFFFFFFF)) {
+        // convert irReading.value from 32bit to 16bit
+        uint16_t irRemoteCode = (irReading.value & 0xFFFF);
+#if defined DEBUG
+        Serial.print(F("ir code: 0x"));
+        Serial.print(irRemoteCode <= 0x0010 ? "0" : "");
+        Serial.print(irRemoteCode <= 0x0100 ? "0" : "");
+        Serial.print(irRemoteCode <= 0x1000 ? "0" : "");
+        Serial.println(irRemoteCode, HEX);
+#endif
+        preference.irRemoteUserCodes[i] = irRemoteCode;
+      }
+      // key was held down on NEC encoding, repeat last question
+      else {
+        i--;
+      }
+      mp3.loop();
+    }
+    preferences(WRITE);
+    mp3.playMp3FolderTrack(901);
+    waitForTrackToFinish();
 #else
     mp3.playMp3FolderTrack(947);
 #endif
   }
   else if (subMenu == ResetEEPROM) {
 #if defined AiO
-  for (int i = 0; i < 1020; i++) {
-    EEPROM_update(i, 0);
-  }
+    for (int i = 0; i < EEPROM_size; i++) {
+      EEPROM_update(i, 0);
+    }
 #else
     for (int i = 0; i < EEPROM.length(); i++) {
-      EEPROM.update(i, 0); 
+      EEPROM.update(i, 0);
     }
-#endif  
+#endif
     resetSettings();
     mp3.playMp3FolderTrack(999);
   }
@@ -3448,9 +3443,9 @@ bool SetModifier (folderSettings * tmpFolderSettings) {
 }
 bool RemoveModifier() {
   activeModifier = NULL;
-  
+
   _lastTrackFinished = 0;
-  
+
   mySettings.savedModifier.folder = 0;
   mySettings.savedModifier.mode = 0;
   writeSettingsToFlash();
@@ -3486,48 +3481,48 @@ bool setupSystemControl (folderSettings * tmpFolderSettings) {
 }
 uint8_t readAudiobookMemory (uint8_t folder, uint8_t memoryNumber) {
   uint16_t address = (folder - 1)  + ((memoryNumber - 1) * 99);
-if (memoryNumber > 0) {
-      
+  if (memoryNumber > 0) {
+
 #if defined DEBUG
-  Serial.print(F("read memory No. "));
-  Serial.print(memoryNumber);
-  Serial.print(F(" of folder No. "));
-  Serial.println(folder);
-  Serial.print(F("at address "));
-  Serial.println(address);
+    Serial.print(F("read memory No. "));
+    Serial.print(memoryNumber);
+    Serial.print(F(" of folder No. "));
+    Serial.println(folder);
+    Serial.print(F("at address "));
+    Serial.println(address);
 #endif
-  
+
 #if defined AiO
-   uint8_t returnValue;
-   EEPROM_get(address,returnValue);
-   return returnValue;
+    uint8_t returnValue;
+    EEPROM_get(address, returnValue);
+    return returnValue;
 #else
-   return EEPROM.read(address);
+    return EEPROM.read(address);
 #endif
-} else 
-  return 1;
+  } else
+    return 1;
 }
 
 void writeAudiobookMemory (uint8_t folder, uint8_t memoryNumber, uint8_t track) {
   uint16_t address = (folder - 1)  + ((memoryNumber - 1) * 99);
-if (memoryNumber > 0) {
-   
+  if (memoryNumber > 0) {
+
 #if defined DEBUG
-  Serial.print(F("write track No. "));
-  Serial.print(track);
-  Serial.print(F(" of folder No. "));
-  Serial.print(folder);
-  Serial.print(F(" in memory No. "));
-  Serial.println(memoryNumber);
+    Serial.print(F("write track No. "));
+    Serial.print(track);
+    Serial.print(F(" of folder No. "));
+    Serial.print(folder);
+    Serial.print(F(" in memory No. "));
+    Serial.println(memoryNumber);
 #endif
 
 #if defined AiO
     EEPROM_update(address, track);
 #else
-   EEPROM.update(address, track);
+    EEPROM.update(address, track);
 #endif
-} else 
-  return;
+  } else
+    return;
 }
 
 //Um festzustellen ob eine Karte entfernt wurde, muss der MFRC regelmäßig ausgelesen werden
@@ -3656,8 +3651,8 @@ void setstandbyTimer() {
 #if defined DEBUG
   Serial.println(F("set standby timer"));
 #endif
-#if defined AiO  
-// verstärker aus
+#if defined AiO
+  // verstärker aus
   digitalWrite(8, HIGH);
   delay(100);
 #else if defined SPEAKER_SWITCH
@@ -3714,7 +3709,7 @@ void shutDown() {
 
   mp3.pause();
 
-#if defined AiO 
+#if defined AiO
   // verstärker an
   digitalWrite(8, LOW);
   delay(100);
@@ -3739,7 +3734,7 @@ void shutDown() {
   mp3.playMp3FolderTrack(265);
   waitForTrackToFinish();
 
-#if defined AiO 
+#if defined AiO
   // verstärker aus
   digitalWrite(8, HIGH);
   delay(100);
@@ -3751,13 +3746,13 @@ void shutDown() {
 #if not defined AiO
   digitalWrite(shutdownPin, HIGH);
 
-// enter sleep state
-// http://discourse.voss.earth/t/intenso-s10000-powerbank-automatische-abschaltung-software-only/805
-// powerdown to 27mA (powerbank switches off after 30-60s)
+  // enter sleep state
+  // http://discourse.voss.earth/t/intenso-s10000-powerbank-automatische-abschaltung-software-only/805
+  // powerdown to 27mA (powerbank switches off after 30-60s)
   mfrc522.PCD_AntennaOff();
   mfrc522.PCD_SoftPowerDown();
   mp3.sleep();
-  
+
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   cli();  // Disable interrupts
   sleep_mode();
