@@ -2139,7 +2139,7 @@ void loop() {
   AnaInloop(ANALOG_INPUT_TRIGGER_TIME);
 #endif
 
-#if defined FADING_LED ^ defined POWER_ON_LED
+#if defined FADING_LED
   fadeStatusLed(isPlaying());
 #endif
 
@@ -3762,14 +3762,14 @@ void shutDown() {
 }
 
 //////////////////////////////////////////////////////////////////////////
-#if defined FADING_LED ^ defined POWER_ON_LED
+#if defined FADING_LED
 // fade in/out status led while beeing idle, during playback set to full brightness
 void fadeStatusLed(bool isPlaying) {
   static bool statusLedDirection = false;
   static int8_t statusLedValue = 255;
   static unsigned long statusLedOldMillis;
-  static int8_t statusLedDeltaValuePause = 100;
-  static int8_t statusLedDeltaValuePlay = 10;
+  static int8_t statusLedDeltaValuePause = 500;
+  static int8_t statusLedDeltaValuePlay = 1;
   static int8_t statusLedDeltaValue = 10;
 
   if (isPlaying) {

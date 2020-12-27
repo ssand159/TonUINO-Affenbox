@@ -10,20 +10,20 @@
 #endif
 //////////////////////////////
 
-//#define FIVEBUTTONS 
+#define FIVEBUTTONS 
 #define DEBUG           //Debug Ausgaben in der Konsole
 //#define DEBUG_QUEUE   //Debug Ausgabe der Queue
 //#define EEPROM_DELETE //Löscht den EEPROM bei jedem Start
 
 #define PUSH_ON_OFF     //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
 #define SPEAKER_SWITCH  //mit AiO nicht mehr nötig, da standardmäßig vorhanden
+//#define POWER_ON_LED
+//#define FADING_LED    //nur in Verbindung mit POWER_ON_LED
 
-#if not defined AiO     //!Aktuell sind nur Grundfunktionen mit der AiO kompatibel!
+#if not defined AiO     //!Folgende Funktionen sind noch nicht für die AiO frei gegeben!
 //#define ANALOG_INPUT  //old ROTARY_SWITCH
 //#define ROTARY_ENCODER
 //#define ROBOTDYN_3X4  //Ersetzt die Auswertung des ANALOG_INPUT, durch eine für die Robotdyn 3x4 Matrixtastatur angepasste. ANALOG_INPUT muss zusätzlich aktiviert sein!
-//#define POWER_ON_LED
-//#define FADING_LED    //ungetestet, nur in Verbindung mit POWER_ON_LED
 //#define IRREMOTE
 #endif
 //////////////////////////////////////////////////////////////////////////
