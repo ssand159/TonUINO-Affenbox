@@ -59,7 +59,7 @@
 #endif
 
 #ifdef POWER_ON_LED
-#define PowerOnLEDPin 5
+#define PowerOnLEDPin 6 //Default 6
 #endif
 
 #ifdef ROTARY_ENCODER
@@ -1894,7 +1894,7 @@ void loop() {
   RotSwloop(ROTARY_SWITCH_TRIGGER_TIME);
 #endif
 
-#if defined POWER_ON_LED ^ defined FADING_LED
+#if defined FADING_LED
   fadeStatusLed(isPlaying());
 #endif
 
@@ -1918,7 +1918,7 @@ void loop() {
     return;
   }
 
-/Springe zum ersten Titel zurück
+//Springe zum ersten Titel zurück
   if ((upButton.pressedFor(LONGER_PRESS) || downButton.pressedFor(LONGER_PRESS)) && !pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed()) {
     mp3.pause();
     do {
@@ -3411,7 +3411,7 @@ if (volume > mySettings.initVolume)
 }
 
 //////////////////////////////////////////////////////////////////////////
-#if defined POWER_ON_LED ^ defined FADING_LED
+#if defined FADING_LED
 // fade in/out status led while beeing idle, during playback set to full brightness
 void fadeStatusLed(bool isPlaying) {
 static bool statusLedDirection = false;
