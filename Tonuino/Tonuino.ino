@@ -349,7 +349,7 @@ void shuffleQueue(uint8_t startTrack = firstTrack, uint8_t endTrack = numTracksI
   Serial.println(F("shuffle Queue"));
 #ifdef DEBUG_2
   Serial.print(F("startTrack: "));
-  Serial.println(startTrack);  
+  Serial.println(startTrack);
   Serial.print(F("endTrack: "));
   Serial.println(endTrack);
 #endif
@@ -729,7 +729,11 @@ class PuzzleGame: public Modifier {
     virtual bool handleNext() {
       return true;
     }
-
+    
+    virtual bool handlePrevious() {
+      return true;
+    }
+    
     virtual bool handleNextButton()       {
       return true;
     }
@@ -903,7 +907,10 @@ class QuizGame: public Modifier {
     virtual bool handleNext() {
       return true;
     }
-
+    
+    virtual bool handlePrevious() {
+      return true;
+    }
     virtual bool handlePause() {
 #if defined DEBUG
       Serial.println(F("QuizGame > pause and repeat "));
@@ -1112,7 +1119,11 @@ class TheQuest: public Modifier {
     virtual bool handleNext() {
       return true;
     }
-
+    
+    virtual bool handlePrevious() {
+      return true;
+    }
+    
     virtual bool handlePause() {
       return true;
     }
@@ -1204,6 +1215,10 @@ class ButtonSmash: public Modifier {
     }
 
     virtual bool handleNext() {
+      return true;
+    }
+
+    virtual bool handlePrevious() {
       return true;
     }
 
@@ -1441,7 +1456,7 @@ class RepeatSingleModifier: public Modifier {
 static void nextTrack(uint8_t track) {
   bool queueTrack = false;
 #ifdef DEBUG
-      Serial.println(F("Next track"));
+  Serial.println(F("Next track"));
 #endif
   if (activeModifier != NULL) {
     if (activeModifier->handleNext() == true) {
@@ -1452,36 +1467,38 @@ static void nextTrack(uint8_t track) {
     }
   }
 
-  if (track == _lastTrackFinished || knownCard == false) {
-#ifdef DEBUG_2
-      Serial.println(F("_lastTrackFinished"));
+  if (track == _lastTrackFinished || knownCard == false || (!isPlaying())) {
+#ifdef DEBUG
+    Serial.println(F("no next track"));
 #endif
     return;
   }
-_lastTrackFinished = track;
+  _lastTrackFinished = track;
 
   switch (myFolder->mode) {
     case Album:
       if (currentTrack < numTracksInFolder)
         currentTrack = currentTrack + 1;
-      else{
+      else {
         currentTrack = 0;
         mp3.pause();
         setstandbyTimer();
-        return;}
+        return;
+      }
       break;
     case Album_Section:
       if (currentTrack < myFolder->special2)
         currentTrack = currentTrack + 1;
-      else{
-        currentTrack = firstTrack -1;
+      else {
+        currentTrack = firstTrack - 1;
         mp3.pause();
         setstandbyTimer();
-        return;}
+        return;
+      }
       break;
 
     case Party:
-     if (currentTrack < numTracksInFolder) {
+      if (currentTrack < numTracksInFolder) {
         currentTrack = currentTrack + 1;
       }
       else {
@@ -1491,9 +1508,9 @@ _lastTrackFinished = track;
         //     shuffleQueue();
       }
       queueTrack = true;
-    break;
+      break;
     case Party_Section:
-       if (currentTrack < (myFolder->special2 - firstTrack + 1)) {
+      if (currentTrack < (myFolder->special2 - firstTrack + 1)) {
         currentTrack = currentTrack + 1;
       }
       else {
@@ -1524,8 +1541,8 @@ _lastTrackFinished = track;
         writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
       }
       else {
-        writeAudiobookMemory (myFolder->folder, myFolder->special3, firstTrack);  
-        mp3.pause();      
+        writeAudiobookMemory (myFolder->folder, myFolder->special3, firstTrack);
+        mp3.pause();
         setstandbyTimer();
         return;
       }
@@ -1533,7 +1550,7 @@ _lastTrackFinished = track;
 
     default:
 #ifdef DEBUG
-      Serial.println(F("No next Track"));
+      Serial.println(F("no next Track"));
 #endif
       setstandbyTimer();
       delay(500);
@@ -1541,22 +1558,22 @@ _lastTrackFinished = track;
       break;
   }
 
-disablestandbyTimer();
+  disablestandbyTimer();
 
 #ifdef DEBUG
   Serial.print("next track: ");
 #endif
-    
+
   if (queueTrack) {
-    mp3.playFolderTrack(myFolder->folder, queue[currentTrack-1]);
+    mp3.playFolderTrack(myFolder->folder, queue[currentTrack - 1]);
 #ifdef DEBUG
-    Serial.println(queue[currentTrack-1]);
+    Serial.println(queue[currentTrack - 1]);
 #endif
   }
   else {
     mp3.playFolderTrack(myFolder->folder, currentTrack);
 
-      
+
 #ifdef DEBUG
     Serial.println(currentTrack);
 #endif
@@ -1568,20 +1585,42 @@ disablestandbyTimer();
 static void previousTrack() {
   bool queueTrack = false;
   
-_lastTrackFinished = 0;
+  #ifdef DEBUG
+  Serial.println(F("Previous track"));
+#endif
+  if (activeModifier != NULL) {
+    if (activeModifier->handlePrevious() == true) {
+#ifdef DEBUG
+      Serial.println(F("locked"));
+#endif
+      return;
+    }
+  }
+  
+if (!isPlaying()){
+  #ifdef DEBUG
+      Serial.println(F("no previous Track"));
+#endif
+  return; 
+}
+  _lastTrackFinished = 0;
 
   switch (myFolder->mode) {
     case Album:
-     if (currentTrack > 1){
-        currentTrack = currentTrack - 1;}
-      else{
-          currentTrack = numTracksInFolder;}
+      if (currentTrack > 1) {
+        currentTrack = currentTrack - 1;
+      }
+      else {
+        currentTrack = numTracksInFolder;
+      }
       break;
     case Album_Section:
-      if (currentTrack > firstTrack){
-          currentTrack = currentTrack - 1;}
+      if (currentTrack > firstTrack) {
+        currentTrack = currentTrack - 1;
+      }
       else {
-        currentTrack = myFolder->special2 - firstTrack + 1;}
+        currentTrack = myFolder->special2 - firstTrack + 1;
+      }
       break;
 
     case Party:
@@ -1604,34 +1643,36 @@ _lastTrackFinished = 0;
       break;
 
     case AudioBook:
-     if (currentTrack > 1){
-        currentTrack = currentTrack - 1;        
+      if (currentTrack > 1) {
+        currentTrack = currentTrack - 1;
       } else {
-          currentTrack = 1;}
-          // Fortschritt im EEPROM abspeichern
-        writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
+        currentTrack = 1;
+      }
+      // Fortschritt im EEPROM abspeichern
+      writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
       break;
 
     case AudioBook_Section:
       if (currentTrack > firstTrack) {
         currentTrack = currentTrack - 1;
-        
+
       } else {
-          currentTrack = 1;}
-          // Fortschritt im EEPROM abspeichern
+        currentTrack = 1;
+      }
+      // Fortschritt im EEPROM abspeichern
       writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
       break;
 
     default:
 #ifdef DEBUG
-      Serial.println(F("No previous Track"));
+      Serial.println(F("no previous Track"));
 #endif
       setstandbyTimer();
       return;
       break;
   }
 
-disablestandbyTimer();
+  disablestandbyTimer();
 
 #ifdef DEBUG
   Serial.print("previous track: ");
@@ -1904,7 +1945,7 @@ void volumeDownButton() {
   if (activeModifier != NULL) {
     if (activeModifier->handleVolume() == true) {
 #if defined DEBUG
-      Serial.println(F("Volume locked"));
+      Serial.println(F("volume locked"));
 #endif
       return;
     }
@@ -1915,7 +1956,7 @@ void volumeDownButton() {
     volume--;
   }
 #if defined DEBUG
-  Serial.print(F("volume Down: "));
+  Serial.print(F("volume Down "));
   Serial.println(volume);
 #endif
 }
@@ -1925,11 +1966,12 @@ void nextButton() {
   if (activeModifier != NULL) {
     if (activeModifier->handleNextButton() == true) {
 #if defined DEBUG
-      Serial.println(F("Next button locked"));
+      Serial.println(F("next button locked"));
 #endif
       return;
     }
   }
+  
   nextTrack(random(65536));
   delay(300);
 }
@@ -1938,7 +1980,7 @@ void previousButton() {
   if (activeModifier != NULL) {
     if (activeModifier->handlePreviousButton() == true) {
 #if defined DEBUG
-      Serial.println(F("Previous button locked"));
+      Serial.println(F("previous button locked"));
 #endif
       return;
     }
@@ -2013,14 +2055,14 @@ void playFolder() {
       shuffleQueue();
       queueTrack = true;
       break;
-case Party_Section:
+    case Party_Section:
 #ifdef DEBUG
       Serial.println(F("Party section"));
 #endif
       currentTrack = 1;
       firstTrack = myFolder->special;
       //numTracksInFolder = myFolder->special2;
-      shuffleQueue(firstTrack,myFolder->special2);
+      shuffleQueue(firstTrack, myFolder->special2);
       queueTrack = true;
       break;
 
@@ -2088,7 +2130,7 @@ case Party_Section:
       Serial.println(F("Track not starting")) ;
 #endif
     }
-  }  
+  }
 }
 //////////////////////////////////////////////////////////////////////////
 void playShortCut(uint8_t shortCut) {
@@ -2173,8 +2215,8 @@ void loop() {
 #if defined DEBUG
         Serial.println(F("reset memory"));
 #endif
-      writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
-      }      
+        writeAudiobookMemory (myFolder->folder, myFolder->special3, currentTrack);
+      }
     }
     playFolder();
     return;
@@ -2275,7 +2317,8 @@ void loop() {
         nextButton();
       }
     }
-    else {
+  }     else if (buttonFour.pressedFor(LONG_PRESS)) {
+    if (!isPlaying()) {
       playShortCut(1);
     }
   }
@@ -2288,7 +2331,8 @@ void loop() {
         previousButton();
       }
     }
-    else {
+  } else if (buttonFive.pressedFor(LONG_PRESS)) {
+    if (!isPlaying()) {
       playShortCut(2);
     }
   }
