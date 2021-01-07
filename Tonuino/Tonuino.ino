@@ -144,6 +144,7 @@ typedef enum Enum_Modifier
   QuizGameMod = 9,
   ButtonSmashMod = 10,
   TheQuestMod = 11,
+  CalculateMod = 12,
   AdminMenuMod = 255
 };
 typedef enum Enum_SystemControl
@@ -729,11 +730,11 @@ class PuzzleGame: public Modifier {
     virtual bool handleNext() {
       return true;
     }
-    
+
     virtual bool handlePrevious() {
       return true;
     }
-    
+
     virtual bool handleNextButton()       {
       return true;
     }
@@ -907,7 +908,7 @@ class QuizGame: public Modifier {
     virtual bool handleNext() {
       return true;
     }
-    
+
     virtual bool handlePrevious() {
       return true;
     }
@@ -1119,11 +1120,11 @@ class TheQuest: public Modifier {
     virtual bool handleNext() {
       return true;
     }
-    
+
     virtual bool handlePrevious() {
       return true;
     }
-    
+
     virtual bool handlePause() {
       return true;
     }
@@ -1184,7 +1185,7 @@ class ButtonSmash: public Modifier {
       mp3.setVolume(special2);
       delay(200);
 
-      Folder = special;
+      this->Folder = special;
       numTracksInFolder = mp3.getFolderTrackCount(Folder);
 
       firstTrack = 1;
@@ -1195,7 +1196,7 @@ class ButtonSmash: public Modifier {
     void  next() {
       mp3.pause();
       delay(100);
-      numTracksInFolder = mp3.getFolderTrackCount(Folder);
+      numTracksInFolder = mp3.getFolderTrackCount(this->Folder);
 
       if (currentTrack != numTracksInFolder - firstTrack + 1) {
 #if defined DEBUG
@@ -1210,7 +1211,7 @@ class ButtonSmash: public Modifier {
         shuffleQueue();
         currentTrack = 1;
       }
-      mp3.playFolderTrack(Folder, queue[currentTrack - 1]);
+      mp3.playFolderTrack(this->Folder, queue[currentTrack - 1]);
       waitForTrackToFinish();
     }
 
@@ -1267,6 +1268,180 @@ class ButtonSmash: public Modifier {
       return ButtonSmashMod ;
     }
 };
+
+class Calculate: public Modifier {
+  private:
+    uint8_t mode = 1; // learn mode (1 = addition, 2 = subtraction, 3 = multiplication, 4 = division, 5 = mixed)
+    uint8_t upperBound = 0; // max number (can not exceed 254)
+    uint8_t opA = 0;
+    uint8_t opB = 0;
+    uint8_t answer = 0;
+    uint8_t result = 0;
+    uint8_t opr = 0; // operator, see mode (0..3)
+    unsigned long lastAction = 0;
+
+    void nextQuestion(bool repeat = false) {
+#if defined DEBUG
+      Serial.println(F("Calculate > next Question"));
+#endif
+      this->lastAction = millis();
+      if (!repeat) {
+        if (this->mode == 5)
+        {
+          this->opr = random(1, 5);
+        }
+        else {
+          this->opr = this->mode;
+        }
+        this->result = 0;
+
+        switch (this->opr) {
+          case 2: // subtraction
+            {
+              this->opA = random(2, this->upperBound);
+              this->opB = random(1, this->opA);
+            }
+            break;
+          case 3: // multiplication
+            {
+              this->opA = random(1, this->upperBound);
+              this->opB = random(1, floor(this->upperBound / this->opA));
+
+            }
+            break;
+          case 4: // division
+            {
+              this->opA = random(2, this->upperBound);
+              do {
+                this->opB = random(1, this->upperBound);
+              } while (this->opA % this->opB  != 0);
+            }
+            break;
+          default: // addition
+            {
+              this->opA = random(1, this->upperBound - 1);
+              this->opB = random(1, this->upperBound - this->opA);
+            }
+            break;
+        }
+      }
+
+      switch (this->opr) {
+        case 1:
+          {
+            this->result = this->opA + this->opB;
+          }
+          break;
+        case 2:
+          {
+            this->result = this->opA - this->opB;
+          }
+          break;
+        case 3:
+          {
+            this->result = this->opA * this->opB;
+          }
+          break;
+        case 4:
+          {
+            this->result = this->opA / this->opB;
+          }
+          break;
+      }
+#if defined DEBUG
+      Serial.print(F("Calculate > correct result: "));
+      Serial.println(this->result);
+#endif
+      mp3.playMp3FolderTrack(411); // question "how much is"
+      waitForTrackToFinish();
+      mp3.playMp3FolderTrack(this->opA); // 1..254
+      waitForTrackToFinish();
+      mp3.playMp3FolderTrack(411 + this->opr); // 402, 403, 404, 405
+      waitForTrackToFinish();
+      mp3.playMp3FolderTrack(this->opB); // 1..254
+      waitForTrackToFinish();
+    }
+
+  public:
+    virtual bool handlePause() {
+      return true;
+    }
+    virtual bool handleNext() {
+      return true;
+    }
+    virtual bool handlePrevious() {
+      return true;
+    }
+    virtual bool handleNextButton() {
+      return true;
+    }
+    virtual bool handlePreviousButton() {
+      return true;
+    }
+    virtual bool handleShortCut() {
+      return true;
+    }
+    virtual bool handleRFID(nfcTagObject *newCard) {
+      return true;
+    }
+    virtual bool handleAdminMenu() {
+      return true;
+    }
+    virtual void loop() {
+      
+      this->answer = voiceMenu(255, 0, 0, false, 0, 0, true);
+
+      if (this->answer == 0) {
+        mp3.playMp3FolderTrack(298); // next Question
+        waitForTrackToFinish();
+        this->nextQuestion();
+        return;
+      }
+
+      if (this->result == this->answer) {
+#if defined DEBUG
+        Serial.println(F("Calculate > right"));
+#endif
+
+        mp3.playMp3FolderTrack(420); // richtig
+        waitForTrackToFinish();
+        this->nextQuestion();
+      }
+      else {
+#if defined DEBUG
+        Serial.println(F("Calculate > wrong"));
+#endif
+
+        mp3.playMp3FolderTrack(421); // falsch
+        waitForTrackToFinish();
+        this->nextQuestion(true); // repeat question
+      }
+      return;
+    }
+
+    Calculate(uint8_t special, uint8_t special2) {
+#if defined DEBUG
+      Serial.println(F("Calculate"));
+#endif
+      this->mode = special;
+      this->upperBound = special2;
+
+      if (this->mode == 5) {
+        this->opr = random(1, 5);
+      }
+      else {
+        this->opr = this->mode;
+      }
+      mp3.playMp3FolderTrack(410); // intro
+      waitForTrackToFinish();
+      this->nextQuestion();
+    }
+
+    uint8_t getActive() {
+      return CalculateMod;
+    }
+};
+
 //////////////////////////////////////////////////////////////////////////
 class Locked: public Modifier {
   public:
@@ -1455,6 +1630,11 @@ class RepeatSingleModifier: public Modifier {
 // Leider kann das Modul selbst keine Queue abspielen, daher müssen wir selbst die Queue verwalten
 static void nextTrack(uint8_t track) {
   bool queueTrack = false;
+
+  if (track == _lastTrackFinished || knownCard == false || (!isPlaying())) {
+    return;
+  }
+
 #ifdef DEBUG
   Serial.println(F("Next track"));
 #endif
@@ -1467,12 +1647,7 @@ static void nextTrack(uint8_t track) {
     }
   }
 
-  if (track == _lastTrackFinished || knownCard == false || (!isPlaying())) {
-#ifdef DEBUG
-    Serial.println(F("no next track"));
-#endif
-    return;
-  }
+
   _lastTrackFinished = track;
 
   switch (myFolder->mode) {
@@ -1584,8 +1759,12 @@ static void nextTrack(uint8_t track) {
 //////////////////////////////////////////////////////////////////////////
 static void previousTrack() {
   bool queueTrack = false;
-  
-  #ifdef DEBUG
+
+  if (!isPlaying()) {
+    return;
+  }
+
+#ifdef DEBUG
   Serial.println(F("Previous track"));
 #endif
   if (activeModifier != NULL) {
@@ -1596,13 +1775,8 @@ static void previousTrack() {
       return;
     }
   }
-  
-if (!isPlaying()){
-  #ifdef DEBUG
-      Serial.println(F("no previous Track"));
-#endif
-  return; 
-}
+
+
   _lastTrackFinished = 0;
 
   switch (myFolder->mode) {
@@ -1930,15 +2104,16 @@ void volumeUpButton() {
       return;
     }
   }
-
-  if (volume < mySettings.maxVolume) {
-    mp3.increaseVolume();
-    volume++;
-  }
+  if (isPlaying()) {
+    if (volume < mySettings.maxVolume) {
+      mp3.increaseVolume();
+      volume++;
+    }
 #if defined DEBUG
-  Serial.print(F("volume Up: "));
-  Serial.println(volume);
+    Serial.print(F("volume Up: "));
+    Serial.println(volume);
 #endif
+  }
 }
 //////////////////////////////////////////////////////////////////////////
 void volumeDownButton() {
@@ -1951,14 +2126,16 @@ void volumeDownButton() {
     }
   }
 
-  if (volume > mySettings.minVolume) {
-    mp3.decreaseVolume();
-    volume--;
-  }
+  if (isPlaying()) {
+    if (volume > mySettings.minVolume) {
+      mp3.decreaseVolume();
+      volume--;
+    }
 #if defined DEBUG
-  Serial.print(F("volume Down "));
-  Serial.println(volume);
+    Serial.print(F("volume Down "));
+    Serial.println(volume);
 #endif
+  }
 }
 #endif
 //////////////////////////////////////////////////////////////////////////
@@ -1971,7 +2148,7 @@ void nextButton() {
       return;
     }
   }
-  
+
   nextTrack(random(65536));
   delay(300);
 }
@@ -3398,9 +3575,13 @@ void irLoop () {
 #endif
 //////////////////////////////////////////////////////////////////////////
 bool setupModifier(folderSettings * tmpFolderSettings) {
+  /*
+    uint8_t voiceMenu(uint16_t numberOfOptions, uint16_t startMessage, int messageOffset,
+                    bool preview = false, int previewFromFolder = 0, int defaultValue = 0, bool exitWithLongPress = false)
+  */
 
   tmpFolderSettings->folder = ModifierMode;
-  tmpFolderSettings->mode = voiceMenu(10, 966, 966, false, false, 0, true);
+  tmpFolderSettings->mode = voiceMenu(12, 966, 966, false, false, 0, true);
 
   if (tmpFolderSettings->mode != ModifierMode) {
     if (tmpFolderSettings->mode == SleepTimerMod) {
@@ -3413,7 +3594,7 @@ bool setupModifier(folderSettings * tmpFolderSettings) {
       tmpFolderSettings->special2 = 0x00;
     } else if (tmpFolderSettings->mode == PuzzleGameMod) {
       //Save first part?
-      tmpFolderSettings->special = voiceMenu(2, 977, 933) - 1;
+      tmpFolderSettings->special = voiceMenu(2, 979, 933) - 1;
       tmpFolderSettings->special2 = 0x00;
     }
     else if (tmpFolderSettings->mode == QuizGameMod) {
@@ -3427,9 +3608,15 @@ bool setupModifier(folderSettings * tmpFolderSettings) {
       //Set Volume
       tmpFolderSettings->special2 =  voiceMenu(30, 904, false, false, 0);
     }
+    else if (tmpFolderSettings->mode == CalculateMod) {
+      //Set Oprator
+      tmpFolderSettings->special =  voiceMenu(5, 423, 423, false, 0, 0, true);
+      //Set max number
+      tmpFolderSettings->special2 =  voiceMenu(255, 429, 0, false, 0, 0, true);
+    }
 
     //Save Modifier in EEPROM?
-    tmpFolderSettings->special3 = voiceMenu(2, 978, 933, false, false, 0) - 1;
+    tmpFolderSettings->special3 = voiceMenu(2, 980, 933, false, false, 0) - 1;
     tmpFolderSettings->special4 = 0x00;
     return true;
   }
@@ -3472,6 +3659,7 @@ bool SetModifier (folderSettings * tmpFolderSettings) {
     case 9: activeModifier = new QuizGame(tmpFolderSettings->special); break;
     case 10: activeModifier = new ButtonSmash(tmpFolderSettings->special, tmpFolderSettings->special2); break;
     case 11: activeModifier = new TheQuest(tmpFolderSettings->special, tmpFolderSettings->special2); break;
+    case 12: activeModifier = new Calculate (tmpFolderSettings->special, tmpFolderSettings->special2); break;
   }
   if (tmpFolderSettings->special3 == 1) {
     mySettings.savedModifier = *tmpFolderSettings;

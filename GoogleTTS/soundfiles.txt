@@ -276,6 +276,26 @@
 0325_select_audio_book_slot.mp3|OK, wähle nun bitte die Nummer des Hörbuchspeichers für diesen Ordner aus. Wichtig wenn mehrere Hörbuchkarten für diesen Ordner erstellt werden.
 0400_ok.mp3|OK. Ich habe die Einstellungen übernommen.
 0401_error.mp3|Oh weh! Das hat leider nicht geklappt!
+0410_rechnen_intro.mp3|Willkommen beim Rechnnen üben! Ich stelle dir eine Aufgabe und du kannst mit den Lauter und Leisertasten dein Ergebnis eingeben. Mit der Pausetaste bestätigst du deine Auswahl.
+0411_wieviel_ist.mp3|Wie viel ist?
+0412_plus.mp3|Plus
+0413_minus.mp3|Minus
+0414_mal.mp3|Mal
+0415_geteilt_durch.mp3|geteilt durch
+0416_ist.mp3|ist
+0417_nochmal_versuchen.mp3|Möchtest du es noch einmal versuchen? 
+0418_rechne_mit_mir.mp3|Rechne mit mir.
+0419_grosse_zahlen.mp3|So große Zahlen kann ich nicht rechnen!
+0420_richtig.mp3|Das ist richtig!
+0421_falsch.mp3|Das ist leider falsch!
+0422_grundrechenarten_ueben.mp3|Die Grundrechenarten üben.
+0423_rechenart_intro.mp3|Wähle die gewünschte Rechenart aus.
+0424_addition.mp3|Addition
+0425_subtraktion.mp3|Subtraktion
+0426_multiplikation.mp3|Multiplikation
+0427_division.mp3|Division
+0428_alle_rechenarten.mp3|Alle Rechenarten
+0429_bis_maximal.mp3|Bis zu welcher Zahl soll gerrechnet werden. Bitte wähle mit der Lauter und Leisertaste die Zahl aus und bestätige mit der Pausetaste.
 0800_waiting_for_card.mp3|Bitte lege nun die Karte auf!
 0802_reset_aborted.mp3|OK, ich habe den Vorgang abgebrochen.
 0900_admin.mp3|Willkommen im Admin Menü. Bitte wähle eine Funktion mit den Lautstärketasten aus und bestätige sie mit der Pausetaste! Durch einen langen Druck auf die Pausetaste kannst du den Vorgang abbrechen.
@@ -344,13 +364,15 @@
 0974_modifier_puzzlegame.mp3|Puzzle Spiel. Ein Spiel, dass nach auflegen eines Puzzle Teils, das dazugehörige Gegenstück erwartet.
 0975_modifier_quiz.mp3|Quiz. Ein Spiel, dass aus dem gespeicherten Ordner eine zufällige Audiodatei abspielt und das Puzzlteil mit der selben Puzzle Teilnummer, wie die der Audiodatei, erwartet.
 0976_modifier_button_smash.mp3|Button Smash. Ein Spiel, dass nach jeder Aktion eine beliebige Audiodatei aus dem gespeicherten Ordner abspielt.
-0977_savePuzzlePart.mp3|Soll das erste Puzzle Teil gespeichert bleiben? Dann Wähle Ja. Oder soll das erste Puzzleteil jedes Mal neu aufgelegt werden? Dann wähle Nein
-0978_modifier_save.mp3|Soll diese Modifikation auch bei Neustart noch aktiv sein?
-0980_admin_lock_intro.mp3|Wähle bitte aus ob und wie das Adminmenü geschützt werden soll.
-0981_admin_lock_disabled.mp3|Kein Schutz. das Adminmenü kann jederzeit durch drücken von allen drei Tasten aktiviert werden.
-0982_admin_lock_card.mp3|Nur Adminkarte. das Adminmenü kann nur mit einer Adminkarte geöffnet werden. Eine neue Adminkarte kann jederzeit angelernt werden.
-0983_admin_lock_pin.mp3|Codeeingabe. das Adminmenü wird durch eine vierstellige Pin geschützt. Wenn du diese Option auswählst musst du als nächstes die Pin festlegen.
-0984_admin_lock_calc.mp3|Rechenaufgabe. das Adminmenü kann nur durch Lösen einer Rechenaufgabe betreten werden.
+0977_modifier_the_quest.mp3|The Quest. Ein Abenteuer, in dem du Aufgaben erfüllen musst um an dein Ziel zu gelangen.
+0978_modifier_learn_to_calculate.mp3|Rechnen lernen. Ein Spiel in dem man Rechenaufgaben gestellt bekommt und diese lösen muss.
+0979_savePuzzlePart.mp3|Soll das erste Puzzle Teil gespeichert bleiben? Dann Wähle Ja. Oder soll das erste Puzzleteil jedes Mal neu aufgelegt werden? Dann wähle Nein
+0980_modifier_save.mp3|Soll diese Modifikation auch bei Neustart noch aktiv sein?
+0986_admin_lock_intro.mp3|Wähle bitte aus ob und wie das Adminmenü geschützt werden soll.
+0987_admin_lock_disabled.mp3|Kein Schutz. das Adminmenü kann jederzeit durch drücken von allen drei Tasten aktiviert werden.
+0988_admin_lock_card.mp3|Nur Adminkarte. das Adminmenü kann nur mit einer Adminkarte geöffnet werden. Eine neue Adminkarte kann jederzeit angelernt werden.
+0989_admin_lock_pin.mp3|Codeeingabe. das Adminmenü wird durch eine vierstellige Pin geschützt. Wenn du diese Option auswählst musst du als nächstes die Pin festlegen.
+0990_admin_lock_calc.mp3|Rechenaufgabe. das Adminmenü kann nur durch Lösen einer Rechenaufgabe betreten werden.
 0991_admin_pin.mp3|Bitte gebe die Pin ein.
 0992_admin_calc.mp3|Wieviel ist
 0993_admin_calc.mp3|plus
