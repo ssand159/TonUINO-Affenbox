@@ -1275,16 +1275,21 @@ class Calculate: public Modifier {
     uint8_t upperBound = 0; // max number (can not exceed 254)
     uint8_t opA = 0;
     uint8_t opB = 0;
-    uint8_t answer = 0;
+    int16_t answer = 0;
+    uint8_t answerOld = 0;
     uint8_t result = 0;
     uint8_t opr = 0; // operator, see mode (0..3)
-    unsigned long lastAction = 0;
+    bool ignUpButton = false;
+    bool ignDownButton = false;
+    bool ignPauseButton = false;
 
     void nextQuestion(bool repeat = false) {
 #if defined DEBUG
       Serial.println(F("Calculate > next Question"));
 #endif
-      this->lastAction = millis();
+      this->answer = 0;
+      this->answerOld = 0;
+
       if (!repeat) {
         if (this->mode == 5)
         {
@@ -1362,6 +1367,69 @@ class Calculate: public Modifier {
       waitForTrackToFinish();
     }
 
+    uint8_t readAnswer() {
+
+      if (pauseButton.pressedFor(LONG_PRESS)) {
+#if defined DEBUG
+        Serial.println(F("Calculate > long pause "));
+#endif
+        this->ignPauseButton = true;
+        return -1;
+      }
+      if (pauseButton.wasReleased()) {
+#if defined DEBUG
+        Serial.println(F("Calculate > release pause "));
+#endif
+        if (!this->ignPauseButton) {
+
+          if (this->answer != 0) {
+#if defined DEBUG
+            Serial.print(F("= "));
+            Serial.println(this->answer);
+#endif
+            mp3.pause();
+            return 1;
+          }
+          else {
+            this->ignPauseButton = false;
+          }
+
+        }
+      }
+      if (upButton.pressedFor(LONG_PRESS)) {
+        this->answer = min(this->answer + 10, this->upperBound);
+        this->ignUpButton = true;
+      } else if (upButton.wasReleased()) {
+        if (!this->ignUpButton) {
+          this->answer = min(this->answer + 1, this->upperBound) ;
+        } else {
+          this->ignUpButton = false;
+        }
+      }
+
+      if (downButton.pressedFor(LONG_PRESS)) {
+        this->answer = max(this->answer - 10, 1);
+        this->ignDownButton = true;
+      } else if (downButton.wasReleased()) {
+        if (!this->ignDownButton) {
+          this->answer = max(this->answer - 1, 1);
+        } else {
+          this->ignDownButton = false;
+        }
+      }
+
+      if (this->answer != this->answerOld) {
+        this->answerOld = this->answer;
+#if defined DEBUG
+        Serial.println(this->answer);
+#endif
+        mp3.playMp3FolderTrack(this->answer);
+        delay(750);
+      }
+      //delay(150);
+      return 0;
+    }
+
   public:
     virtual bool handlePause() {
       return true;
@@ -1381,6 +1449,12 @@ class Calculate: public Modifier {
     virtual bool handleShortCut() {
       return true;
     }
+    virtual bool handleVolume() {
+      return true;
+    }
+    virtual bool handleShutDown() {
+      return true;
+    }
     virtual bool handleRFID(nfcTagObject *newCard) {
       return true;
     }
@@ -1388,33 +1462,35 @@ class Calculate: public Modifier {
       return true;
     }
     virtual void loop() {
-      
-      this->answer = voiceMenu(255, 0, 0, false, 0, 0, true);
 
-      if (this->answer == 0) {
+      int8_t value = readAnswer();
+
+      if (value == -1) {
+        this->answer = 0;
+        this->answerOld = 0;
         mp3.playMp3FolderTrack(298); // next Question
         waitForTrackToFinish();
         this->nextQuestion();
         return;
-      }
-
-      if (this->result == this->answer) {
+      } else if (value == 1) {
+        if (this->result == this->answer) {
 #if defined DEBUG
-        Serial.println(F("Calculate > right"));
+          Serial.println(F("Calculate > right"));
 #endif
 
-        mp3.playMp3FolderTrack(420); // richtig
-        waitForTrackToFinish();
-        this->nextQuestion();
-      }
-      else {
+          mp3.playMp3FolderTrack(420); // richtig
+          waitForTrackToFinish();
+          this->nextQuestion();
+        }
+        else {
 #if defined DEBUG
-        Serial.println(F("Calculate > wrong"));
+          Serial.println(F("Calculate > wrong"));
 #endif
 
-        mp3.playMp3FolderTrack(421); // falsch
-        waitForTrackToFinish();
-        this->nextQuestion(true); // repeat question
+          mp3.playMp3FolderTrack(421); // falsch
+          waitForTrackToFinish();
+          this->nextQuestion(true); // repeat question
+        }
       }
       return;
     }
@@ -2336,17 +2412,13 @@ void playShortCut(uint8_t shortCut) {
 }
 //////////////////////////////////////////////////////////////////////////
 void loop() {
-  //  do {
+  //do {
   checkStandbyAtMillis();
   mp3.loop();
 
 #if defined ROTARY_ENCODER
   RotEncSetVolume();
 #endif
-
-  //#if defined CHECK_BATTERY
-  //    batteryCheck();
-  //#endif
 
 #if defined ANALOG_INPUT
   AnaInloop(ANALOG_INPUT_TRIGGER_TIME);
