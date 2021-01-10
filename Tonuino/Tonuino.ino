@@ -1707,7 +1707,7 @@ class RepeatSingleModifier: public Modifier {
 static void nextTrack(uint8_t track) {
   bool queueTrack = false;
 
-  if (track == _lastTrackFinished || knownCard == false || (!isPlaying())) {
+  if (track == _lastTrackFinished || knownCard == false) {
     return;
   }
 
@@ -1835,10 +1835,6 @@ static void nextTrack(uint8_t track) {
 //////////////////////////////////////////////////////////////////////////
 static void previousTrack() {
   bool queueTrack = false;
-
-  if (!isPlaying()) {
-    return;
-  }
 
 #ifdef DEBUG
   Serial.println(F("Previous track"));
