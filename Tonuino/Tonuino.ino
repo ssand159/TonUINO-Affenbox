@@ -1293,7 +1293,7 @@ static void nextTrack(uint16_t track) {
     }
   }
 
-  if (track == _lastTrackFinished || knownCard == false || (!isPlaying())) {
+  if (track == _lastTrackFinished || knownCard == false) {
 #ifdef DEBUG
     Serial.println(F("no next track"));
 #endif
@@ -1422,14 +1422,6 @@ static void previousTrack() {
       return;
     }
   }
-
-  if (!isPlaying()) {
-#ifdef DEBUG
-    Serial.println(F("no previous Track"));
-#endif
-    return;
-  }
-
   _lastTrackFinished = 0;
 
   switch (myFolder->mode) {
@@ -1705,6 +1697,7 @@ void volumeUpButton() {
     }
   }
 
+if (isPlaying()){
   if (volume < mySettings.maxVolume) {
     mp3.increaseVolume();
     volume++;
@@ -1713,6 +1706,7 @@ void volumeUpButton() {
   Serial.print(F("volume Up: "));
   Serial.println(volume);
 #endif
+}
 }
 //////////////////////////////////////////////////////////////////////////
 void volumeDownButton() {
@@ -1724,7 +1718,7 @@ void volumeDownButton() {
       return;
     }
   }
-
+if (isPlaying()){
   if (volume > mySettings.minVolume) {
     mp3.decreaseVolume();
     volume--;
@@ -1733,6 +1727,7 @@ void volumeDownButton() {
   Serial.print(F("volume Down: "));
   Serial.println(volume);
 #endif
+}
 }
 #endif
 //////////////////////////////////////////////////////////////////////////
