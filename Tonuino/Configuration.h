@@ -10,21 +10,20 @@
 #endif
 //////////////////////////////
 
-#define FIVEBUTTONS 
-#define DEBUG           //Debug Ausgaben in der Konsole
+//#define FIVEBUTTONS  //Die AiO verwendet Standardmäßig fünf Buttons, vier Analoge eingänge und einen separaten für Pause. Falls ANALOG_INPUT verwendet werden soll muss FIVEBUTTONS deaktiviert werden um einen analogen Eingang frei zu machen. 
+//#define DEBUG        //Debug Ausgaben in der Konsole
 //#define DEBUG_QUEUE   //Debug Ausgabe der Queue
-//#define EEPROM_DELETE //Löscht den EEPROM bei jedem Start
 
 #define PUSH_ON_OFF     //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
 #define SPEAKER_SWITCH  //mit AiO nicht mehr nötig, da standardmäßig vorhanden
 //#define POWER_ON_LED
 //#define FADING_LED    //nur in Verbindung mit POWER_ON_LED
-
-#if not defined AiO     //!Folgende Funktionen sind noch nicht für die AiO frei gegeben!
-//#define ANALOG_INPUT  //old ROTARY_SWITCH
-//#define ROTARY_ENCODER
-//#define ROBOTDYN_3X4  //Ersetzt die Auswertung des ANALOG_INPUT, durch eine für die Robotdyn 3x4 Matrixtastatur angepasste. ANALOG_INPUT muss zusätzlich aktiviert sein!
+#define ANALOG_INPUT  //old ROTARY_SWITCH
 //#define IRREMOTE
+
+ //!Folgende Funktionen sind noch nicht für die AiO frei gegeben!
+#if not defined AiO    
+//#define ROTARY_ENCODER
 #endif
 //////////////////////////////////////////////////////////////////////////
 
@@ -56,17 +55,17 @@
 
 #ifdef ANALOG_INPUT
 #define ANALOG_INPUT_PIN  A4
-//#define ANALOG_INPUT_SUPPLY_PIN 6 //Der Referenzpegel kann auch von einem freien Output Pin kommen
+//#define ANALOG_INPUT_SUPPLY_PIN 6 //Nur verwenden, wenn es unbedingt nötig ist!Der Referenzpegel kann auch von einem IO Pin kommen.
 #endif
 
 #if defined IRREMOTE
-#define irReceiverPin 5                    // pin used for the ir receiver
+#define irReceiverPin 6                    // pin used for the ir receiver
 #endif
 
 #ifdef ROTARY_ENCODER
 #define ROTARY_ENCODER_PIN_A 5 //Default 5; 
 #define ROTARY_ENCODER_PIN_B 6 //Default 6; 
-#define ROTARY_ENCODER_PIN_SUPPLY 8 //uncomment if you want to use an IO pin as supply
+//#define ROTARY_ENCODER_PIN_SUPPLY 8 //Nur verwenden, wenn es unbedingt nötig ist! Die Versorgung des Rotary Encoder kann auch von einem IO Pin kommen-
 #endif
 //////////////////////////////////////////////////////////////////////////
 
@@ -77,6 +76,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 ////////// NFC Gain //////////////////////////////////////////////////////
+
 //#define NFCgain_max   // Maximale Empfindlichkeit
 #define NFCgain_avg   // Mittlere Empfindlichkeit
 //#define NFCgain_min   // Minimale Empfindlichkeit
@@ -89,12 +89,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 ///////// conifguration of the analog input ////////////////////////////
-#ifdef ANALOG_INPUT
-#define ANALOG_INPUT_POSITIONS 16
-#define ANALOG_INPUT_TOLERNACE 0.15
-#define ANALOG_INPUT_REF_VOLTAGE 5.0
-#define ANALOG_INPUT_RES_TO_GND 1 //Anzahl Widerstände zwischen der erten Stufe und GND
-#define ANALOG_INPUT_RES_TO_VCC 1 //Anzahl Widerstände zwischen der letzten Stufe und VCC
-#define ANALOG_INPUT_TRIGGER_TIME 2000
-#endif
+
+#define ANALOG_INPUT_TOLERNACE 2 //Toleranzwert in % um den der Wert am Eingang +/- abweichen darf
+#define ANALOG_INPUT_TRIGGER_TIME 35 //Die Zeit im ms, die der analoge Wert anliegen muss, damit er übernommen wird.
+//#define ANALOG_INPUT_PRINT //Aktiviert eine kontinuierliche Ausgabe des aktuellen analogen Werts. Nur für Debug zwecke. Dies ist unabhängig des DEBUG define.
+
 //////////////////////////////////////////////////////////////////////////

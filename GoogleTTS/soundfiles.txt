@@ -253,128 +253,148 @@
 0253.mp3|253
 0254.mp3|254
 0255.mp3|255
-0298_puzzle_try_next.mp3|Ok, probieren wir was anderes.
-0300_new_tag.mp3|Oh, eine neue Karte!
-0301_select_folder.mp3|Verwende die Lautstärketasten um einen Ordner für die Karte auszuwählen. Drücke die Pausetaste um fortzufahren.
+0298.mp3|Ok, probieren wir was anderes.
+0300.mp3|Oh, eine neue Karte!
+0301.mp3|Verwende die Lautstärketasten um einen Ordner für die Karte auszuwählen. Drücke die Pausetaste um fortzufahren.
 0305.mp3|OK, wähle nun mit den Lautstärketasten den Wiedergabemodus aus.
-0306_mode_random_episode.mp3|Hörspielmodus. Eine zufällige Datei aus dem Ordner wiedergeben
-0307_mode_album.mp3|Albummodus. Den kompletten Ordner wiedergeben
-0308_mode_party.mp3|Party Modus. Ordner zufällig wiedergeben.
-0309_mode_single_track.mp3|Einzel Modus. Eine bestimmte Datei im Ordner wiedergeben.
-0310_mode_audio_book.mp3|Hörbuch Modus. Einen Ordner wiedergeben und den Fortschritt speichern.
-0311_admin.mp3|Admin Funktionen.
-0312_special_random.mp3|Spezialmodus Von-Bis, Hörspiel. Eine zufällige Datei zwischen der Start und Enddatei wiedergeben.
-0313_special_album.mp3|Spezialmodus Von-Bis, Album. Alle Dateien zwischen der Start und Enddatei wiedergeben.
-0314_special_party.mp3|Spezialmodus Von-Bis, Party. Alle Dateien zwischen der Start und Enddatei zufällig wiedergeben.
-0315_special_audio_book.mp3|Spezialmodus Von-Bis, Hörbuch. Alle Dateien zwischen der Start und Enddatei wiedergeben, sowie den Fortschritt speichern.
-0316_special_puzzle.mp3|Puzzle Teil. Wird für die SPiele Puzzle und Quiz benötigt. Spielt im Normalbetrieb die Audiodatei einzeln ab.
-0320_select_file.mp3|OK, wähle nun bitte die Datei mit den Lautstärketasten aus.
-0321_select_first_file.mp3|OK, wähle nun bitte die Startdatei mit den Lautstärketasten aus.
-0322_select_last_file.mp3|Wähle nun bitte die Enddatei mit den Lautstärketasten aus.
-0323_select_puzzle_audio.mp3|OK, wähle nun bitte die Audiodatei für das Puzzle Teil aus.
-0324_select_puzzle_no.mp3|Wähle nun bitte die Nummer des Puzzle Teils aus.
-0325_select_audio_book_slot.mp3|OK, wähle nun bitte die Nummer des Hörbuchspeichers für diesen Ordner aus. Wichtig wenn mehrere Hörbuchkarten für diesen Ordner erstellt werden.
-0400_ok.mp3|OK. Ich habe die Einstellungen übernommen.
-0401_error.mp3|Oh weh! Das hat leider nicht geklappt!
-0410_rechnen_intro.mp3|Willkommen beim Rechnnen üben! Ich stelle dir eine Aufgabe und du kannst mit den Lauter und Leisertasten dein Ergebnis eingeben. Mit der Pausetaste bestätigst du deine Auswahl.
-0411_wieviel_ist.mp3|Wie viel ist?
-0412_plus.mp3|Plus
-0413_minus.mp3|Minus
-0414_mal.mp3|Mal
-0415_geteilt_durch.mp3|geteilt durch
-0416_ist.mp3|ist
-0417_nochmal_versuchen.mp3|Möchtest du es noch einmal versuchen? 
-0418_rechne_mit_mir.mp3|Rechne mit mir.
-0419_grosse_zahlen.mp3|So große Zahlen kann ich nicht rechnen!
-0420_richtig.mp3|Das ist richtig!
-0421_falsch.mp3|Das ist leider falsch!
-0422_grundrechenarten_ueben.mp3|Die Grundrechenarten üben.
-0423_rechenart_intro.mp3|Wähle die gewünschte Rechenart aus.
-0424_addition.mp3|Addition
-0425_subtraktion.mp3|Subtraktion
-0426_multiplikation.mp3|Multiplikation
-0427_division.mp3|Division
-0428_alle_rechenarten.mp3|Alle Rechenarten
-0429_bis_maximal.mp3|Bis zu welcher Zahl soll gerrechnet werden. Bitte wähle mit der Lauter und Leisertaste die Zahl aus und bestätige mit der Pausetaste.
-0800_waiting_for_card.mp3|Bitte lege nun die Karte auf!
-0802_reset_aborted.mp3|OK, ich habe den Vorgang abgebrochen.
-0900_admin.mp3|Willkommen im Admin Menü. Bitte wähle eine Funktion mit den Lautstärketasten aus und bestätige sie mit der Pausetaste! Durch einen langen Druck auf die Pausetaste kannst du den Vorgang abbrechen.
-0901_card_reset.mp3|Eine Karte neu konfigurieren.
-0902_max_volume.mp3|Maximale Lautstärke festlegen.
-0903_min_volume.mp3|Minimale Lautstärke festlegen.
-0904_init_volume.mp3|Lautstärke beim Start festlegen.
-0905_eq.mp3|EQ konfigurieren.
-0906_modifiers.mp3|Eine Modifikationskarte erstellen. Diese Karten werden nach den eigentlichen Musikkarten aufgelegt und ändern das Verhalten deines TonUINOs.
-0907_shortcut.mp3|Tasten mit einem Shortcut konfigurieren. Ein Shortcut wird über einen langen Tastendruck gestartet und funktioniert nur, wenn gerade nichts abgespielt wird.
-0908_standbytimer.mp3|Den Timer konfigurieren.
-0909_batch_cards.mp3|Einzelkarten für einen Ordner erstellen.
-0910_switch_volume.mp3|Funktion der Lautstärketasten umdrehen.
-0911_stopWhenCardAway.mp3|Stopp bei entfernter Karte.
-0912_configRotarySwitch.mp3|Konfigurieren des Drehschalters.
-0913_reset.mp3|Alle Einstellungen löschen.
-0914_admin_lock.mp3|Das Adminmenü absichern.
-0920_eq_intro.mp3|Bitte wähle eine Einstellung für den EQ mit den Lautstärketasten aus und bestätige sie mit der Pausetaste.
-0921_normal.mp3|Normal
-0922_pop.mp3|Pop
-0923_rock.mp3|Rock
-0924_jazz.mp3|Jazz
-0925_classic.mp3|Classic
-0926_bass.mp3|Bass
-0930_max_volume_intro.mp3|Maximale Lautstärke wählen und mit der Pausetaste bestätigen.
-0931_min_volume_into.mp3|Minimale Lautstärke wählen und mit der Pausetaste bestätigen.
-0932_init_volume_into.mp3|Lautstärke beim Start wählen und mit der Pausetaste bestätigen.
-0933_switch_volume_intro.mp3|Möchtest du die Funktion der Lautstärketasten umdrehen? Du musst dann die Tasten lange drücken um ein Lied vor oder zurückzugehen.
-0934_no.mp3|Nein.
-0935_yes.mp3|Ja.
-0936_batch_cards_intro.mp3|OK, bitte lege nun nacheinander die Karten auf die Box. Ich werde die jeweilige Nummer vorher ansagen, damit du nicht durcheinander kommst. Zum Abbrechen einfach eine der Lautstärketasten drücken!
-0937_stopWhenCardAway_intro.mp3|Möchtest du den Track stoppen wenn die Karte enfernt wird?
-0940_shortcut_into.mp3|Bitte wähle den Shortcut, den du konfigurieren möchtest, aus.
-0941_pause.mp3|Pausetaste
-0942_up.mp3|Vor- bzw. Lautertaste
-0943_down.mp3|Zurück- bzw. Leisertaste
-0944_startup.mp3|Shortcut beim Start festlegen
-0945_chooseRotarySwitchSlot.mp3|Welche Drehschalterposition soll konfiguriert werden?
-0946_repeatRotarySwitchkonfiguration.mp3|Soll eine weitere Drehschalterposition konfiguriert werden?
-0947_noRotarySwitch.mp3|Der Drehschalter kann nicht konfiguriert werden. Das define ist auskommentiert.
-0948_rotarySwitchSlotMode.mp3|Mit welcher Funktion soll die Drehschalterposition belegt werden?
-0949_optionNormalPlayback.mp3|Wiedergabe von Dateien.
-0950_optionModifiers.mp3|Modifikation.
-0951_optionSystemControl.mp3|System Kontrolle.
-0952_systemControl.mp3|Wähle eine System Kontrolle.
-0953_pause.mp3|Pause
-0954_volume.mp3|Lautstärke festlegen.
-0955_forward.mp3|Nächster Titel.
-0956_backward.mp3|Vorheriger Titel.
-0957_shutDown.mp3|TonUINO ausschalten.
-0958_removeModifier.mp3|Modifikation entfernen.
-0960_timer_intro.mp3|Nach wievielen Minuten soll der TonUINO ausgeschaltet werden?
-0961_timer_5.mp3|5 Minuten.
-0962_timer_15.mp3|15 Minuten.
-0963_timer_30.mp3|30 Minuten.
-0964_timer_60.mp3|60 Minuten.
-0965_timer_disabled.mp3|nicht automatisch abschalten
-0966_modifier_Intro.mp3|Bitte wähle nun deine Modifikationskarte mit den Lautstärketasten aus.
-0967_modifier_SleepTimer.mp3|Schlummermodus
-0968_modifier_FreezeDance.mp3|Stopptanz. TonUINO spielt Stopptanz mit dir und hält zufällig für dich die Wiedergabe kurz an.
-0969_modifier_Locked.mp3|TonUINO Sperren
-0970_modifier_Toddler.mp3|Krabbler-Modus. Alle Tasten vom TonUINO werden für die ganz Kleinen gesperrt. Karten funktionieren weiterhin.
-0971_modifier_KinderGarden.mp3|KiTa-Modus. Damit es keinen Streit mehr gibt werden neue Karten nicht sofort gespielt sondern erst nachdem das aktuelle Lied vorbei ist. Die Vor- und Zurücktasten sind gesperrt.
-0972_modifier_repeat1.mp3|Titel wiederholen. den aktuellen Titel endlos wiederholen.
-0973_modifier_feedback.mp3|Feedback.
-0974_modifier_puzzlegame.mp3|Puzzle Spiel. Ein Spiel, dass nach auflegen eines Puzzle Teils, das dazugehörige Gegenstück erwartet.
-0975_modifier_quiz.mp3|Quiz. Ein Spiel, dass aus dem gespeicherten Ordner eine zufällige Audiodatei abspielt und das Puzzlteil mit der selben Puzzle Teilnummer, wie die der Audiodatei, erwartet.
-0976_modifier_button_smash.mp3|Button Smash. Ein Spiel, dass nach jeder Aktion eine beliebige Audiodatei aus dem gespeicherten Ordner abspielt.
-0977_modifier_the_quest.mp3|The Quest. Ein Abenteuer, in dem du Aufgaben erfüllen musst um an dein Ziel zu gelangen.
-0978_modifier_learn_to_calculate.mp3|Rechnen lernen. Ein Spiel in dem man Rechenaufgaben gestellt bekommt und diese lösen muss.
-0979_savePuzzlePart.mp3|Soll das erste Puzzle Teil gespeichert bleiben? Dann Wähle Ja. Oder soll das erste Puzzleteil jedes Mal neu aufgelegt werden? Dann wähle Nein
-0980_modifier_save.mp3|Soll diese Modifikation auch bei Neustart noch aktiv sein?
-0986_admin_lock_intro.mp3|Wähle bitte aus ob und wie das Adminmenü geschützt werden soll.
-0987_admin_lock_disabled.mp3|Kein Schutz. das Adminmenü kann jederzeit durch drücken von allen drei Tasten aktiviert werden.
-0988_admin_lock_card.mp3|Nur Adminkarte. das Adminmenü kann nur mit einer Adminkarte geöffnet werden. Eine neue Adminkarte kann jederzeit angelernt werden.
-0989_admin_lock_pin.mp3|Codeeingabe. das Adminmenü wird durch eine vierstellige Pin geschützt. Wenn du diese Option auswählst musst du als nächstes die Pin festlegen.
-0990_admin_lock_calc.mp3|Rechenaufgabe. das Adminmenü kann nur durch Lösen einer Rechenaufgabe betreten werden.
-0991_admin_pin.mp3|Bitte gebe die Pin ein.
-0992_admin_calc.mp3|Wieviel ist
-0993_admin_calc.mp3|plus
-0994_admin_calc.mp3|minus
-0999_reset_ok.mp3|Reset wurde durchgeführt!
+0306.mp3|Hörspielmodus. Eine zufällige Datei aus dem Ordner wiedergeben
+0307.mp3|Albummodus. Den kompletten Ordner wiedergeben
+0308.mp3|Party Modus. Ordner zufällig wiedergeben.
+0309.mp3|Einzel Modus. Eine bestimmte Datei im Ordner wiedergeben.
+0310.mp3|Hörbuch Modus. Einen Ordner wiedergeben und den Fortschritt speichern.
+0311.mp3|Admin Funktionen.
+0312.mp3|Spezialmodus Von-Bis, Hörspiel. Eine zufällige Datei zwischen der Start und Enddatei wiedergeben.
+0313.mp3|Spezialmodus Von-Bis, Album. Alle Dateien zwischen der Start und Enddatei wiedergeben.
+0314.mp3|Spezialmodus Von-Bis, Party. Alle Dateien zwischen der Start und Enddatei zufällig wiedergeben.
+0315.mp3|Spezialmodus Von-Bis, Hörbuch. Alle Dateien zwischen der Start und Enddatei wiedergeben, sowie den Fortschritt speichern.
+0316.mp3|Puzzle Teil. Wird für die SPiele Puzzle und Quiz benötigt. Spielt im Normalbetrieb die Audiodatei einzeln ab.
+0320.mp3|OK, wähle nun bitte die Datei mit den Lautstärketasten aus.
+0321.mp3|OK, wähle nun bitte die Startdatei mit den Lautstärketasten aus.
+0322.mp3|Wähle nun bitte die Enddatei mit den Lautstärketasten aus.
+0323.mp3|OK, wähle nun bitte die Audiodatei für das Puzzle Teil aus.
+0324.mp3|Wähle nun bitte die Nummer des Puzzle Teils aus.
+0325.mp3|OK, wähle nun bitte die Nummer des Hörbuchspeichers für diesen Ordner aus. Wichtig wenn mehrere Hörbuchkarten für diesen Ordner erstellt werden.
+0400.mp3|OK. Ich habe die Einstellungen übernommen.
+0401.mp3|Oh weh! Das hat leider nicht geklappt!
+0410.mp3|Willkommen beim Rechnnen üben! Ich stelle dir eine Aufgabe und du kannst mit den Lauter und Leisertasten dein Ergebnis eingeben. Mit der Pausetaste bestätigst du deine Auswahl.
+0411.mp3|Wie viel ist?
+0412.mp3|Plus
+0413.mp3|Minus
+0414.mp3|Mal
+0415.mp3|geteilt durch
+0416.mp3|ist
+0417.mp3|Möchtest du es noch einmal versuchen? 
+0418.mp3|Rechne mit mir.
+0419.mp3|So große Zahlen kann ich nicht rechnen!
+0420.mp3|Das ist richtig!
+0421.mp3|Das ist leider falsch!
+0422.mp3|Die Grundrechenarten üben.
+0423.mp3|Wähle die gewünschte Rechenart aus.
+0424.mp3|Addition
+0425.mp3|Subtraktion
+0426.mp3|Multiplikation
+0427.mp3|Division
+0428.mp3|Alle Rechenarten
+0429.mp3|Bis zu welcher Zahl soll gerrechnet werden. Bitte wähle mit der Lauter und Leisertaste die Zahl aus und bestätige mit der Pausetaste.
+0800.mp3|Bitte lege nun die Karte auf!
+0802.mp3|OK, ich habe den Vorgang beendet.
+0827.mp3|Diese Einstellung benötigt ein analoges Eingabemedium. Dieses muss im Programmcode aktiviert werden.
+0828.mp3|Mit den Lautstärketasten können die einzelnen Funktionen ausgewählt werden, die mit der analogen Eingabe verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
+0829.mp3|Betätige und halte das Eingabemedium jetzt gedrückt!
+0830.mp3|Diese Einstellung benötigt einen Infrarotempfänger. Dieser muss im Programmcode aktiviert werden.
+0831.mp3|Mit den Lautstärketasten können die einzelnen Funktionen ausgewählt werden, die mit der Fernbedienung verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
+0832.mp3|Bitte jetzt die Taste auf der Fernbedienung drücken.
+0833.mp3|Wähle die Funktion aus oder beende das anlernen.
+0834.mp3|Pause
+0835.mp3|Vor
+0836.mp3|Um 10 vor
+0837.mp3|Zurück
+0838.mp3|Um 10 zurück
+0839.mp3|Lauter
+0840.mp3|Leiser
+0841.mp3|Ausschalten
+0842.mp3|Adminmenü
+0843.mp3|Auf ersten Track springen und wenn vorhanden, Hörbuchspeicher zurück setzen.
+0844.mp3|Shortcut Nummer
+0900.mp3|Willkommen im Admin Menü. Bitte wähle eine Einstellung mit den Lautstärketasten aus und bestätige sie mit der Pausetaste! Ein langer Druck auf die Pausetaste bricht das Menü ab.
+0901.mp3|Karte neu konfigurieren.
+0902.mp3|Maximale Lautstärke festlegen.
+0903.mp3|Minimale Lautstärke festlegen.
+0904.mp3|Startlautstärke festlegen.
+0905.mp3|EQ konfigurieren.
+0906.mp3|Modifikationskarte erstellen. Diese Karten werden nach den eigentlichen Musikkarten aufgelegt und ändern das Verhalten deines TonUINOs.
+0907.mp3|Shortcuts konfigurieren.
+0908.mp3|Timer konfigurieren.
+0909.mp3|Einzelkarten für einen Ordner erstellen.
+0910.mp3|Tastenfunktion umdrehen.
+0911.mp3|Stopp bei entfernter Karte.
+0912.mp3|Analoge Eingänge anlernen.
+0913.mp3|Konfiguration der analogen Eingänge.
+0914.mp3|Fernbedienung anlernen.
+0915.mp3|Einstellungen zurück setzen.
+0916.mp3|Sperren des Adminmenüs.
+0920.mp3|Bitte wähle eine Einstellung für den EQ mit den Lautstärketasten aus und bestätige sie mit der Pausetaste.
+0921.mp3|Normal
+0922.mp3|Pop
+0923.mp3|Rock
+0924.mp3|Jazz
+0925.mp3|Classic
+0926.mp3|Bass
+0930.mp3|Maximale Lautstärke wählen und mit der Pausetaste bestätigen.
+0931.mp3|Minimale Lautstärke wählen und mit der Pausetaste bestätigen.
+0932.mp3|Lautstärke beim Start wählen und mit der Pausetaste bestätigen.
+0933.mp3|Möchtest du die Funktion der Lautstärketasten umdrehen? Du musst dann die Tasten lange drücken um ein Lied vor oder zurückzugehen.
+0934.mp3|Nein.
+0935.mp3|Ja.
+0936.mp3|OK, bitte lege nun nacheinander die Karten auf die Box. Ich werde die jeweilige Nummer vorher ansagen, damit du nicht durcheinander kommst. Zum Abbrechen einfach eine der Lautstärketasten drücken!
+0937.mp3|Möchtest du den Track stoppen wenn die Karte enfernt wird?
+0940.mp3|Bitte wähle den Shortcut aus, den du konfigurieren möchtest.
+0941.mp3|Pausetaste
+0942.mp3|Vor- bzw. Lautertaste
+0943.mp3|Zurück- bzw. Leisertaste
+0944.mp3|Shortcut beim Start festlegen
+0945.mp3|Welche Drehschalterposition soll konfiguriert werden?
+0946.mp3|Soll eine weitere Drehschalterposition konfiguriert werden?
+0947.mp3|Der Drehschalter kann nicht konfiguriert werden. Das define ist auskommentiert.
+0948.mp3|Mit welcher Funktion soll die Drehschalterposition belegt werden?
+0949.mp3|Wiedergabe von Dateien.
+0950.mp3|Modifikation.
+0951.mp3|System Kontrolle.
+0952.mp3|Wähle eine System Kontrolle.
+0953.mp3|Pause
+0954.mp3|Lautstärke festlegen.
+0955.mp3|Nächster Titel.
+0956.mp3|Vorheriger Titel.
+0957.mp3|TonUINO ausschalten.
+0958.mp3|Modifikation entfernen.
+0960.mp3|Nach wievielen Minuten soll der TonUINO ausgeschaltet werden?
+0961.mp3|5 Minuten.
+0962.mp3|15 Minuten.
+0963.mp3|30 Minuten.
+0964.mp3|60 Minuten.
+0965.mp3|nicht automatisch abschalten
+0966.mp3|Bitte wähle nun deine Modifikationskarte mit den Lautstärketasten aus.
+0967.mp3|Schlummermodus
+0968.mp3|Stopptanz. TonUINO spielt Stopptanz mit dir und hält zufällig für dich die Wiedergabe kurz an.
+0969.mp3|TonUINO Sperren
+0970.mp3|Krabbler-Modus. Alle Tasten vom TonUINO werden für die ganz Kleinen gesperrt. Karten funktionieren weiterhin.
+0971.mp3|KiTa-Modus. Damit es keinen Streit mehr gibt werden neue Karten nicht sofort gespielt sondern erst nachdem das aktuelle Lied vorbei ist. Die Vor- und Zurücktasten sind gesperrt.
+0972.mp3|Titel wiederholen. den aktuellen Titel endlos wiederholen.
+0973.mp3|Feedback.
+0974.mp3|Puzzle Spiel. Ein Spiel, dass nach auflegen eines Puzzle Teils, das dazugehörige Gegenstück erwartet.
+0975.mp3|Quiz. Ein Spiel, dass aus dem gespeicherten Ordner eine zufällige Audiodatei abspielt und das Puzzlteil mit der selben Puzzle Teilnummer, wie die der Audiodatei, erwartet.
+0976.mp3|Button Smash. Ein Spiel, dass nach jeder Aktion eine beliebige Audiodatei aus dem gespeicherten Ordner abspielt.
+0977.mp3|The Quest. Ein Abenteuer, in dem du Aufgaben erfüllen musst um an dein Ziel zu gelangen.
+0978.mp3|Rechnen lernen. Ein Spiel in dem man Rechenaufgaben gestellt bekommt und diese lösen muss.
+0979.mp3|Soll das erste Puzzle Teil gespeichert bleiben? Dann Wähle Ja. Oder soll das erste Puzzleteil jedes Mal neu aufgelegt werden? Dann wähle Nein
+0980.mp3|Soll diese Modifikation auch bei Neustart noch aktiv sein?
+0986.mp3|Wähle bitte aus ob und wie das Adminmenü geschützt werden soll.
+0987.mp3|Kein Schutz. das Adminmenü kann jederzeit durch drücken von allen drei Tasten aktiviert werden.
+0988.mp3|Nur Adminkarte. das Adminmenü kann nur mit einer Adminkarte geöffnet werden. Eine neue Adminkarte kann jederzeit angelernt werden.
+0989.mp3|Codeeingabe. das Adminmenü wird durch eine vierstellige Pin geschützt. Wenn du diese Option auswählst musst du als nächstes die Pin festlegen.
+0990.mp3|Rechenaufgabe. das Adminmenü kann nur durch Lösen einer Rechenaufgabe betreten werden.
+0991.mp3|Bitte gebe die Pin ein.
+0992.mp3|Wieviel ist
+0993.mp3|plus
+0994.mp3|minus
+0999.mp3|Reset wurde durchgeführt!
