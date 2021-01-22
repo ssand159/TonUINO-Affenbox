@@ -3216,7 +3216,7 @@ void adminMenu(bool fromCard = false) {
       upperTolerance = (currentAnalogValue + ((currentAnalogValue * mySettings.analogInputTolerance) / 100));
       upperTolerance = max(upperTolerance, minValue + 1);
       lowerTolerance = (currentAnalogValue - ((currentAnalogValue * mySettings.analogInputTolerance) / 100));
-      lowerTolerance = max(lowerTolerance, minValue - 1);
+      //lowerTolerance = max(lowerTolerance, minValue - 1);
 #if defined ANALOG_INPUT_PRINT
       Serial.print(F("analog input compare value: "));
       Serial.println(currentAnalogValue);
