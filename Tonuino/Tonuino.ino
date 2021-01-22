@@ -3180,7 +3180,7 @@ void adminMenu(bool fromCard = false) {
     uint16_t upperTolerance = 0;
     uint16_t lowerTolerance = 0;
     static const uint8_t minValue = 3;
-    static const uint8_t analogValuesCount = 25;
+    static const uint8_t analogValuesCount = 15;
 
     do {
       mp3.loop();
@@ -3213,7 +3213,7 @@ void adminMenu(bool fromCard = false) {
       upperTolerance = (currentAnalogValue + ((currentAnalogValue * mySettings.analogInputTolerance) / 100));
       upperTolerance = max(upperTolerance, minValue + 1);
       lowerTolerance = (currentAnalogValue - ((currentAnalogValue * mySettings.analogInputTolerance) / 100));
-      lowerTolerance = min(lowerTolerance, minValue - 1);
+      lowerTolerance = max(lowerTolerance, minValue - 1);
 #if defined ANALOG_INPUT_PRINT
       Serial.print(F("analog input compare value: "));
       Serial.println(currentAnalogValue);
