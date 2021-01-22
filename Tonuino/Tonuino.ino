@@ -2274,8 +2274,11 @@ void setup() {
   analogReadResolution(12);
 #else
   analogReference(DEFAULT);
+  Mode(ANALOG_INPUT_PIN, INPUT_PULLDOWN);
 #endif
+   
 
+   
   // Busy Pin
   pinMode(busyPin, INPUT);
   mp3.begin();
