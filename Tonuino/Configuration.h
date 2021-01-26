@@ -10,20 +10,19 @@
 #endif
 //////////////////////////////
 
-//#define FIVEBUTTONS  //Die AiO verwendet Standardmäßig fünf Buttons, vier Analoge eingänge und einen separaten für Pause. Falls ANALOG_INPUT verwendet werden soll muss FIVEBUTTONS deaktiviert werden um einen analogen Eingang frei zu machen. 
-//#define DEBUG        //Debug Ausgaben in der Konsole
-//#define DEBUG_QUEUE   //Debug Ausgabe der Queue
+#define FIVEBUTTONS  //Die AiO verwendet Standardmäßig fünf Buttons, vier Analoge eingänge und einen separaten für Pause. Falls ANALOG_INPUT verwendet werden soll muss FIVEBUTTONS deaktiviert werden um einen analogen Eingang frei zu machen. 
+//#define DEBUG        //Erweiterte Debug Ausgaben in der Konsole
+//#define QUEUE_PRINT  //Debug Ausgabe der Queue
 
 #define PUSH_ON_OFF     //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
-#define SPEAKER_SWITCH  //mit AiO nicht mehr nötig, da standardmäßig vorhanden
+#define SPEAKER_SWITCH  //mit AiO nicht mehr als externe Hardware nötig, da standardmäßig vorhanden
 //#define POWER_ON_LED
 //#define FADING_LED    //nur in Verbindung mit POWER_ON_LED
-#define ANALOG_INPUT  //old ROTARY_SWITCH
+//#define ANALOG_INPUT    //Programmierbarer Analoger Eingang, setzt entsprechende Hardware vorraus
 //#define IRREMOTE
 
- //!Folgende Funktionen sind noch nicht für die AiO frei gegeben!
 #if not defined AiO    
-//#define ROTARY_ENCODER
+//#define ROTARY_ENCODER //Der AiO fehlen geeignete Inputs um den Rotary Encoder zu betreiben
 #endif
 //////////////////////////////////////////////////////////////////////////
 
@@ -50,7 +49,7 @@
 #endif
 
 #ifdef POWER_ON_LED
-#define PowerOnLEDPin 6
+#define POWER_ON_LED_PIN 6
 #endif
 
 #ifdef ANALOG_INPUT
@@ -59,7 +58,7 @@
 #endif
 
 #if defined IRREMOTE
-#define irReceiverPin 6                    // pin used for the ir receiver
+#define IRREMOTE_PIN 6                    // pin used for the ir receiver
 #endif
 
 #ifdef ROTARY_ENCODER
@@ -70,9 +69,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 ////////// Button timings ////////////////////////////////////////////////
-#define LONG_PRESS 1000
-#define LONGER_PRESS 2000
-#define LONGEST_PRESS 5000
+#define LONG_PRESS 750
+#define LONGER_PRESS 1500
+#define LONGEST_PRESS 3000
 //////////////////////////////////////////////////////////////////////////
 
 ////////// NFC Gain //////////////////////////////////////////////////////
@@ -88,10 +87,12 @@
 #endif
 //////////////////////////////////////////////////////////////////////////
 
+#if defined IRREMOTE
+#define IRREMOTE_PRINT //Aktiviert zusätzliche Debug Ausgaben im seriellen Moitor
+#endif
+
 ///////// conifguration of the analog input ////////////////////////////
 
-#define ANALOG_INPUT_TOLERNACE 2 //Toleranzwert in % um den der Wert am Eingang +/- abweichen darf
-#define ANALOG_INPUT_TRIGGER_TIME 35 //Die Zeit im ms, die der analoge Wert anliegen muss, damit er übernommen wird.
-//#define ANALOG_INPUT_PRINT //Aktiviert eine kontinuierliche Ausgabe des aktuellen analogen Werts. Nur für Debug zwecke. Dies ist unabhängig des DEBUG define.
-
+//#define ANALOG_INPUT_PRINT //Aktiviert zusätzliche Debug Ausgaben im seriellen Moitor
+//#define ROTARY_ENCODER_PRINT
 //////////////////////////////////////////////////////////////////////////

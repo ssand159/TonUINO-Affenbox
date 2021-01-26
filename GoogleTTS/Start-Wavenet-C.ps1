@@ -26,7 +26,7 @@ $GenerateGoogleTTSVoice="de-DE-Wavenet-C"
 
 # Initialisiere Speech Engines
 if ($GenerateGoogleTTS) {
-    $GoogleTTSPath = $Basepath + "\GoogleTTS"
+    $GoogleTTSPath = $Basepath + "\"
     if (!(test-path($GoogleTTSPath))) { New-Item -Path $GoogleTTSPath -ItemType Directory }
 }
 

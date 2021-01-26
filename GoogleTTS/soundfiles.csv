@@ -253,12 +253,9 @@
 0253.mp3|253
 0254.mp3|254
 0255.mp3|255
-0256.mp3| 
-0257.mp3| 
-0258.mp3| 
 0298.mp3|Ok, probieren wir was anderes.
 0300.mp3|Oh, eine neue Karte!
-0301.mp3|Verwende die Lautstärketasten um einen Ordner auszuwählen. Drücke die Pausetaste um fortzufahren.
+0301.mp3|Verwende die Lautstärketasten um einen Ordner für die Karte auszuwählen. Drücke die Pausetaste um fortzufahren.
 0305.mp3|OK, wähle nun mit den Lautstärketasten den Wiedergabemodus aus.
 0306.mp3|Hörspielmodus. Eine zufällige Datei aus dem Ordner wiedergeben
 0307.mp3|Albummodus. Den kompletten Ordner wiedergeben
@@ -304,43 +301,38 @@
 0827.mp3|Diese Einstellung benötigt ein analoges Eingabemedium. Dieses muss im Programmcode aktiviert werden.
 0828.mp3|Mit den Lautstärketasten können die einzelnen Funktionen ausgewählt werden, die mit der analogen Eingabe verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
 0829.mp3|Betätige und halte das Eingabemedium jetzt gedrückt!
-0830.mp3|Das Eingabemedium wieder loslassen, beziehungsweise in den Leerlaufzustand versetzen.
-0831.mp3|Diese Einstellung benötigt einen Infrarotempfänger. Dieser muss im Programmcode aktiviert werden.
-0833.mp3|Mit den Lautstärketasten können die einzelnen Funktionen ausgewählt werden, die mit der Fernbedienung verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
-0833.mp3|Bitte jetzt die Taste auf der Fernbedienung drücken.
-0834.mp3|Wähle die Funktion aus oder beende das anlernen.
-0835.mp3|Pause
-0836.mp3|Vor
-0837.mp3|Um 10 vor
-0838.mp3|Zurück
-0839.mp3|Um 10 zurück
-0840.mp3|Lauter
-0841.mp3|Leiser
-0842.mp3|Ausschalten
-0843.mp3|Adminmenü
-0844.mp3|Auf ersten Track springen und wenn vorhanden, Hörbuchspeicher zurück setzen.
-0845.mp3|Modifikation entfernen
-0846.mp3|Shortcut
-0847.mp3|Hier kann festgelegt werden, ob das analoge Eingabemedium seinen Zustand als kurzen Impuls schickt, im Beispiel Taster, oder dauerhaft anliegt ,im Beispiel Drehschalter.
-0848.mp3|Welcher Siganltyp wird benutzt.
-0849.mp3|Impuls
-0850.mp3|Dauerhaftes Signal
+0830.mp3|Diese Einstellung benötigt einen Infrarotempfänger. Dieser muss im Programmcode aktiviert werden.
+0831.mp3|Mit den Lautstärketasten können die einzelnen Funktionen ausgewählt werden, die mit der Fernbedienung verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
+0832.mp3|Bitte jetzt die Taste auf der Fernbedienung drücken.
+0833.mp3|Wähle die Funktion aus oder beende das anlernen.
+0834.mp3|Pause
+0835.mp3|Vor
+0836.mp3|Um 10 vor
+0837.mp3|Zurück
+0838.mp3|Um 10 zurück
+0839.mp3|Lauter
+0840.mp3|Leiser
+0841.mp3|Ausschalten
+0842.mp3|Adminmenü
+0843.mp3|Auf ersten Track springen und wenn vorhanden, Hörbuchspeicher zurück setzen.
+0844.mp3|Shortcut Nummer
 0900.mp3|Willkommen im Admin Menü. Bitte wähle eine Einstellung mit den Lautstärketasten aus und bestätige sie mit der Pausetaste! Ein langer Druck auf die Pausetaste bricht das Menü ab.
 0901.mp3|Karte neu konfigurieren.
 0902.mp3|Maximale Lautstärke festlegen.
 0903.mp3|Minimale Lautstärke festlegen.
 0904.mp3|Startlautstärke festlegen.
 0905.mp3|EQ konfigurieren.
-0906.mp3|Shortcuts konfigurieren.
-0907.mp3|Timer konfigurieren.
-0908.mp3|Einzelkarten für einen Ordner erstellen.
-0909.mp3|Tastenfunktion umdrehen.
-0910.mp3|Stopp bei entfernter Karte.
-0911.mp3|Analoge Eingänge anlernen.
-0912.mp3|Analoger Eingangstyp wählen.
-0913.mp3|Fernbedienung anlernen.
-0914.mp3|Einstellungen zurück setzen.
-0915.mp3|Sperren des Adminmenüs.
+0906.mp3|Modifikationskarte erstellen. Diese Karten werden nach den eigentlichen Musikkarten aufgelegt und ändern das Verhalten deines TonUINOs.
+0907.mp3|Shortcuts konfigurieren.
+0908.mp3|Timer konfigurieren.
+0909.mp3|Einzelkarten für einen Ordner erstellen.
+0910.mp3|Tastenfunktion umdrehen.
+0911.mp3|Stopp bei entfernter Karte.
+0912.mp3|Analoge Eingänge anlernen.
+0913.mp3|Konfiguration der analogen Eingänge.
+0914.mp3|Fernbedienung anlernen.
+0915.mp3|Einstellungen zurück setzen.
+0916.mp3|Sperren des Adminmenüs.
 0920.mp3|Bitte wähle eine Einstellung für den EQ mit den Lautstärketasten aus und bestätige sie mit der Pausetaste.
 0921.mp3|Normal
 0922.mp3|Pop
@@ -351,15 +343,30 @@
 0930.mp3|Maximale Lautstärke wählen und mit der Pausetaste bestätigen.
 0931.mp3|Minimale Lautstärke wählen und mit der Pausetaste bestätigen.
 0932.mp3|Lautstärke beim Start wählen und mit der Pausetaste bestätigen.
-0933.mp3|Möchtest du die Funktion der Lautstärketasten umdrehen?
+0933.mp3|Möchtest du die Funktion der Lautstärketasten umdrehen? Du musst dann die Tasten lange drücken um ein Lied vor oder zurückzugehen.
 0934.mp3|Nein.
 0935.mp3|Ja.
 0936.mp3|OK, bitte lege nun nacheinander die Karten auf die Box. Ich werde die jeweilige Nummer vorher ansagen, damit du nicht durcheinander kommst. Zum Abbrechen einfach eine der Lautstärketasten drücken!
 0937.mp3|Möchtest du den Track stoppen wenn die Karte enfernt wird?
-0940.mp3|Bitte wähle die Shortcut Nummer aus, die du konfigurieren möchtest.
-0941.mp3|Was soll erstellt werden?
-0942.mp3|Ein Wiedergabemodus
-0943.mp3|Eine Modifikation
+0940.mp3|Bitte wähle den Shortcut aus, den du konfigurieren möchtest.
+0941.mp3|Pausetaste
+0942.mp3|Vor- bzw. Lautertaste
+0943.mp3|Zurück- bzw. Leisertaste
+0944.mp3|Shortcut beim Start festlegen
+0945.mp3|Welche Drehschalterposition soll konfiguriert werden?
+0946.mp3|Soll eine weitere Drehschalterposition konfiguriert werden?
+0947.mp3|Der Drehschalter kann nicht konfiguriert werden. Das define ist auskommentiert.
+0948.mp3|Mit welcher Funktion soll die Drehschalterposition belegt werden?
+0949.mp3|Wiedergabe von Dateien.
+0950.mp3|Modifikation.
+0951.mp3|System Kontrolle.
+0952.mp3|Wähle eine System Kontrolle.
+0953.mp3|Pause
+0954.mp3|Lautstärke festlegen.
+0955.mp3|Nächster Titel.
+0956.mp3|Vorheriger Titel.
+0957.mp3|TonUINO ausschalten.
+0958.mp3|Modifikation entfernen.
 0960.mp3|Nach wievielen Minuten soll der TonUINO ausgeschaltet werden?
 0961.mp3|5 Minuten.
 0962.mp3|15 Minuten.
@@ -373,10 +380,12 @@
 0970.mp3|Krabbler-Modus. Alle Tasten vom TonUINO werden für die ganz Kleinen gesperrt. Karten funktionieren weiterhin.
 0971.mp3|KiTa-Modus. Damit es keinen Streit mehr gibt werden neue Karten nicht sofort gespielt sondern erst nachdem das aktuelle Lied vorbei ist. Die Vor- und Zurücktasten sind gesperrt.
 0972.mp3|Titel wiederholen. den aktuellen Titel endlos wiederholen.
-0973.mp3|Puzzle Spiel. Ein Spiel, dass nach auflegen eines Puzzle Teils, das dazugehörige Gegenstück erwartet.
-0974.mp3|Quiz. Ein Spiel, dass aus dem gespeicherten Ordner eine zufällige Audiodatei abspielt und das Puzzlteil mit der selben Puzzle Teilnummer, wie die der Audiodatei, erwartet.
-0975.mp3|Button Smash. Ein Spiel, dass nach jeder Aktion eine beliebige Audiodatei aus dem gespeicherten Ordner abspielt.
-0976.mp3|Rechnen lernen. Ein Spiel in dem man Rechenaufgaben gestellt bekommt und diese lösen muss.
+0973.mp3|Feedback.
+0974.mp3|Puzzle Spiel. Ein Spiel, dass nach auflegen eines Puzzle Teils, das dazugehörige Gegenstück erwartet.
+0975.mp3|Quiz. Ein Spiel, dass aus dem gespeicherten Ordner eine zufällige Audiodatei abspielt und das Puzzlteil mit der selben Puzzle Teilnummer, wie die der Audiodatei, erwartet.
+0976.mp3|Button Smash. Ein Spiel, dass nach jeder Aktion eine beliebige Audiodatei aus dem gespeicherten Ordner abspielt.
+0977.mp3|The Quest. Ein Abenteuer, in dem du Aufgaben erfüllen musst um an dein Ziel zu gelangen.
+0978.mp3|Rechnen lernen. Ein Spiel in dem man Rechenaufgaben gestellt bekommt und diese lösen muss.
 0979.mp3|Soll das erste Puzzle Teil gespeichert bleiben? Dann Wähle Ja. Oder soll das erste Puzzleteil jedes Mal neu aufgelegt werden? Dann wähle Nein
 0980.mp3|Soll diese Modifikation auch bei Neustart noch aktiv sein?
 0986.mp3|Wähle bitte aus ob und wie das Adminmenü geschützt werden soll.
