@@ -271,7 +271,7 @@ uint16_t sizeOfAdminSettings = sizeof(adminSettings)
 static byte lastCardUid[4];
 static byte retries;
 static bool lastCardWasUL;
-static bool forgetLastCard = false;
+//static bool forgetLastCard = false;
 static bool knownCard = false;
 static uint8_t activeShortCut = 0;
 static uint8_t trackToStoreOnCard = 0;
@@ -2781,7 +2781,7 @@ void pauseAction() {
         //ungespeicherter Track vorhanden und keine Karte
         mp3.playMp3FolderTrack(981);
         waitForTrackToStart();
-        
+
         mp3.playMp3FolderTrack(400);
         waitForTrackToStart();
       }
@@ -2901,13 +2901,14 @@ void adminMenu(bool fromCard = false) {
       return;
     }
   }
-  forgetLastCard = true;
+
   disablestandbyTimer();
   mp3Pause();
 #if defined DEBUG
   Serial.println(F("adminMenu"));
 #endif
   knownCard = false;
+    lastCardUid = NULL;
   activeShortCut = 0;
   if (fromCard == false) {
     // Admin menu has been locked - it still can be trigged via admin card
@@ -3520,7 +3521,7 @@ void setupCard() {
   if (returnValue) {
     // Karte ist konfiguriert > speichern
     mp3Pause();
-    forgetLastCard = true;
+    lastCardUid = NULL;
     writeCard(newCard);
   }
 }
@@ -4041,18 +4042,18 @@ Enum_PCS pollCard() {
 }
 
 Enum_PCS handleCardReader() {
-  bool tmpStopWhenCardAway = true;
+  bool tmpStopWhenCardAway = mySettings.stopWhenCardAway;
 
   static unsigned long lastCardPoll = 0;
   unsigned long now = millis();
   // poll card only every 100ms
   if (static_cast<unsigned long>(now - lastCardPoll) > 100)  {
-    if (activeModifier != NULL)
-      tmpStopWhenCardAway = mySettings.stopWhenCardAway && !activeModifier->handleStopWhenCardAway();
-    else
-      tmpStopWhenCardAway = mySettings.stopWhenCardAway;
-
     lastCardPoll = now;
+    
+    if (activeModifier != NULL) {
+      tmpStopWhenCardAway &= !activeModifier->handleStopWhenCardAway();
+    }
+    
     switch (pollCard()) {
       case PCS_NEW_CARD:
 #if defined DEBUG
@@ -4079,13 +4080,13 @@ Enum_PCS handleCardReader() {
         if (tmpStopWhenCardAway) {
 
           //nur weiterspielen wenn vorher nicht konfiguriert wurde
-          if (!forgetLastCard) {
+          //if (!forgetLastCard) {
             knownCard = true;
             mp3.start();
             disablestandbyTimer();
-          }
+          /*}
           else
-            onNewCard();
+            onNewCard();*/
         } else {
           onNewCard();
         }
@@ -4096,7 +4097,7 @@ Enum_PCS handleCardReader() {
 }
 
 void onNewCard() {
-  forgetLastCard = false;
+  //forgetLastCard = false;
   //make random a little bit more "random"
   //randomSeed(millis() + random(1000));
   if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != 0 && myCard.nfcFolderSettings.mode != 0) {
