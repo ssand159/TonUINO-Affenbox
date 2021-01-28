@@ -4068,8 +4068,9 @@ Enum_PCS handleCardReader() {
 #endif
         if (tmpStopWhenCardAway) {
           knownCard = false;
-          mp3Pause();
-          setstandbyTimer();
+          myTrigger.pause |= true;  
+          //mp3Pause();
+          //setstandbyTimer();
         }
         return PCS_CARD_GONE;
         break;
@@ -4081,9 +4082,10 @@ Enum_PCS handleCardReader() {
 
           //nur weiterspielen wenn vorher nicht konfiguriert wurde
           //if (!forgetLastCard) {
-            knownCard = true;
-            mp3.start();
-            disablestandbyTimer();
+          knownCard = true;
+          myTrigger.pause |= true;   
+            //mp3.start();
+            //disablestandbyTimer();  
           /*}
           else
             onNewCard();*/
