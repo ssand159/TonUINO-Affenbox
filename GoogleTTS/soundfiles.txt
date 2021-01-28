@@ -253,13 +253,10 @@
 0253.mp3|253
 0254.mp3|254
 0255.mp3|255
-0256.mp3| 
-0257.mp3| 
-0258.mp3| 
 0298.mp3|Ok, probieren wir was anderes.
 0300.mp3|Oh, eine neue Karte!
-0301.mp3|Verwende die Lautstärketasten um einen Ordner auszuwählen. Drücke die Pausetaste um fortzufahren.
-0305.mp3|OK, wähle nun mit den Lautstärketasten den Wiedergabemodus aus.
+0301.mp3|Verwende die Vor- und Zurücktaste um einen Ordner auszuwählen. Drücke die Pausetaste um fortzufahren.
+0305.mp3|OK, wähle nun mit der Vor- und Zurücktaste den Wiedergabemodus aus.
 0306.mp3|Hörspielmodus. Eine zufällige Datei aus dem Ordner wiedergeben
 0307.mp3|Albummodus. Den kompletten Ordner wiedergeben
 0308.mp3|Party Modus. Ordner zufällig wiedergeben.
@@ -271,15 +268,14 @@
 0314.mp3|Spezialmodus Von-Bis, Party. Alle Dateien zwischen der Start und Enddatei zufällig wiedergeben.
 0315.mp3|Spezialmodus Von-Bis, Hörbuch. Alle Dateien zwischen der Start und Enddatei wiedergeben, sowie den Fortschritt speichern.
 0316.mp3|Puzzle Teil. Wird für die SPiele Puzzle und Quiz benötigt. Spielt im Normalbetrieb die Audiodatei einzeln ab.
-0320.mp3|OK, wähle nun bitte die Datei mit den Lautstärketasten aus.
-0321.mp3|OK, wähle nun bitte die Startdatei mit den Lautstärketasten aus.
-0322.mp3|Wähle nun bitte die Enddatei mit den Lautstärketasten aus.
+0320.mp3|OK, wähle nun bitte die Datei mit der Vor- und Zurücktaste aus.
+0321.mp3|OK, wähle nun bitte die Startdatei mit der Vor- und Zurücktaste aus.
+0322.mp3|Wähle nun bitte die Enddatei mit der Vor- und Zurücktaste aus.
 0323.mp3|OK, wähle nun bitte die Audiodatei für das Puzzle Teil aus.
 0324.mp3|Wähle nun bitte die Nummer des Puzzle Teils aus.
-0325.mp3|OK, wähle nun bitte die Nummer des Hörbuchspeichers für diesen Ordner aus. Wichtig wenn mehrere Hörbuchkarten für diesen Ordner erstellt werden.
 0400.mp3|OK. Ich habe die Einstellungen übernommen.
 0401.mp3|Oh weh! Das hat leider nicht geklappt!
-0410.mp3|Willkommen beim Rechnnen üben! Ich stelle dir eine Aufgabe und du kannst mit den Lauter und Leisertasten dein Ergebnis eingeben. Mit der Pausetaste bestätigst du deine Auswahl.
+0410.mp3|Willkommen beim Rechnnen üben! Ich stelle dir eine Aufgabe und du kannst mit der Vor- und Zurücktaste dein Ergebnis eingeben. Mit der Pausetaste bestätigst du deine Auswahl.
 0411.mp3|Wie viel ist?
 0412.mp3|Plus
 0413.mp3|Minus
@@ -298,15 +294,15 @@
 0426.mp3|Multiplikation
 0427.mp3|Division
 0428.mp3|Alle Rechenarten
-0429.mp3|Bis zu welcher Zahl soll gerrechnet werden. Bitte wähle mit der Lauter und Leisertaste die Zahl aus und bestätige mit der Pausetaste.
+0429.mp3|Bis zu welcher Zahl soll gerrechnet werden. Bitte wähle mit der Vor- und Zurücktaste die Zahl aus und bestätige deine Auswahl mit der Pausetaste.
 0800.mp3|Bitte lege nun die Karte auf!
 0802.mp3|OK, ich habe den Vorgang beendet.
 0827.mp3|Diese Einstellung benötigt ein analoges Eingabemedium. Dieses muss im Programmcode aktiviert werden.
-0828.mp3|Mit den Lautstärketasten können die einzelnen Funktionen ausgewählt werden, die mit der analogen Eingabe verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
+0828.mp3|Mit der Vor- und Zurücktaste können die einzelnen Funktionen ausgewählt werden, die mit der analogen Eingabe verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
 0829.mp3|Betätige und halte das Eingabemedium jetzt gedrückt!
 0830.mp3|Das Eingabemedium wieder loslassen, beziehungsweise in den Leerlaufzustand versetzen.
 0831.mp3|Diese Einstellung benötigt einen Infrarotempfänger. Dieser muss im Programmcode aktiviert werden.
-0833.mp3|Mit den Lautstärketasten können die einzelnen Funktionen ausgewählt werden, die mit der Fernbedienung verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
+0833.mp3|Mit der Vor- und Zurücktaste können die einzelnen Funktionen ausgewählt werden, die mit der Fernbedienung verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
 0833.mp3|Bitte jetzt die Taste auf der Fernbedienung drücken.
 0834.mp3|Wähle die Funktion aus oder beende das anlernen.
 0835.mp3|Pause
@@ -325,7 +321,7 @@
 0848.mp3|Welcher Siganltyp wird benutzt.
 0849.mp3|Impuls
 0850.mp3|Dauerhaftes Signal
-0900.mp3|Willkommen im Admin Menü. Bitte wähle eine Einstellung mit den Lautstärketasten aus und bestätige sie mit der Pausetaste! Ein langer Druck auf die Pausetaste bricht das Menü ab.
+0900.mp3|Willkommen im Admin Menü. Bitte wähle eine Einstellung mit der Vor- und Zurücktaste aus und bestätige sie mit der Pausetaste! Ein langer Druck auf die Pausetaste bricht das Menü ab.
 0901.mp3|Karte neu konfigurieren.
 0902.mp3|Maximale Lautstärke festlegen.
 0903.mp3|Minimale Lautstärke festlegen.
@@ -341,7 +337,7 @@
 0913.mp3|Fernbedienung anlernen.
 0914.mp3|Einstellungen zurück setzen.
 0915.mp3|Sperren des Adminmenüs.
-0920.mp3|Bitte wähle eine Einstellung für den EQ mit den Lautstärketasten aus und bestätige sie mit der Pausetaste.
+0920.mp3|Bitte wähle eine Einstellung für den EQ mit der Vor- und Zurücktaste aus und bestätige sie mit der Pausetaste.
 0921.mp3|Normal
 0922.mp3|Pop
 0923.mp3|Rock
@@ -351,7 +347,7 @@
 0930.mp3|Maximale Lautstärke wählen und mit der Pausetaste bestätigen.
 0931.mp3|Minimale Lautstärke wählen und mit der Pausetaste bestätigen.
 0932.mp3|Lautstärke beim Start wählen und mit der Pausetaste bestätigen.
-0933.mp3|Möchtest du die Funktion der Lautstärketasten umdrehen?
+0933.mp3|Möchtest du die Funktion der Tasten umdrehen?
 0934.mp3|Nein.
 0935.mp3|Ja.
 0936.mp3|OK, bitte lege nun nacheinander die Karten auf die Box. Ich werde die jeweilige Nummer vorher ansagen, damit du nicht durcheinander kommst. Zum Abbrechen einfach eine der Lautstärketasten drücken!
@@ -366,7 +362,7 @@
 0963.mp3|30 Minuten.
 0964.mp3|60 Minuten.
 0965.mp3|nicht automatisch abschalten
-0966.mp3|Bitte wähle nun deine Modifikationskarte mit den Lautstärketasten aus.
+0966.mp3|Bitte wähle nun deine Modifikationskarte mit der Vor- und Zurücktaste aus.
 0967.mp3|Schlummermodus
 0968.mp3|Stopptanz. TonUINO spielt Stopptanz mit dir und hält zufällig für dich die Wiedergabe kurz an.
 0969.mp3|TonUINO Sperren
@@ -379,6 +375,8 @@
 0976.mp3|Rechnen lernen. Ein Spiel in dem man Rechenaufgaben gestellt bekommt und diese lösen muss.
 0979.mp3|Soll das erste Puzzle Teil gespeichert bleiben? Dann Wähle Ja. Oder soll das erste Puzzleteil jedes Mal neu aufgelegt werden? Dann wähle Nein
 0980.mp3|Soll diese Modifikation auch bei Neustart noch aktiv sein?
+0981.mp3|Warte! Ich konnte deinen Fortschritt noch speichern! Bitte lege die Karte nochmal auf, damit du beim nächsten mal hier weiter hören kannst.
+0982.mp3|
 0986.mp3|Wähle bitte aus ob und wie das Adminmenü geschützt werden soll.
 0987.mp3|Kein Schutz. das Adminmenü kann jederzeit durch drücken von allen drei Tasten aktiviert werden.
 0988.mp3|Nur Adminkarte. das Adminmenü kann nur mit einer Adminkarte geöffnet werden. Eine neue Adminkarte kann jederzeit angelernt werden.
