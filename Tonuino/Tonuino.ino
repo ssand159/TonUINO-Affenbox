@@ -6,9 +6,14 @@
    Modifier: Caluclate Spiel fehlerhaft
    IR: Anlernen falsche Sprachausgaben
    IR: Anlernen fehlerhaft, alle Buttons = pause
-      -B-:voiceMenu: Abbruchausgabe wird nicht gespielt -> muss getestet werden
-      -B-:AdminMenu abbruch Menu = shutdown -> muss getestet werden.
-      -B-:AdminMenu umlauf testen
+      -OK-:voiceMenu: Abbruchausgabe wird nicht gespielt -> muss getestet werden
+      -OK-:voiceMenu: 1 vor/zurück nur durch langen Druck
+   voiceMenu: besseres Handling mit waitforTrackToFinish
+      -OK-:AdminMenu abbruch Menu
+      -OK-:voiceMenu: next Track wird ausgeführt
+      -OK-:ShortCut: wird ausgeführt, trotz laufendem Track
+      -OK-:ShortCut: "Oh ein neuer ShortCut" Ansage kommt nicht -> waitForTrackToFinish Abbruch durch PAuse; alle Tasten haben stat wasReleaased SHORT_PRESS erhalten
+   loop: InvertVolume Button führt zu komischen verhalten, bei langem DRuck von Tasten im 3 Button modus
 */
 #include "Configuration.h"
 #include <DFMiniMp3.h>
@@ -27,9 +32,7 @@
 #if defined IRREMOTE
 #include <IRremote.h>
 #endif
-#if defined AiO
 #include "Emulated_EEPROM.h"
-#endif
 
 /*
    _____         _____ _____ _____ _____
@@ -81,7 +84,7 @@ typedef enum Enum_Trigger {
   PreviousPlusTenTrigger,
   VolumeUpTrigger,
   VolumeDownTrigger,
-  ShutDownTrigger,
+  AbortTrigger,
   AdminMenuTrigger,
   ResetTrackTrigger,
   ShortcutTrigger //muss an letzter Stelle stehen bleiben!
@@ -96,7 +99,7 @@ struct inputTrigger {
   bool previousPlusTen;
   bool volumeUp;
   bool volumeDown;
-  bool shutDown;
+  bool cancel;
   bool adminMenu;
   bool resetTrack;
   bool shortCutNo [availableShortCuts]; //muss an letzter Stelle stehen bleiben!
@@ -230,6 +233,7 @@ struct folderSettings {
 };
 folderSettings *myFolder;
 folderSettings shortCuts[availableShortCuts];
+
 uint8_t sizeOfFolderSettings = sizeof(folderSettings);
 
 struct nfcTagObject {
@@ -263,11 +267,11 @@ struct adminSettings {
   uint8_t analogInputTriggerType;
 };
 adminSettings mySettings;
-uint16_t sizeOfAdminSettings = sizeof(adminSettings)
-                               //////////////////////////////////////////////////////////////////////////
+uint16_t sizeOfAdminSettings = sizeof(adminSettings);
+//////////////////////////////////////////////////////////////////////////
 
-                               //////////////////////////////////////////////////////////////////////////
-                               static bool hasCard = false;
+//////////////////////////////////////////////////////////////////////////
+static bool hasCard = false;
 static byte lastCardUid[4];
 static byte retries;
 static bool lastCardWasUL;
@@ -307,7 +311,7 @@ void RotEncSetVolume ();
 void timerIsr() ;
 #endif
 void checkNoTrigger ();
-void resetTrigger();
+void readTrigger(bool invertVolumeButtons = false);
 void resetTriggerEnable();
 void volumeUpAction();
 void volumeDownAction();
@@ -320,7 +324,7 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
                   bool preview = false, uint8_t previewFromFolder = 0, int defaultValue = 0,
                   bool enableSkipTen = false);
 bool setupFolder(folderSettings * theFolder) ;
-void setupShortCut(uint8_t shortCutNumber = 0);
+void setupShortCut(int8_t shortCutNumber = -1);
 void setupCard();
 bool readCard(nfcTagObject * nfcTag);
 void resetCard() ;
@@ -348,7 +352,7 @@ class Mp3Notify {
   public:
 
     static void OnError(uint16_t errorCode) {
-#if defined DEBUG
+#if defined DFPLAYER_PRINT
       switch (errorCode) {
         case DfMp3_Error_Busy: {
             Serial.print(F("busy"));
@@ -407,7 +411,7 @@ class Mp3Notify {
     }
 
     static void PrintlnSourceAction(DfMp3_PlaySources source, const char* action) {
-#if defined DEBUG
+#if defined DFPLAYER_PRINT
       if (source & DfMp3_PlaySources_Sd) Serial.print("SD ");
       if (source & DfMp3_PlaySources_Usb) Serial.print("USB ");
       if (source & DfMp3_PlaySources_Flash) Serial.print("Flash ");
@@ -417,18 +421,18 @@ class Mp3Notify {
     }
 
     static void OnPlaySourceOnline(DfMp3_PlaySources source) {
-#if defined DEBUG
+#if defined DFPLAYER_PRINT
       PrintlnSourceAction(source, "online");
 #endif
 
     }
     static void OnPlaySourceInserted(DfMp3_PlaySources source) {
-#if defined DEBUG
+#if defined DFPLAYER_PRINT
       PrintlnSourceAction(source, "ready");
 #endif
     }
     static void OnPlaySourceRemoved(DfMp3_PlaySources source) {
-#if defined DEBUG
+#if defined DFPLAYER_PRINT
       PrintlnSourceAction(source, "removed");
 #endif
     }
@@ -471,7 +475,7 @@ void shuffleQueue(uint8_t startTrack = firstTrack, uint8_t endTrack = numTracksI
 void writeSettings() {
 
 #if defined DEBUG
-  Serial.print(F("writeSettings at"));
+  Serial.print(F("writeSettings at "));
   Serial.println(EEPROM_settingsStartAdress);
 #endif
   EEPROM_put(EEPROM_settingsStartAdress, mySettings);
@@ -578,7 +582,7 @@ void resetSettings() {
   mySettings.userAge = 0;
   mySettings.nfcGain = 1;
   mySettings.analogInputTolerance = 2;
-  mySettings.analogInputTriggerTime = 35;
+  mySettings.analogInputTriggerTime = SHORT_PRESS;
   mySettings.analogInputTriggerType = NoType;
   writeSettings();
 }
@@ -590,7 +594,7 @@ void resetShortCuts() {
   for (uint8_t i = 0; i < availableShortCuts; i++) {
     shortCuts[i].folder = 0;
     shortCuts[i].mode = 0;
-    shortCuts[i].special1 = 0;
+    shortCuts[i].special = 0;
     shortCuts[i].special2 = 0;
     shortCuts[i].special3 = 0;
   }
@@ -606,7 +610,7 @@ void writeShortCuts() {
 }
 void getShortCuts() {
 
-  EEPROM_get(EEPROM_settingsStartAdress + sizeOfAdminSettings, mySettings);
+  EEPROM_get(EEPROM_settingsStartAdress + sizeOfAdminSettings, shortCuts);
 
 #if defined SHORTCUTS_PRINT
   for (uint8_t i = 0; i < availableShortCuts; i++) {
@@ -624,7 +628,7 @@ void getShortCuts() {
 
     Serial.print(F("special1"));
     Serial.print(F(" : "));
-    Serial.println(shortCuts[i].special1);
+    Serial.println(shortCuts[i].special);
 
     Serial.print(F("special2"));
     Serial.print(F(" : "));
@@ -637,7 +641,7 @@ void getShortCuts() {
 #endif
 }
 void updateShortCutTrackMemory(uint8_t track) {
-  EEPROM_update(EEPROM_settingsStartAdress + sizeOfAdminSettings + (sizeOfShortcuts * activeShortcut) - 1, track);
+  EEPROM_update(EEPROM_settingsStartAdress + sizeOfAdminSettings + (sizeOfFolderSettings * activeShortCut) - 1, track);
 }
 //////////////////////////////////////////////////////////////////////////
 class Modifier {
@@ -1493,11 +1497,11 @@ class Calculate: public Modifier {
 
     uint8_t readAnswer() {
 
-      if (myTrigger.shutDown) {
+      if (myTrigger.cancel) {
 #if defined DEBUG
         Serial.println(F("Calculate > long pause "));
 #endif
-        myTriggerEnable.shutDown = false;
+        myTriggerEnable.cancel = false;
         this->ignPauseButton = true;
         return -1;
       }
@@ -1953,34 +1957,36 @@ void playFolder() {
 }
 
 void activateShortCut (uint8_t shortCutNo) {
-  if (!isPlaying()) {
+
 #if defined DEBUG
-    Serial.print("play short cut ");
+  Serial.println("play short cut");
 #endif
-    if (!(mySettings.shortCuts[shortCutNo - 1].folder == 0 && mySettings.shortCuts[shortCutNo - 1].mode == 0)) {
-      Serial.println(shortCutNo);
-      switch (mySettings.shortCuts[shortCutNo - 1].folder) {
-        case ModifierMode:
-          SetModifier (&mySettings.shortCuts[shortCutNo - 1]);
-          break;
-        default:
-          if (activeModifier != NULL) {
-            if (activeModifier->handleShortCut() == true) {
+  knownCard = false;
+  if (!(shortCuts[shortCutNo].folder == 0 && shortCuts[shortCutNo].mode == 0)) {
+    Serial.println(shortCutNo);
+    switch (shortCuts[shortCutNo - 1].folder) {
+      case ModifierMode:
+        SetModifier (&shortCuts[shortCutNo]);
+        break;
+      default:
+        if (activeModifier != NULL) {
+          if (activeModifier->handleShortCut() == true) {
 #if defined DEBUG
-              Serial.println(F("locked"));
+            Serial.println(F("locked"));
 #endif
-              return;
-            }
+            return;
           }
-          myFolder = &mySettings.shortCuts[shortCutNo - 1];
-          playFolder();
-          activeShortCut = shortCutNo;
-          knownCard = false;
-          break;
-      }
-    } else {
-      setupShortCut(shortCutNo);
+        }
+        myFolder = &shortCuts[shortCutNo];
+        activeShortCut = shortCutNo;
+        playFolder();
+        break;
     }
+  } else {
+    mp3Pause();
+    mp3.playMp3FolderTrack(297);
+    waitForTrackToFinish();
+    setupShortCut(shortCutNo);
   }
 }
 //////////////////////////////////////////////////////////////////////////
@@ -1989,7 +1995,7 @@ void activateShortCut (uint8_t shortCutNo) {
 static void nextTrack(uint8_t track) {
   bool queueTrack = false;
 
-  if (track == _lastTrackFinished || (knownCard == false && activeShortCut = 0)) {
+  if (track == _lastTrackFinished || (knownCard == false && activeShortCut == 0)) {
     return;
   }
   _lastTrackFinished = track;
@@ -2109,7 +2115,7 @@ static void nextTrack(uint8_t track) {
 static void previousTrack() {
   bool queueTrack = false;
 
-  if (knownCard == false && activeShortCut = 0) {
+  if (knownCard == false && activeShortCut == 0) {
     return;
   }
 
@@ -2204,39 +2210,65 @@ static void previousTrack() {
 }
 //////////////////////////////////////////////////////////////////////////
 bool isPlaying() {
+#if defined DFPLAYER_PRINT
+  Serial.print(F("isPlaying: "));
+  Serial.println(!digitalRead(busyPin));
+#endif
   return !digitalRead(busyPin);
 }
 
 void mp3Pause(uint16_t delayTime = 100) {
+#if defined DFPLAYER_PRINT
+  Serial.println(F("mp3Pause"));
+#endif
   mp3.pause();
   delay(delayTime);
+#if defined DFPLAYER_PRINT
+  isPlaying();
+#endif
 }
 
 void waitForTrackToFinish (bool interruptByTrigger = true, uint16_t timeOut = 5000) {
+#if defined DFPLAYER_PRINT
+  Serial.println(F("waitForTrackToFinish"));
+#endif
   waitForTrackToStart(timeOut);
   while (isPlaying()) {
     mp3.loop();
     readTrigger();
-    if (!myTrigger.noTrigger) {
+    if (myTrigger.pauseTrack && myTriggerEnable.pauseTrack) {
+      myTriggerEnable.pauseTrack = false;
+#if defined DFPLAYER_PRINT
+      Serial.println(F("abort wait"));
+#endif
       break;
     }
     resetTrigger();
   }
   resetTrigger();
+#if defined DFPLAYER_PRINT
+  Serial.println(F("track finish"));
+#endif
 }
 
 void waitForTrackToStart(uint16_t timeOut = 5000) {
+#if defined DFPLAYER_PRINT
+  Serial.println(F("waitForTrackToStart"));
+#endif
   unsigned long waitForTrackToStartMillis = millis();
-  //delay(300);
+  delay(100);
   while (!isPlaying()) {
     mp3.loop();
     if (millis() - waitForTrackToStartMillis >= timeOut) {
-#ifdef DEBUG
-      Serial.println(F("Track not starting")) ;
+#ifdef DFPLAYER_PRINT
+      Serial.println(F("track not starting")) ;
 #endif
       break;
     }
   }
+#if defined DFPLAYER_PRINT
+  Serial.println(F("track startet"));
+#endif
 }
 //////////////////////////////////////////////////////////////////////////
 void setup() {
@@ -2258,7 +2290,7 @@ void setup() {
   pinMode(8, OUTPUT);
   digitalWrite(8, HIGH);
   delay(100);
-#else if defined SPEAKER_SWITCH
+#elif defined SPEAKER_SWITCH
   pinMode(SpeakerOnPin, OUTPUT);
   digitalWrite(SpeakerOnPin, LOW);
 #endif
@@ -2370,6 +2402,7 @@ void setup() {
     }
 #endif
     resetSettings();
+    resetShortCuts();
   }
   // load settings & sort cuts from EEPROM
   getSettings();
@@ -2379,7 +2412,7 @@ void setup() {
   // verstärker an
   digitalWrite(8, LOW);
   delay(500);
-#else if defined SPEAKER_SWITCH
+#elif defined SPEAKER_SWITCH
   digitalWrite(SpeakerOnPin, HIGH);
   delay(500);
 #endif
@@ -2391,6 +2424,11 @@ void setup() {
   delay(2000);
   mp3.loop();
   volume = mySettings.initVolume;
+#if defined DEBUG
+  Serial.print(F("Volume: "));
+  Serial.println(volume);
+  Serial.println(mySettings.initVolume);
+#endif
   mp3.setVolume(volume);
   mp3.setEq(mySettings.eq - 1);
 
@@ -2402,7 +2440,7 @@ void setup() {
     SetModifier(&mySettings.savedModifier);
 }
 //////////////////////////////////////////////////////////////////////////
-void readButtons() {
+void readButtons(bool invertVolumeButtons = false) {
   inputTrigger copyTrigger;
 
   pauseButton.read();
@@ -2412,14 +2450,12 @@ void readButtons() {
   buttonFour.read();
   buttonFive.read();
 #endif
-  myTrigger.pauseTrack |= pauseButton.wasReleased() && !pauseButton.pressedFor(LONGER_PRESS);
-  myTrigger.next |= upButton.wasReleased() && !upButton.pressedFor(LONGER_PRESS);
-  myTrigger.nextPlusTen |= upButton.pressedFor(LONG_PRESS);
-  myTrigger.previous |= downButton.wasReleased() && !downButton.pressedFor(LONGER_PRESS);
-  myTrigger.previousPlusTen |= downButton.pressedFor(LONG_PRESS);
+  myTrigger.pauseTrack |= pauseButton.pressedFor(SHORT_PRESS);
+  myTrigger.next |= upButton.pressedFor(SHORT_PRESS);
+  myTrigger.previous |= downButton.pressedFor(SHORT_PRESS);
 #if defined FIVEBUTTONS
-  myTrigger.volumeUp |= buttonFour.wasReleased() && !buttonFour.pressedFor(LONGER_PRESS);
-  myTrigger.volumeDown |= buttonFive.wasReleased() && !buttonFive.pressedFor(LONGER_PRESS);
+  myTrigger.volumeUp |= buttonFour.pressedFor(SHORT_PRESS);
+  myTrigger.volumeDown |= buttonFive.pressedFor(SHORT_PRESS);
   myTrigger.shortCutNo[0] |= buttonFour.pressedFor(LONG_PRESS);
   myTrigger.shortCutNo[1] |= buttonFive.pressedFor(LONG_PRESS);
 #else
@@ -2428,13 +2464,15 @@ void readButtons() {
   myTrigger.shortCutNo[0] |= upButton.pressedFor(LONG_PRESS);
   myTrigger.shortCutNo[1] |= downButton.pressedFor(LONG_PRESS);
 #endif
-  myTrigger.shutDown |= pauseButton.pressedFor(LONGER_PRESS) &&
-                        !upButton.isPressed() && !downButton.isPressed();
+  myTrigger.nextPlusTen |= myTrigger.volumeUp;
+  myTrigger.previousPlusTen |= myTrigger.volumeDown;
+  myTrigger.cancel |= pauseButton.pressedFor(LONGER_PRESS) &&
+                      !upButton.isPressed() && !downButton.isPressed();
   myTrigger.adminMenu |=  (pauseButton.pressedFor(LONG_PRESS) || upButton.pressedFor(LONG_PRESS) || downButton.pressedFor(LONG_PRESS)) &&
                           pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed();
   myTrigger.resetTrack |= (upButton.pressedFor(LONGER_PRESS) || downButton.pressedFor(LONGER_PRESS)) && !pauseButton.isPressed() && upButton.isPressed() && downButton.isPressed();
 
-  if (mySettings.invertVolumeButtons) {
+  if (invertVolumeButtons) {
     copyTrigger.next = myTrigger.next;
     copyTrigger.previous = myTrigger.previous;
     copyTrigger.volumeUp = myTrigger.volumeUp;
@@ -2492,8 +2530,8 @@ void readIr () {
           case VolumeDownTrigger:
             myTrigger.volumeDown |= true;
             break;
-          case ShutDownTrigger:
-            myTrigger.shutDown |= true;
+          case AbortTrigger:
+            myTrigger.cancel |= true;
             break;
           case AdminMenuTrigger:
             myTrigger.adminMenu |= true;
@@ -2552,8 +2590,8 @@ void readAnalogIn() {
       case VolumeDownTrigger:
         myTrigger.volumeDown |= true;
         break;
-      case ShutDownTrigger:
-        myTrigger.shutDown |= true;
+      case AbortTrigger:
+        myTrigger.cancel |= true;
         break;
       case AdminMenuTrigger:
         myTrigger.adminMenu |= true;
@@ -2627,8 +2665,8 @@ void timerIsr() {
 }
 #endif
 
-void readTrigger() {
-  readButtons();
+void readTrigger(bool invertVolumeButtons = false) {
+  readButtons(invertVolumeButtons);
 
 #if defined IRREMOTE
   readIr();
@@ -2640,14 +2678,16 @@ void readTrigger() {
 
   checkNoTrigger ();
 
-  if (myTrigger.noTrigger == true) {
+  if (myTrigger.noTrigger && myTriggerEnable.noTrigger) {
     resetTriggerEnable();
+  } else {
+    myTriggerEnable.noTrigger = true;
   }
 }
 
 void checkNoTrigger () {
   myTrigger.noTrigger = !(myTrigger.pauseTrack || myTrigger.next || myTrigger.nextPlusTen || myTrigger.previous || myTrigger.previousPlusTen
-                          || myTrigger.volumeUp || myTrigger.volumeDown || myTrigger.pauseTrack || myTrigger.shutDown || myTrigger.adminMenu || myTrigger.resetTrack);
+                          || myTrigger.volumeUp || myTrigger.volumeDown || myTrigger.pauseTrack || myTrigger.cancel || myTrigger.adminMenu || myTrigger.resetTrack);
 
   for (uint8_t i = 0; i < availableShortCuts; i++) {
     myTrigger.noTrigger &= !myTrigger.shortCutNo[i];
@@ -2655,7 +2695,7 @@ void checkNoTrigger () {
 }
 
 void resetTrigger() {
-  myTrigger.noTrigger = false;
+  myTrigger.noTrigger = true;
   myTrigger.pauseTrack = false;
   myTrigger.next = false;
   myTrigger.nextPlusTen = false;
@@ -2666,13 +2706,13 @@ void resetTrigger() {
   for (uint8_t i = 0; i < availableShortCuts; i++) {
     myTrigger.shortCutNo[i] = false;
   }
-  myTrigger.shutDown = false;
+  myTrigger.cancel = false;
   myTrigger.adminMenu = false;
   myTrigger.resetTrack = false;
 }
 
 void resetTriggerEnable() {
-  myTriggerEnable.noTrigger = true;
+  myTriggerEnable.noTrigger = false;
   myTriggerEnable.pauseTrack = true;
   myTriggerEnable.next = true;
   myTriggerEnable.nextPlusTen = true;
@@ -2683,7 +2723,7 @@ void resetTriggerEnable() {
   for (uint8_t i = 0; i < availableShortCuts; i++) {
     myTriggerEnable.shortCutNo[i] = true;
   }
-  myTriggerEnable.shutDown = true;
+  myTriggerEnable.cancel = true;
   myTriggerEnable.adminMenu = true;
   myTriggerEnable.resetTrack = true;
 }
@@ -2721,7 +2761,7 @@ void volumeDownAction() {
   }
 
   if (isPlaying()) {
-    if (volume > mySettings.minVolume) {
+    if (volume > mySettings.minVolume && volume > 1) {
       mp3.decreaseVolume();
       volume--;
     }
@@ -2795,6 +2835,45 @@ void pauseAction() {
   }
 }
 //////////////////////////////////////////////////////////////////////////
+void cancelAction() {
+  if (activeModifier != NULL) {
+    if (activeModifier->handleShutDown() == true) {
+#if defined DEBUG
+      Serial.println(F("shut down command locked"));
+#endif
+      return;
+    }
+  }
+  if (myTriggerEnable.cancel == true) {
+    myTriggerEnable.cancel = false;
+    shutDown();
+  }
+}
+//////////////////////////////////////////////////////////////////////////
+void shortCutAction(uint8_t shortCutNo) {
+  if (myTriggerEnable.shortCutNo[shortCutNo] == true) {
+    myTriggerEnable.shortCutNo[shortCutNo] = false;
+    if (!isPlaying()) {
+      activateShortCut(shortCutNo);
+    }
+  }
+}
+//////////////////////////////////////////////////////////////////////////
+void adminMenuAction() {
+  if (activeModifier != NULL) {
+    if (activeModifier->handleAdminMenu() == true) {
+#if defined DEBUG
+      Serial.println(F("ddmin menu command locked"));
+#endif
+      return;
+    }
+  }
+  if (myTriggerEnable.adminMenu == true) {
+    myTriggerEnable.adminMenu = false;
+    adminMenu();
+  }
+}
+//////////////////////////////////////////////////////////////////////////
 void loop() {
   checkStandbyAtMillis();
   mp3.loop();
@@ -2807,7 +2886,7 @@ void loop() {
   fadeStatusLed(isPlaying());
 #endif
 
-  readTrigger();
+  readTrigger(mySettings.invertVolumeButtons);
 
   if (activeModifier != NULL) {
     activeModifier->loop();
@@ -2815,31 +2894,31 @@ void loop() {
 
   // admin menu
   if (myTrigger.adminMenu) {
+    myTriggerEnable.adminMenu = false;
     mp3Pause();
     do {
       readTrigger();
-      if (myTrigger.noTrigger == true) {
+      if (myTrigger.noTrigger && myTriggerEnable.noTrigger) {
+        myTriggerEnable.noTrigger = false;
         break;
       }
       resetTrigger();
     } while (true);
-    resetTrigger();
-    adminMenu();
-    return;
+    adminMenuAction();
   }
 
   //Springe zum ersten Titel zurück
-  if (myTrigger.resetTrack) {
+  if (myTrigger.resetTrack && myTriggerEnable.resetTrack) {
+    myTriggerEnable.resetTrack = false;
     mp3Pause();
     do {
       readTrigger();
-      if (myTrigger.noTrigger == true) {
+      if (myTrigger.noTrigger && myTriggerEnable.noTrigger) {
+        myTriggerEnable.noTrigger = false;
         break;
       }
       resetTrigger();
     } while (true);
-    resetTrigger();
-    readTrigger();
 #if defined DEBUG
     Serial.println(F("back to first track"));
 #endif
@@ -2853,15 +2932,14 @@ void loop() {
       }
     }
     playFolder();
-    return;
   }
 
   if (myTrigger.pauseTrack) {
     pauseAction();
   }
 
-  else if (myTrigger.shutDown) {
-    shutDown();
+  else if (myTrigger.cancel) {
+    cancelAction();
   }
 
   if (myTrigger.volumeUp) {
@@ -2891,16 +2969,7 @@ void loop() {
 }
 //////////////////////////////////////////////////////////////////////////
 void adminMenu(bool fromCard = false) {
-  uint8_t subMenu = 0
-
-  if (activeModifier != NULL) {
-    if (activeModifier->handleAdminMenu() == true) {
-#if defined DEBUG
-      Serial.println(F("Admin Menu locked"));
-#endif
-      return;
-    }
-  }
+  uint8_t subMenu = 0;
 
   disablestandbyTimer();
   mp3Pause();
@@ -2908,7 +2977,7 @@ void adminMenu(bool fromCard = false) {
   Serial.println(F("adminMenu"));
 #endif
   knownCard = false;
-    lastCardUid = NULL;
+  memset(lastCardUid, 0, sizeof(lastCardUid));
   activeShortCut = 0;
   if (fromCard == false) {
     // Admin menu has been locked - it still can be trigged via admin card
@@ -2920,6 +2989,8 @@ void adminMenu(bool fromCard = false) {
   do {
     subMenu = voiceMenu(15, 900, 900, false, false, 0);
     if (subMenu == Exit) {
+      writeSettings();
+      setstandbyTimer();
       return;
     }
     else if (subMenu == ResetCard) {
@@ -2980,11 +3051,11 @@ void adminMenu(bool fromCard = false) {
 #endif
         do {
           readTrigger();
-          if (myTrigger.shutDown) {
+          if (myTrigger.cancel) {
 #if defined DEBUG
             Serial.println(F("abort!"));
 #endif
-            myTriggerEnable.shutDown = false;
+            myTriggerEnable.cancel = false;
             mp3.playMp3FolderTrack(802);
             return;
           }
@@ -3098,14 +3169,14 @@ void adminMenu(bool fromCard = false) {
             millisTriggerTime = millis();
           }
           readTrigger();
-          if (myTrigger.shutDown) {
-            myTriggerEnable.shutDown = false;
+          if (myTrigger.cancel) {
+            myTriggerEnable.cancel = false;
             break;
           }
           resetTrigger();
         };
 
-        if (!myTrigger.shutDown) {
+        if (!myTrigger.cancel) {
 #if defined ANALOG_INPUT_PRINT
           Serial.println(F("input detected, measure average value"));
           Serial.println(F("!!hold the input!!"));
@@ -3131,8 +3202,8 @@ void adminMenu(bool fromCard = false) {
               readTrigger();
               currentAnalogValue = analogRead(ANALOG_INPUT_PIN);
               currentAnalogValue = max(currentAnalogValue, minValue);
-              if (myTrigger.shutDown) {
-                myTriggerEnable.shutDown = false;
+              if (myTrigger.cancel) {
+                myTriggerEnable.cancel = false;
                 break;
               }
               resetTrigger();
@@ -3141,7 +3212,7 @@ void adminMenu(bool fromCard = false) {
             Serial.println(F("input released"));
 #endif
           }
-          if (!myTrigger.shutDown) {
+          if (!myTrigger.cancel) {
             mySettings.analogInUserValues[functionNr] = newAnalogValue;
 
 #if defined ANALOG_INPUT_PRINT
@@ -3176,10 +3247,10 @@ void adminMenu(bool fromCard = false) {
         case NoType:
           break;
         case Impuls:
-          mySettings.analogInputTriggerTime = 35;
+          mySettings.analogInputTriggerTime = SHORT_PRESS;
           break;
         case Permament:
-          mySettings.analogInputTriggerTime = 1500;
+          mySettings.analogInputTriggerTime = LONGER_PRESS;
           break;
       }
 #else
@@ -3261,11 +3332,13 @@ void adminMenu(bool fromCard = false) {
           break;
       }
     }
-  } while (subMenu == 0);
+  } while (true);
 
-  resetTrigger();
-  writeSettings();
-  setstandbyTimer();
+  /*
+    resetTrigger();
+    writeSettings();
+    setstandbyTimer();
+  */
 }
 //////////////////////////////////////////////////////////////////////////
 uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOffset,
@@ -3279,7 +3352,6 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
   mp3Pause();
 
   resetTrigger();
-  resetTriggerEnable();
 
   if (startMessage != 0) {
     mp3.playMp3FolderTrack(startMessage);
@@ -3296,16 +3368,15 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
     readTrigger();
     mp3.loop();
 
-    if (myTrigger.nextPlusTen && numberOfOptions > 10 && enableSkipTen) {
+    if (myTrigger.nextPlusTen && numberOfOptions > 10 && enableSkipTen && myTriggerEnable.nextPlusTen) {
       myTriggerEnable.nextPlusTen = false;
       currentValue += 10;
       if (currentValue == 0) {
         currentValue = 1;
       }
-      myTriggerEnable.next = true;
-    } else if (myTrigger.next) {
+    }
+    if (myTrigger.next && myTriggerEnable.next) {
       myTriggerEnable.next = false;
-      //if (!myTriggerEnable.next) {
       currentValue++;
       if (currentValue == 0) {
         currentValue = 1;
@@ -3315,16 +3386,15 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
       currentValue = currentValue - numberOfOptions;
     }
 
-    if (myTrigger.previousPlusTen && numberOfOptions > 10 && enableSkipTen) {
+    if (myTrigger.previousPlusTen && numberOfOptions > 10 && enableSkipTen && myTriggerEnable.previousPlusTen) {
       myTriggerEnable.previousPlusTen = false;
       currentValue -= 10;
-      myTriggerEnable.previous = true;
       if (currentValue == 0) {
         currentValue = -1;
       }
-    } else if (myTrigger.previous) {
+    }
+    if (myTrigger.previous && myTriggerEnable.previous) {
       myTriggerEnable.previous = false;
-      //if (!myTriggerEnable.previous) {
       currentValue--;
       if (currentValue == 0) {
         currentValue = -1;
@@ -3351,11 +3421,10 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
           mp3.playFolderTrack(previewFromFolder, currentValue);
         }
       }
-      resetTrigger();
     }
 
-    if (myTrigger.shutDown) {
-      myTriggerEnable.shutDown = false;
+    if (myTrigger.cancel && myTriggerEnable.cancel) {
+      myTriggerEnable.cancel = false;
 
       mp3.playMp3FolderTrack(802);
       waitForTrackToFinish();
@@ -3363,8 +3432,8 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
       checkStandbyAtMillis();
       returnValue = defaultValue;
     }
-    if (myTrigger.pauseTrack) {
-      myTriggerEnable.pauseTrack = true;
+    if (myTrigger.pauseTrack && myTriggerEnable.pauseTrack) {
+      myTriggerEnable.pauseTrack = false;
       if (currentValue != 0) {
         returnValue = currentValue;
       }
@@ -3472,21 +3541,21 @@ bool setupFolder(folderSettings * theFolder) {
   return true;
 }
 //////////////////////////////////////////////////////////////////////////
-void setupShortCut(uint8_t shortCutNumber = 0) {
+void setupShortCut(int8_t shortCutNo = -1) {
   bool returnValue = true;
   mp3Pause();
 #if defined DEBUG
   Serial.println(F("setupShortCut"));
 #endif
-  if (shortCutNumber == 0) {
-    shortCutNumber = voiceMenu(availableShortCuts, 940, 0);
+  if (shortCutNo == -1) {
+    shortCutNo = voiceMenu(availableShortCuts, 940, 0);
   }
   switch (voiceMenu(2, 941, 941)) {
     case 1:
-      returnValue &= setupFolder(&mySettings.shortCuts[shortCutNumber - 1]);
+      returnValue &= setupFolder(&shortCuts[shortCutNo]);
       break;
     case 2:
-      returnValue &= setupModifier(&mySettings.shortCuts[shortCutNumber - 1]);
+      returnValue &= setupModifier(&shortCuts[shortCutNo]);
       break;
     default:
       returnValue &= false;
@@ -3521,7 +3590,7 @@ void setupCard() {
   if (returnValue) {
     // Karte ist konfiguriert > speichern
     mp3Pause();
-    lastCardUid = NULL;
+    memset(lastCardUid, 0, sizeof(lastCardUid));
     writeCard(newCard);
   }
 }
@@ -3696,11 +3765,11 @@ void resetCard() {
   mp3.playMp3FolderTrack(800);
   do {
     readTrigger();
-    if (myTrigger.shutDown) {
+    if (myTrigger.cancel) {
 #if defined DEBUG
       Serial.print(F("Abgebrochen!"));
 #endif
-      myTriggerEnable.shutDown = false;
+      myTriggerEnable.cancel = false;
       mp3.playMp3FolderTrack(802);
       return;
     }
@@ -3989,7 +4058,7 @@ void writeCardMemory (uint8_t track) {
 }
 
 //Um festzustellen ob eine Karte entfernt wurde, muss der MFRC regelmäßig ausgelesen werden
-Enum_PCS pollCard() {
+uint8_t pollCard() {
   const byte maxRetries = 2;
 
   if (!hasCard)  {
@@ -4049,11 +4118,11 @@ Enum_PCS handleCardReader() {
   // poll card only every 100ms
   if (static_cast<unsigned long>(now - lastCardPoll) > 100)  {
     lastCardPoll = now;
-    
+
     if (activeModifier != NULL) {
       tmpStopWhenCardAway &= !activeModifier->handleStopWhenCardAway();
     }
-    
+
     switch (pollCard()) {
       case PCS_NEW_CARD:
 #if defined DEBUG
@@ -4068,7 +4137,7 @@ Enum_PCS handleCardReader() {
 #endif
         if (tmpStopWhenCardAway) {
           knownCard = false;
-          myTrigger.pause |= true;  
+          myTrigger.pauseTrack |= true;
           //mp3Pause();
           //setstandbyTimer();
         }
@@ -4083,11 +4152,11 @@ Enum_PCS handleCardReader() {
           //nur weiterspielen wenn vorher nicht konfiguriert wurde
           //if (!forgetLastCard) {
           knownCard = true;
-          myTrigger.pause |= true;   
-            //mp3.start();
-            //disablestandbyTimer();  
+          myTrigger.pauseTrack |= true;
+          //mp3.start();
+          //disablestandbyTimer();
           /*}
-          else
+            else
             onNewCard();*/
         } else {
           onNewCard();
@@ -4127,7 +4196,7 @@ void setstandbyTimer() {
   // verstärker aus
   digitalWrite(8, HIGH);
   delay(100);
-#else if defined SPEAKER_SWITCH
+#elif defined SPEAKER_SWITCH
   digitalWrite(SpeakerOnPin, LOW);
   delay(100);
 #endif
@@ -4149,7 +4218,7 @@ void disablestandbyTimer() {
   // verstärker an
   digitalWrite(8, LOW);
   delay(100);
-#else if defined SPEAKER_SWITCH
+#elif defined SPEAKER_SWITCH
   digitalWrite(SpeakerOnPin, HIGH);
   delay(100);
 #endif
@@ -4166,34 +4235,24 @@ void checkStandbyAtMillis() {
 }
 //////////////////////////////////////////////////////////////////////////
 void shutDown() {
-  if (activeModifier != NULL) {
-    if (activeModifier->handleShutDown() == true) {
-#if defined DEBUG
-      Serial.println(F("Shut down locked"));
-#endif
-      return;
-    }
-  }
+#if defined PUSH_ON_OFF
 #if defined DEBUG
   Serial.println("Shut Down");
 #endif
 
-  myTriggerEnable.shutDown = false;
   mp3Pause();
 
 #if defined AiO
   // verstärker an
   digitalWrite(8, LOW);
 
-#else if defined SPEAKER_SWITCH
+#elif defined SPEAKER_SWITCH
   digitalWrite(SpeakerOnPin, HIGH);
 #endif
 
 #if defined POWER_ON_LED
   digitalWrite(PowerOnLEDPin, LOW);
 #endif
-
-  delay(100);
 
   if (volume > mySettings.initVolume)
     volume = mySettings.initVolume;
@@ -4202,15 +4261,15 @@ void shutDown() {
   delay(100);
 
   knownCard = false;
-  activeShortCut = false
-                   mp3.playMp3FolderTrack(265);
+  activeShortCut = false;
+  mp3.playMp3FolderTrack(265);
   waitForTrackToFinish();
 
 #if defined AiO
   // verstärker aus
   digitalWrite(8, HIGH);
 
-#else if defined SPEAKER_SWITCH
+#elif defined SPEAKER_SWITCH
   digitalWrite(SpeakerOnPin, LOW);
 #endif
 
@@ -4222,13 +4281,14 @@ void shutDown() {
   // powerdown to 27mA (powerbank switches off after 30-60s)
   mfrc522.PCD_AntennaOff();
   mfrc522.PCD_SoftPowerDown();
-  mp3.sleep();
+  //mp3.sleep();
 
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   cli();  // Disable interrupts
   sleep_mode();
 #else
   digitalWrite(shutdownPin, LOW);
+#endif
 #endif
 }
 

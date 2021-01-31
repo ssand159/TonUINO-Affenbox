@@ -253,6 +253,7 @@
 0253.mp3|253
 0254.mp3|254
 0255.mp3|255
+0297.mp3|Oh, ein unbekannter Shortcut 
 0298.mp3|Ok, probieren wir was anderes.
 0300.mp3|Oh, eine neue Karte!
 0301.mp3|Verwende die Vor- und Zurücktaste um einen Ordner auszuwählen. Drücke die Pausetaste um fortzufahren.
