@@ -21,7 +21,8 @@
 //#define IRREMOTE
 
 #if not defined AiO    
-//#define ROTARY_ENCODER //Der AiO fehlen geeignete Inputs um den Rotary Encoder zu betreiben
+//Der AiO fehlen geeignete Inputs um den Rotary Encoder zu betreiben 
+//#define ROTARY_ENCODER // ROTARY ENCODER derzeit nicht nutzbar WIP
 #endif
 //////////////////////////////////////////////////////////////////////////
 
