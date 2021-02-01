@@ -1,5 +1,6 @@
 /* ToDo:
    Trackspeicher: Fehlerbehandlung Speichern auf Karte WIP
+   Trackspeicher: Bei Neuauflegen einer Karte mit Speicher und ungespeichertem Inhalt-> wenn pause: Ansage, das speicher geschrieben wurde -> wenn play, kein Neustart!
       -OK-:Modifier: Konfiguration falsch, nur 10 Optionen
    Modifier: Caluclate Spiel fehlerhaft, EIngabe nur in 10er Schritten, Verlassen ohne Karte unmöglich
    IR: Anlernen falsche Sprachausgaben
@@ -2904,11 +2905,10 @@ void pauseAction() {
       mp3Pause();
       if (trackToStoreOnCard > 0 && !hasCard) {
         //ungespeicherter Track vorhanden und keine Karte
-        mp3.playMp3FolderTrack(981);
-        waitForTrackToStart();
-
-        mp3.playMp3FolderTrack(400);
-        waitForTrackToStart();
+        //mp3.playMp3FolderTrack(981);
+        //waitForTrackToStart();
+        //mp3.playMp3FolderTrack(400);
+        //waitForTrackToStart();
       }
       setstandbyTimer();
     }
@@ -4270,6 +4270,10 @@ Enum_PCS handleCardReader() {
 #if defined DEBUG
         Serial.println(F("same card"));
 #endif
+        if (trackToStoreOnCard > 0) {
+          writeCardMemory(trackToStoreOnCard);
+          trackToStoreOnCard = 0;
+        }
         if (tmpStopWhenCardAway) {
 
           //nur weiterspielen wenn vorher nicht konfiguriert wurde
