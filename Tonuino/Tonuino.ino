@@ -1,10 +1,10 @@
 /* ToDo:
-   Fehlerbehandlung Speichern auf Karte WIP
+   Trackspeicher: Fehlerbehandlung Speichern auf Karte WIP
       -OK-:Modifier: Konfiguration falsch, nur 10 Optionen
    Modifier: Caluclate Spiel fehlerhaft, EIngabe nur in 10er Schritten, Verlassen ohne Karte unmöglich
    IR: Anlernen falsche Sprachausgaben
    IR: Anlernen fehlerhaft, alle Buttons = pause
-   Trackspeicher: Album lesen oder schreiben der Track nummer falsch
+      -OK-:Trackspeicher: Album lesen oder schreiben der Track nummer falsch -> Gelichzeitiges Auslösen von Next/previous mit dem aktuellen shortcut, DANACH ausführen des neuen ShortCuts
       -OK-:Trackspeicher: Short Cut Fortschritt wird nicht in EEPROM geschrieben
       -OK-:Trackspeicher: Short Cut Hörbuch, bei wiederaufnehemen des Tracks, wird der folge Track gespielt
       -OK-:voiceMenu: Abbruchausgabe wird nicht gespielt -> muss getestet werden
@@ -18,6 +18,7 @@
       -OK-:Short Cut: Modifier entfernen falls einer aktiv ->Bug mit delete activeModifer?
       -OK-:loop: InvertVolume Button führt zu komischen verhalten, bei langem DRuck von Tasten im 3 Button modus
       -OK-:Buttons: Longpress führt auch Shortpress aus
+
 */
 #include "Configuration.h"
 #include <DFMiniMp3.h>
@@ -1849,22 +1850,12 @@ void playFolder() {
   uint8_t counter = 0;
   bool queueTrack = false;
 
-#ifdef DEBUG
-  Serial.println(F("playFolder")) ;
-#endif
-
   mp3.loop();
   disablestandbyTimer();
-  //knownCard = true;
   _lastTrackFinished = 0;
   numTracksInFolder = mp3.getFolderTrackCount(myFolder->folder);
   firstTrack = 1;
 
-#ifdef DEBUG
-  Serial.print(numTracksInFolder);
-  Serial.print(F(" tracks in folder "));
-  Serial.println(myFolder->folder);
-#endif
 
   switch (myFolder->mode) {
     case AudioDrama:
@@ -1880,7 +1871,6 @@ void playFolder() {
       Serial.print(F(" to "));
       Serial.println(myFolder->special2);
 #endif
-      //numTracksInFolder = myFolder->special2;
       firstTrack = myFolder->special;
       currentTrack = random(myFolder->special, myFolder->special2 + 1);
       break;
@@ -1889,10 +1879,15 @@ void playFolder() {
 #ifdef DEBUG
       Serial.println(F("Album"));
 #endif
-      if (myFolder->special3 != 0) {
-        currentTrack = myFolder->special3+1;
+      if (myFolder->special3 > 0) {
+        if (myFolder->special3 < numTracksInFolder) {
+          currentTrack = myFolder->special3 + 1;
+        } else {
+          currentTrack = 1;
+        }
+        writeCardMemory(currentTrack);
       } else {
-        currentTrack= 1;
+        currentTrack = 1;
       }
       break;
     case Album_Section:
@@ -1902,11 +1897,14 @@ void playFolder() {
       Serial.print(F(" to "));
       Serial.println(myFolder->special2);
 #endif
-      //numTracksInFolder = myFolder->special2;
       firstTrack = myFolder->special;
-      currentTrack = myFolder->special;
-       if (myFolder->special3 != 0 && myFolder->special3 < myFolder->special2) {
-        currentTrack = myFolder->special3 + 1;
+      if (myFolder->special3 > 0) {
+        if (myFolder->special3 < myFolder->special2) {
+          currentTrack = myFolder->special3 + 1;          
+        } else {
+          currentTrack = myFolder->special;
+        }
+        writeCardMemory(currentTrack);
       } else {
         currentTrack = myFolder->special;
       }
@@ -1926,7 +1924,6 @@ void playFolder() {
 #endif
       currentTrack = 1;
       firstTrack = myFolder->special;
-      //numTracksInFolder = myFolder->special2;
       shuffleQueue(firstTrack, myFolder->special2);
       queueTrack = true;
       break;
@@ -1935,7 +1932,7 @@ void playFolder() {
 #ifdef DEBUG
       Serial.println(F("Audio Book"));
 #endif
-      currentTrack = myFolder->special3; //readAudiobookMemory(myFolder->folder, myFolder->special3);
+      currentTrack = myFolder->special3;
       if (currentTrack == 0 || currentTrack > numTracksInFolder) {
         currentTrack = 1;
       }
@@ -1945,8 +1942,7 @@ void playFolder() {
       Serial.println(F("Audio Book section"));
 #endif
       firstTrack = myFolder->special;
-      //numTracksInFolder = myFolder->special2;
-      currentTrack = myFolder->special3;//readAudiobookMemory(myFolder->folder, myFolder->special3);
+      currentTrack = myFolder->special3;
       if (currentTrack < firstTrack || currentTrack >= firstTrack + numTracksInFolder) {
         currentTrack = firstTrack;
 #ifdef DEBUG
@@ -1971,6 +1967,9 @@ void playFolder() {
   }
 
 #ifdef DEBUG
+  Serial.print(numTracksInFolder);
+  Serial.print(F(" tracks in folder "));
+  Serial.println(myFolder->folder);
   Serial.print(F("play track: "));
 #endif
 
@@ -2048,15 +2047,15 @@ static void nextTrack(uint8_t track) {
   }
   switch (myFolder->mode) {
     case AudioDrama:
+    case AudioDrama_Section:
+      //if (myTrigger.next) { //nextTrack bei Hörspielen nur bei externem Trigger
       //currentTrack = random(1, numTracksInFolder + 1);
+      //}
       break;
     case Album:
-      if (currentTrack < numTracksInFolder)
+      if (currentTrack < numTracksInFolder) {
         currentTrack = currentTrack + 1;
-      if (myFolder->special3 > 0) {
-        writeCardMemory (currentTrack);
-      }
-      else {
+      } else {
         currentTrack = 0;
         mp3Pause();
         setstandbyTimer();
@@ -2067,12 +2066,9 @@ static void nextTrack(uint8_t track) {
       }
       break;
     case Album_Section:
-      if (currentTrack < myFolder->special2)
+      if (currentTrack < myFolder->special2) {
         currentTrack = currentTrack + 1;
-      if (myFolder->special3 > 0) {
-        writeCardMemory (currentTrack);
-      }
-      else {
+      } else {
         currentTrack = firstTrack - 1;
         mp3Pause();
         setstandbyTimer();
@@ -2528,24 +2524,24 @@ void readButtons(bool invertVolumeButtons = false) {
 #else
   if (invertVolumeButtons) {
     //3 Buttons invertiert
-    myTrigger.volumeUp |= upButton.wasReleased() && myTriggerEnable.next;
-    myTrigger.volumeDown |= downButton.wasReleased() && myTriggerEnable.previous;
-    myTrigger.next |= upButton.pressedFor(LONG_PRESS);
-    myTrigger.previous |= downButton.pressedFor(LONG_PRESS);
-    myTrigger.shortCutNo[0] |= myTrigger.next;
-    myTrigger.shortCutNo[1] |= myTrigger.previous;
-    myTrigger.nextPlusTen |= myTrigger.next;
-    myTrigger.previousPlusTen |= myTrigger.previous;
+    myTrigger.volumeUp |= upButton.wasReleased() && myTriggerEnable.next && myTriggerEnable.shortCutNo[0];
+    myTrigger.volumeDown |= downButton.wasReleased() && myTriggerEnable.previous && myTriggerEnable.shortCutNo[1];
+    myTrigger.next |= upButton.pressedFor(LONG_PRESS) && myTriggerEnable.shortCutNo[0];
+    myTrigger.previous |= downButton.pressedFor(LONG_PRESS) && myTriggerEnable.shortCutNo[1];
+    myTrigger.shortCutNo[0] |= upButton.pressedFor(LONG_PRESS);
+    myTrigger.shortCutNo[1] |= downButton.pressedFor(LONG_PRESS);
+    myTrigger.nextPlusTen |= upButton.pressedFor(LONG_PRESS);
+    myTrigger.previousPlusTen |= downButton.pressedFor(LONG_PRESS);
   } else {
     //3 Buttons nicht invertiert
-    myTrigger.volumeUp |= upButton.pressedFor(LONG_PRESS);
-    myTrigger.volumeDown |= downButton.pressedFor(LONG_PRESS);
-    myTrigger.next |= upButton.wasReleased() && myTriggerEnable.volumeUp;
-    myTrigger.previous |= downButton.wasReleased() && myTriggerEnable.volumeDown;
-    myTrigger.shortCutNo[0] |= myTrigger.volumeUp;
-    myTrigger.shortCutNo[1] |= myTrigger.volumeDown;
-    myTrigger.nextPlusTen |= myTrigger.volumeUp;
-    myTrigger.previousPlusTen |= myTrigger.volumeDown;
+    myTrigger.volumeUp |= upButton.pressedFor(LONG_PRESS) && myTriggerEnable.shortCutNo[0];
+    myTrigger.volumeDown |= downButton.pressedFor(LONG_PRESS) && myTriggerEnable.shortCutNo[1];
+    myTrigger.next |= upButton.wasReleased() && myTriggerEnable.volumeUp && myTriggerEnable.shortCutNo[0];
+    myTrigger.previous |= downButton.wasReleased() && myTriggerEnable.volumeDown && myTriggerEnable.shortCutNo[1];
+    myTrigger.shortCutNo[0] |= upButton.pressedFor(LONG_PRESS);
+    myTrigger.shortCutNo[1] |= downButton.pressedFor(LONG_PRESS);
+    myTrigger.nextPlusTen |= upButton.pressedFor(LONG_PRESS);
+    myTrigger.previousPlusTen |= downButton.pressedFor(LONG_PRESS);
   }
 #endif
 
@@ -2871,7 +2867,7 @@ void nextAction() {
       return;
     }
   }
-  if (myTriggerEnable.next == true) {
+  if (myTriggerEnable.next == true && isPlaying()) {
     myTriggerEnable.next = false;
     nextTrack(random(65536));
   }
@@ -2886,7 +2882,7 @@ void previousAction() {
       return;
     }
   }
-  if (myTriggerEnable.previous == true) {
+  if (myTriggerEnable.previous == true && isPlaying()) {
     myTriggerEnable.previous = false;
     previousTrack();
   }
@@ -3592,21 +3588,24 @@ bool setupFolder(folderSettings * theFolder) {
 
     case AudioBook:
     case Album:
-#if defined DEBUG
-      Serial.println(F("Memory"));
-#endif
+      theFolder->special = 0;
+      theFolder->special2 = 0;
+
       //Speicherplatz für Alben? Ja/Nein
       if (theFolder->mode == Album || theFolder->mode == Album_Section) {
         enableMemory = voiceMenu(2, 982, 933, false, false, 0) - 1;
         if (enableMemory == 1) {
-          theFolder->special3 = 1;
+          theFolder->special3 = 255;// Muss mit letztem möglichen Track initialisert werden, da bei start der Karte, der Track um eins erhöht wird. So kann nie Track 1 gespielt werden.
         }
         else {
           theFolder->special3 = 0;
         }
       } else if (theFolder->mode == AudioBook || theFolder->mode == AudioBook_Section) {
         theFolder->special3 = 1;
+      } else {
+        theFolder->special3 = 0;
       }
+
       break;
     case AdminMenu:
 #if defined DEBUG
@@ -3614,6 +3613,9 @@ bool setupFolder(folderSettings * theFolder) {
 #endif
       theFolder->folder = 0;
       theFolder->mode = 255;
+      theFolder->special = 0;
+      theFolder->special2 = 0;
+      theFolder->special3 = 0;
       break;
     case PuzzlePart:
 #if defined DEBUG
@@ -3623,6 +3625,7 @@ bool setupFolder(folderSettings * theFolder) {
                                      true, theFolder->folder, 0, true);
       theFolder->special2 = voiceMenu(255, 324, 0,
                                       false, theFolder->folder, 0, true);
+      theFolder->special3 = 0;
       break;
     default:
       break;
@@ -3805,8 +3808,8 @@ bool readCard(nfcTagObject * nfcTag) {
   }
 
 #if defined DEBUG
-  Serial.print(F("Data on Card: "));
-  dump_byte_array(buffer, 16);
+  Serial.println(F("Data on Card: "));
+  //dump_byte_array(buffer, 16);
 #endif
   uint32_t tempCookie;
   tempCookie = (uint32_t)buffer[0] << 24;
@@ -3823,6 +3826,20 @@ bool readCard(nfcTagObject * nfcTag) {
   tempCard.nfcFolderSettings.special3 = buffer[9];
   tempCard.nfcFolderSettings.special4 = buffer[10];
 
+#if defined DEBUG
+  Serial.print(F("folder "));
+  Serial.println(tempCard.nfcFolderSettings.folder);
+  Serial.print(F("mode "));
+  Serial.println(tempCard.nfcFolderSettings.mode);
+  Serial.print(F("special "));
+  Serial.println(tempCard.nfcFolderSettings.special);
+  Serial.print(F("special2 "));
+  Serial.println(tempCard.nfcFolderSettings.special2);
+  Serial.print(F("special3 "));
+  Serial.println(tempCard.nfcFolderSettings.special3);
+  Serial.print(F("special4 "));
+  Serial.println(tempCard.nfcFolderSettings.special4);
+#endif
   if (tempCard.cookie == cardCookie) {
 
     if (activeModifier != NULL && tempCard.nfcFolderSettings.folder != 0) {
