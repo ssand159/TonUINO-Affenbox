@@ -1,10 +1,21 @@
 /* ToDo:
-   Trackspeicher: Fehlerbehandlung Speichern auf Karte WIP
-   Trackspeicher: Bei Neuauflegen einer Karte mit Speicher und ungespeichertem Inhalt-> wenn pause: Ansage, das speicher geschrieben wurde -> wenn play, kein Neustart!
-      -OK-:Modifier: Konfiguration falsch, nur 10 Optionen
+   Album mit Speicher: Wenn letzter Titel erreicht, wird bei langem Druck der ShortCut, statt next Track ausgeführt
    Modifier: Caluclate Spiel fehlerhaft, EIngabe nur in 10er Schritten, Verlassen ohne Karte unmöglich
    IR: Anlernen falsche Sprachausgaben
    IR: Anlernen fehlerhaft, alle Buttons = pause
+   Umzug auf PlatformIO
+   Alterssperre
+   Sleepmodifier, Lautstärke ausfaden lassen
+   RFID Empfindlichkeit über Adminmenü
+   Neopixel LED als Status einfügen
+   Steuerung über RFID
+   Steuerung über Serial
+   Modifierjingle + Ansagen
+   Always Queue
+   Jukebox Modifier: Rndom Track bis RFID aufgelegt, dann einen Track aus RFID und weiter mit Random
+   Memory: Modifier karte, die mit einem Satz memory RFID Tags mehrere Motive zulässt
+      -OK-:Trackspeicher: Bei Neuauflegen einer Karte mit Speicher und ungespeichertem Inhalt -> wenn pause: Ansage, das speicher nicht geschrieben wurde -> wenn play, kein Neustart!
+      -OK-:Modifier: Konfiguration falsch, nur 10 Optionen
       -OK-:Trackspeicher: Album lesen oder schreiben der Track nummer falsch -> Gelichzeitiges Auslösen von Next/previous mit dem aktuellen shortcut, DANACH ausführen des neuen ShortCuts
       -OK-:Trackspeicher: Short Cut Fortschritt wird nicht in EEPROM geschrieben
       -OK-:Trackspeicher: Short Cut Hörbuch, bei wiederaufnehemen des Tracks, wird der folge Track gespielt
@@ -282,6 +293,7 @@ static byte lastCardUid[4];
 static byte retries;
 static bool lastCardWasUL;
 //static bool forgetLastCard = false;
+static bool skipNext = false;
 static bool knownCard = false;
 static int8_t activeShortCut = -1;
 static uint8_t trackToStoreOnCard = 0;
@@ -1901,7 +1913,7 @@ void playFolder() {
       firstTrack = myFolder->special;
       if (myFolder->special3 > 0) {
         if (myFolder->special3 < myFolder->special2) {
-          currentTrack = myFolder->special3 + 1;          
+          currentTrack = myFolder->special3 + 1;
         } else {
           currentTrack = myFolder->special;
         }
@@ -1992,7 +2004,7 @@ void playFolder() {
 }
 
 void activateShortCut (uint8_t shortCutNo) {
-
+  trackToStoreOnCard = 0;
 #if defined DEBUG ^ defined SHORTCUTS_PRINT
   Serial.print("play short cut no ");
   Serial.println(shortCutNo);
@@ -2030,13 +2042,15 @@ void activateShortCut (uint8_t shortCutNo) {
 static void nextTrack(uint8_t track) {
   bool queueTrack = false;
 
+#ifdef DEBUG
+  Serial.print(F("Next track"));
+  Serial.println(track);
+
+#endif
   if (track == _lastTrackFinished || (knownCard == false && activeShortCut < 0)) {
     return;
   }
   _lastTrackFinished = track;
-#ifdef DEBUG
-  Serial.println(F("Next track"));
-#endif
 
   if (activeModifier != NULL) {
     if (activeModifier->handleNext() == true) {
@@ -2046,6 +2060,9 @@ static void nextTrack(uint8_t track) {
       return;
     }
   }
+  
+  disablestandbyTimer();
+  
   switch (myFolder->mode) {
     case AudioDrama:
     case AudioDrama_Section:
@@ -2056,28 +2073,23 @@ static void nextTrack(uint8_t track) {
     case Album:
       if (currentTrack < numTracksInFolder) {
         currentTrack = currentTrack + 1;
+        if (myFolder->special3 > 0 && currentTrack != 0) {
+          writeCardMemory (currentTrack);
+        }
       } else {
-        currentTrack = 0;
-        mp3Pause();
-        setstandbyTimer();
-        return;
-      }
-      if (myFolder->special3 > 0 && currentTrack != 0) {
-        writeCardMemory (currentTrack);
+        currentTrack = numTracksInFolder;
       }
       break;
     case Album_Section:
       if (currentTrack < myFolder->special2) {
         currentTrack = currentTrack + 1;
+        if (myFolder->special3 > 0 && currentTrack != 0) {
+          writeCardMemory (currentTrack);
+        }
       } else {
-        currentTrack = firstTrack - 1;
-        mp3Pause();
-        setstandbyTimer();
-        return;
+        currentTrack = myFolder->special2;
       }
-      if (myFolder->special3 > 0 && currentTrack != 0) {
-        writeCardMemory (currentTrack);
-      }
+
       break;
 
     case Party:
@@ -2141,8 +2153,8 @@ static void nextTrack(uint8_t track) {
       break;
   }
 
-  disablestandbyTimer();
-
+  
+  
   Serial.print("next track: ");
 
   if (queueTrack) {
@@ -2177,24 +2189,26 @@ static void previousTrack() {
     case Album:
       if (currentTrack > 1) {
         currentTrack = currentTrack - 1;
+        if (myFolder->special3 > 0 && currentTrack != 0) {
+          writeCardMemory (currentTrack);
+        }
       }
       else {
-        currentTrack = numTracksInFolder;
+        currentTrack = 1;
       }
-      if (myFolder->special3 > 0 && currentTrack != 0) {
-        writeCardMemory (currentTrack);
-      }
+
       break;
     case Album_Section:
       if (currentTrack > firstTrack) {
         currentTrack = currentTrack - 1;
+        if (myFolder->special3 > 0 && currentTrack != 0) {
+          writeCardMemory (currentTrack);
+        }
       }
       else {
-        currentTrack = myFolder->special2 - firstTrack + 1;
+        currentTrack = firstTrack;
       }
-      if (myFolder->special3 > 0 && currentTrack != 0) {
-        writeCardMemory (currentTrack);
-      }
+
       break;
 
     case Party:
@@ -2902,17 +2916,16 @@ void pauseAction() {
     myTriggerEnable.pauseTrack = false;
     if (isPlaying()) {
       Serial.println(F("pause"));
-      mp3Pause();
-      if (trackToStoreOnCard > 0 && !hasCard) {
+
+      if (trackToStoreOnCard > 0 && !hasCard && activeShortCut < 0) {
         //ungespeicherter Track vorhanden und keine Karte
-        //mp3.playMp3FolderTrack(981);
-        //waitForTrackToStart();
-        //mp3.playMp3FolderTrack(400);
-        //waitForTrackToStart();
+        mp3.playAdvertisement(981);
+        waitForTrackToFinish();
+        delay(100);
       }
+      mp3Pause();
       setstandbyTimer();
-    }
-    else if (knownCard || activeShortCut >= 0) {
+    } else if (knownCard || activeShortCut >= 0) {
       Serial.println(F("play"));
       mp3.start();
       disablestandbyTimer();
@@ -3593,7 +3606,7 @@ bool setupFolder(folderSettings * theFolder) {
 
       //Speicherplatz für Alben? Ja/Nein
       if (theFolder->mode == Album || theFolder->mode == Album_Section) {
-        enableMemory = voiceMenu(2, 982, 933, false, false, 0) - 1;
+        enableMemory = voiceMenu(2, 983, 933, false, false, 0) - 1;
         if (enableMemory == 1) {
           theFolder->special3 = 255;// Muss mit letztem möglichen Track initialisert werden, da bei start der Karte, der Track um eins erhöht wird. So kann nie Track 1 gespielt werden.
         }
@@ -4270,10 +4283,6 @@ Enum_PCS handleCardReader() {
 #if defined DEBUG
         Serial.println(F("same card"));
 #endif
-        if (trackToStoreOnCard > 0) {
-          writeCardMemory(trackToStoreOnCard);
-          trackToStoreOnCard = 0;
-        }
         if (tmpStopWhenCardAway) {
 
           //nur weiterspielen wenn vorher nicht konfiguriert wurde
@@ -4285,8 +4294,21 @@ Enum_PCS handleCardReader() {
           /*}
             else
             onNewCard();*/
-        } else {
+        } else if (trackToStoreOnCard == 0) {
           onNewCard();
+        }
+
+        if (trackToStoreOnCard > 0) {
+          writeCardMemory(trackToStoreOnCard);
+          trackToStoreOnCard = 0;
+          if (!isPlaying()) {
+            mp3.start();
+            delay(150);
+            mp3.playAdvertisement(982);
+            waitForTrackToFinish();
+            delay(150);
+            mp3.pause();          
+          }
         }
         return PCS_CARD_IS_BACK;
         break;
@@ -4298,6 +4320,7 @@ void onNewCard() {
   //forgetLastCard = false;
   //make random a little bit more "random"
   //randomSeed(millis() + random(1000));
+  trackToStoreOnCard = 0;
   if (myCard.cookie == cardCookie && myCard.nfcFolderSettings.folder != 0 && myCard.nfcFolderSettings.mode != 0) {
     Serial.println(F("onNewCard()->playFolder"));
     knownCard = true;

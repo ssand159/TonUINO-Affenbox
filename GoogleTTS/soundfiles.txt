@@ -376,8 +376,9 @@
 0976.mp3|Rechnen lernen. Ein Spiel in dem man Rechenaufgaben gestellt bekommt und diese lösen muss.
 0979.mp3|Soll das erste Puzzle Teil gespeichert bleiben? Dann Wähle Ja. Oder soll das erste Puzzleteil jedes Mal neu aufgelegt werden? Dann wähle Nein
 0980.mp3|Soll diese Modifikation auch bei Neustart noch aktiv sein?
-0981.mp3|Warte! Ich konnte deinen Fortschritt noch speichern! Bitte lege die Karte nochmal auf, damit du beim nächsten mal hier weiter hören kannst.
-0982.mp3|Soll der Fortschritt gespeichert werden?
+0981.mp3|Warte! Ich konnte deinen Fortschritt nicht speichern! Bitte lege die Karte nochmal auf.
+0982.mp3|Gespeichert!
+0983.mp3|Soll der Fortschritt gespeichert werden?
 0986.mp3|Wähle bitte aus ob und wie das Adminmenü geschützt werden soll.
 0987.mp3|Kein Schutz. das Adminmenü kann jederzeit durch drücken von allen drei Tasten aktiviert werden.
 0988.mp3|Nur Adminkarte. das Adminmenü kann nur mit einer Adminkarte geöffnet werden. Eine neue Adminkarte kann jederzeit angelernt werden.
