@@ -1,6 +1,6 @@
 ///////// uncomment the below line to enable the function ////////////////
 
-//#define AiO
+#define AiO
 
 /////!! NICHT ENTFERNEN!!/////
 #if not defined AiO
@@ -10,11 +10,11 @@
 #endif
 //////////////////////////////
 
-//#define FIVEBUTTONS  //Die AiO verwendet Standardmäßig fünf Buttons, vier Analoge eingänge und einen separaten für Pause. Falls ANALOG_INPUT verwendet werden soll muss FIVEBUTTONS deaktiviert werden um einen analogen Eingang frei zu machen. 
+#define FIVEBUTTONS  //Die AiO verwendet Standardmäßig fünf Buttons, vier Analoge eingänge und einen separaten für Pause. Falls ANALOG_INPUT verwendet werden soll muss FIVEBUTTONS deaktiviert werden um einen analogen Eingang frei zu machen. 
 #define DEBUG        //Erweiterte Debug Ausgaben in der Konsole
 
-//#define PUSH_ON_OFF     //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
-//#define SPEAKER_SWITCH  //mit AiO nicht mehr als externe Hardware nötig, da standardmäßig vorhanden
+#define PUSH_ON_OFF     //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
+#define SPEAKER_SWITCH  //mit AiO nicht mehr als externe Hardware nötig, da standardmäßig vorhanden
 //#define POWER_ON_LED
 //#define FADING_LED    //nur in Verbindung mit POWER_ON_LED
 //#define ANALOG_INPUT    //Programmierbarer Analoger Eingang, setzt entsprechende Hardware vorraus
@@ -27,8 +27,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 ///////// conifguration of the input and output pins //////////////////////
-#define buttonPause A2 //Default A0; Pocket A2
-#define buttonUp A0 //Default A1; AiO A2; Pocket A0
+#define buttonPause A0 //Default A0; Pocket A2
+#define buttonUp A2 //Default A1; AiO A2; Pocket A0
 #define buttonDown A1 //Default A2; AiO A1; Pocket A1
 #define busyPin 4
 
@@ -96,7 +96,7 @@
 
 //#define ANALOG_INPUT_PRINT //Aktiviert zusätzliche Debug Ausgaben im seriellen Moitor
 //#define ROTARY_ENCODER_PRINT
-#define SHORTCUTS_PRINT
+//#define SHORTCUTS_PRINT
 //#define QUEUE_PRINT  //Debug Ausgabe der Queue
 //#define DFPLAYER_PRINT
 
