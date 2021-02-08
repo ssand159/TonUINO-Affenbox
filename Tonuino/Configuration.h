@@ -1,6 +1,6 @@
 ///////// uncomment the below line to enable the function ////////////////
 
-#define AiO
+//#define AiO
 
 /////!! NICHT ENTFERNEN!!/////
 #if not defined AiO
@@ -10,15 +10,15 @@
 #endif
 //////////////////////////////
 
-#define FIVEBUTTONS  //Die AiO verwendet Standardmäßig fünf Buttons, vier Analoge eingänge und einen separaten für Pause. Falls ANALOG_INPUT verwendet werden soll muss FIVEBUTTONS deaktiviert werden um einen analogen Eingang frei zu machen. 
-#define DEBUG        //Erweiterte Debug Ausgaben in der Konsole
+//#define FIVEBUTTONS  //Die AiO verwendet Standardmäßig fünf Buttons, vier Analoge eingänge und einen separaten für Pause. Falls ANALOG_INPUT verwendet werden soll muss FIVEBUTTONS deaktiviert werden um einen analogen Eingang frei zu machen. 
+//#define DEBUG        //Erweiterte Debug Ausgaben in der Konsole
 
-#define PUSH_ON_OFF     //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
-#define SPEAKER_SWITCH  //mit AiO nicht mehr als externe Hardware nötig, da standardmäßig vorhanden
+//#define PUSH_ON_OFF     //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
+//#define SPEAKER_SWITCH  //mit AiO nicht mehr als externe Hardware nötig, da standardmäßig vorhanden
 //#define POWER_ON_LED
 //#define FADING_LED    //nur in Verbindung mit POWER_ON_LED
 //#define ANALOG_INPUT    //Programmierbarer Analoger Eingang, setzt entsprechende Hardware vorraus
-//#define IRREMOTE
+#define IRREMOTE
 
 #if not defined AiO    
 //Der AiO fehlen geeignete Inputs um den Rotary Encoder zu betreiben 
@@ -27,9 +27,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 ///////// conifguration of the input and output pins //////////////////////
-#define buttonPause A0 //Default A0; Pocket A2
-#define buttonUp A2 //Default A1; AiO A2; Pocket A0
-#define buttonDown A1 //Default A2; AiO A1; Pocket A1
+#define buttonPause A2 //Default A0; Pocket A2
+#define buttonUp A0 //Default A1; AiO A4; Pocket A0
+#define buttonDown A1 //Default A2; AiO A3; Pocket A1
 #define busyPin 4
 
 #define shutdownPin 7 //Default 7; AiO 7
@@ -37,8 +37,8 @@
 #define openAnalogPin A7 //Default A7, muss ein unbelegeter, analoger Eingang sein
 
 #ifdef FIVEBUTTONS
-#define buttonFourPin A4 //Default A3; AiO A4
-#define buttonFivePin A3 //Default A4; AiO A3
+#define buttonFourPin A4 //Default A3; AiO A2
+#define buttonFivePin A3 //Default A4; AiO A1
 #endif
 
 #define RST_PIN 9                 // Configurable, see typical pin layout above
@@ -86,12 +86,6 @@
 #ifdef ROTARY_ENCODER
 #define ROTARY_ENCODER_STEPS 4
 #endif
-//////////////////////////////////////////////////////////////////////////
-
-#if defined IRREMOTE
-#define IRREMOTE_PRINT //Aktiviert zusätzliche Debug Ausgaben im seriellen Moitor
-#endif
-
 ///////// conifguration of the analog input ////////////////////////////
 
 //#define ANALOG_INPUT_PRINT //Aktiviert zusätzliche Debug Ausgaben im seriellen Moitor
@@ -99,5 +93,6 @@
 //#define SHORTCUTS_PRINT
 //#define QUEUE_PRINT  //Debug Ausgabe der Queue
 //#define DFPLAYER_PRINT
+#define IRREMOTE_PRINT
 
 //////////////////////////////////////////////////////////////////////////

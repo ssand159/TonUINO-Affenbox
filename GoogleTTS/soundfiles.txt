@@ -298,12 +298,14 @@
 0429.mp3|Bis zu welcher Zahl soll gerrechnet werden. Bitte wähle mit der Vor- und Zurücktaste die Zahl aus und bestätige deine Auswahl mit der Pausetaste.
 0800.mp3|Bitte lege nun die Karte auf!
 0802.mp3|OK, ich habe den Vorgang beendet.
+0825.mp3|Möchtest du alle Einstellungen löschen?
+0826.mp3|Möchtest du die bisherigen Einstellungen löschen?
 0827.mp3|Diese Einstellung benötigt ein analoges Eingabemedium. Dieses muss im Programmcode aktiviert werden.
 0828.mp3|Mit der Vor- und Zurücktaste können die einzelnen Funktionen ausgewählt werden, die mit der analogen Eingabe verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
 0829.mp3|Betätige und halte das Eingabemedium jetzt gedrückt!
 0830.mp3|Das Eingabemedium wieder loslassen, beziehungsweise in den Leerlaufzustand versetzen.
 0831.mp3|Diese Einstellung benötigt einen Infrarotempfänger. Dieser muss im Programmcode aktiviert werden.
-0833.mp3|Mit der Vor- und Zurücktaste können die einzelnen Funktionen ausgewählt werden, die mit der Fernbedienung verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
+0832.mp3|Mit der Vor- und Zurücktaste können die einzelnen Funktionen ausgewählt werden, die mit der Fernbedienung verknüpft werden sollen. Mit der Pause Taste wird das anlernen der Funktion gestartet. Ein langer Druck auf die Pausetaste beendet das Anlernen. 
 0833.mp3|Bitte jetzt die Taste auf der Fernbedienung drücken.
 0834.mp3|Wähle die Funktion aus oder beende das anlernen.
 0835.mp3|Pause
@@ -388,4 +390,4 @@
 0992.mp3|Wieviel ist
 0993.mp3|plus
 0994.mp3|minus
-0999.mp3|Reset wurde durchgeführt!
+0999.mp3|Ich habe die Einstellungen gelöscht!
