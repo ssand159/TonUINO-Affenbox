@@ -47,7 +47,7 @@ Funktionsumfang/ Änderungen:
 - Neue Eingabemethode: Analoger Eingang. Es kann ein Anlaoger Eingang verwendet werden um den TonUINO zu steuern oder Shortcuts zu starten. Die Eingangspegel können über das Adminmenü einglernt werden. Somit ist es egal welches System zur generierung der Pegel verwendet wird.
 - Neue Eingabemethode: IR Fernbedienung. Es kann eine Infrarot Fernbedienung über das Admin Menü angelernt werden, um den TonUINO zu steuern oder Shortcuts zu starten.
 - Menüs sind jetzt umlaufend und das Admin Menü beendet sich nicht automatisch, sodass man mehrere Einstellungen hintereinander vornehmen kann.
-- #defines sind in der COnfiguration.h ausgelagert.
+- #defines sind in der Configuration.h ausgelagert.
 
 HINWEIS: Bitte den mp3 Ordner erneuern und den EEPROM inital löschen!
 
