@@ -11,14 +11,14 @@
 //////////////////////////////
 
 //#define FIVEBUTTONS  //Die AiO verwendet Standardmäßig fünf Buttons, vier Analoge eingänge und einen separaten für Pause. Falls ANALOG_INPUT verwendet werden soll muss FIVEBUTTONS deaktiviert werden um einen analogen Eingang frei zu machen. 
-//#define DEBUG        //Erweiterte Debug Ausgaben in der Konsole
+#define DEBUG        //Erweiterte Debug Ausgaben in der Konsole
 
 //#define PUSH_ON_OFF     //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
 //#define SPEAKER_SWITCH  //mit AiO nicht mehr als externe Hardware nötig, da standardmäßig vorhanden
 //#define POWER_ON_LED
 //#define FADING_LED    //nur in Verbindung mit POWER_ON_LED
 //#define ANALOG_INPUT    //Programmierbarer Analoger Eingang, setzt entsprechende Hardware vorraus
-#define IRREMOTE
+//#define IRREMOTE
 
 #if not defined AiO    
 //Der AiO fehlen geeignete Inputs um den Rotary Encoder zu betreiben 
@@ -29,7 +29,7 @@
 ///////// conifguration of the input and output pins //////////////////////
 #define buttonPause A2 //Default A0; Pocket A2
 #define buttonUp A0 //Default A1; AiO A4; Pocket A0
-#define buttonDown A1 //Default A2; AiO A3; Pocket A1
+#define buttonDown A1//Default A2; AiO A3; Pocket A1
 #define busyPin 4
 
 #define shutdownPin 7 //Default 7; AiO 7
@@ -69,7 +69,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 ////////// Button timings ////////////////////////////////////////////////
-#define SHORT_PRESS 35
+#define SHORT_PRESS 50
 #define LONG_PRESS 750
 #define LONGER_PRESS 1500 
 #define LONGEST_PRESS 3000
@@ -93,6 +93,6 @@
 //#define SHORTCUTS_PRINT
 //#define QUEUE_PRINT  //Debug Ausgabe der Queue
 //#define DFPLAYER_PRINT
-#define IRREMOTE_PRINT
+//#define IRREMOTE_PRINT
 
 //////////////////////////////////////////////////////////////////////////
