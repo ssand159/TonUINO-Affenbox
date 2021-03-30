@@ -1,7 +1,4 @@
-/* ToDo:  
-   Major: Pause wenn Kart weg ohne Funktion.
-   Major: Wenn Pause wenn Karte weg aktiv, next Track und Play ohne Funktion, wenn Kart weg -> knownCard = false pause Trigger triggert pause nicht
-        
+/* ToDo:          
    To Do: Startansage Puzzle/Quiz, ähnlich Rechnen lernen
    Minor Hörbuch nach ende des letzten Tracks, wenn Titel nicht auf Karte gespeichert, keine Ansage
    Minor Trackspeicher, Fehlerhafte abhandlung wenn Track nicht gespeichert und karte wieder erwartet wird.
@@ -47,6 +44,8 @@
       -OK- Minor: Shortcut enable in Puzzle/Quiz
       -OK-: Minor: Queue Probleme in Quiz, Fragen werden widerholt
       -OK-: Minor: Erstellung Puzzle Karte, Teil speicher verdreht?   
+      -OK-: Major: Pause wenn Kart weg ohne Funktion.
+      -OK-: Major: Wenn Pause wenn Karte weg aktiv, next Track und Play ohne Funktion, wenn Kart weg -> knownCard = false pause Trigger triggert pause nicht
 */
 #include "Configuration.h"
 #include <DFMiniMp3.h>
