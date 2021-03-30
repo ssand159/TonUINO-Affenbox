@@ -1,11 +1,7 @@
-/* ToDo:
-   fixed? Minor: Puzzel/Quiz Feedbacksound fehlerhaft
-   fixed? Minor: Shortcut enable in Puzzle/Quiz
-   fixed? Minor: Erstellung Puzzle Karte, Teil speicher verdreht? 
-   fixed? Minor: Queue Probleme in Quiz, Fragen werden widerholt
-      
-   Minor: keine Lautstärke änderung in Puzzle
-      
+/* ToDo:  
+   Major: Pause wenn Kart weg ohne Funktion.
+   Major: Wenn Pause wenn Karte weg aktiv, next Track und Play ohne Funktion, wenn Kart weg -> knownCard = false pause Trigger triggert pause nicht
+        
    To Do: Startansage Puzzle/Quiz, ähnlich Rechnen lernen
    Minor Hörbuch nach ende des letzten Tracks, wenn Titel nicht auf Karte gespeichert, keine Ansage
    Minor Trackspeicher, Fehlerhafte abhandlung wenn Track nicht gespeichert und karte wieder erwartet wird.
@@ -47,6 +43,10 @@
       -OK-:Major ButtonSmash Aktuell laufender Track wird nicht beendet und kann dann auch nicht mehr beendet werden
       -OK-:Major Repeat  Mofifer kein next Track auf befehl
       -OK-:Mainor: Kindergarten Modifier startet keine Wiedergabe, wenn im Leerlauf aktiviert.
+      -OK-: Minor: Puzzel/Quiz Feedbacksound fehlerhaft
+      -OK- Minor: Shortcut enable in Puzzle/Quiz
+      -OK-: Minor: Queue Probleme in Quiz, Fragen werden widerholt
+      -OK-: Minor: Erstellung Puzzle Karte, Teil speicher verdreht?   
 */
 #include "Configuration.h"
 #include <DFMiniMp3.h>
@@ -1048,13 +1048,13 @@ class QuizGame: public Modifier {
     bool PartTwoSaved = false;
 
     void Success () {
-      PartOneSaved = false;
-      PartTwoSaved = false;
 #if defined DEBUG
       Serial.println(F("QuizGame > success"));
 #endif
       mp3.playMp3FolderTrack(256);
       waitForTrackToFinish();
+      this->PartOneSaved = false;
+      this->PartTwoSaved = false;
       next();
     }
 
@@ -1138,7 +1138,9 @@ class QuizGame: public Modifier {
       this->PartOneSpecial = queue[currentTrack - 1];
       this->PartOneSpecial2 = this->PartOneSpecial;
 #if defined DEBUG
+Serial.print(F("Track: "));
       Serial.println(currentTrack);
+      Serial.print(F("Part: "));
       Serial.println(this->PartOneSpecial);
 #endif
       mp3.playFolderTrack(this->PartOneFolder, this->PartOneSpecial);
@@ -2093,6 +2095,8 @@ static void nextTrack(uint8_t track, bool force = false) {
 #ifdef DEBUG
   Serial.print(F("next track "));
   Serial.println(track);
+          Serial.print(F("knownCard "));
+        Serial.println(knownCard);
 #endif
   if (!force && (track == _lastTrackFinished || (knownCard == false && activeShortCut < 0))) {
 #ifdef DEBUG
@@ -2956,6 +2960,12 @@ void previousAction() {
 }
 //////////////////////////////////////////////////////////////////////////
 void pauseAction() {
+  #if defined DEBUG
+        Serial.println(F("pause action"));
+          Serial.print(F("knownCard "));
+        Serial.println(knownCard);
+        #endif
+        
   if (myTriggerEnable.pauseTrack == true) {
     myTriggerEnable.pauseTrack = false;
     if (activeModifier != NULL) {
@@ -4392,7 +4402,9 @@ Enum_PCS handleCardReader() {
 #endif
         if (tmpStopWhenCardAway) {
           knownCard = false;
+          myTriggerEnable.pauseTrack |= true;
           myTrigger.pauseTrack |= true;
+          pauseAction();
           //mp3Pause();
           //setstandbyTimer();
         }
@@ -4406,8 +4418,10 @@ Enum_PCS handleCardReader() {
 
           //nur weiterspielen wenn vorher nicht konfiguriert wurde
           //if (!forgetLastCard) {
-          knownCard = true;
+          knownCard = true;          
+          myTriggerEnable.pauseTrack |= true;
           myTrigger.pauseTrack |= true;
+          pauseAction();
           //mp3.start();
           //disablestandbyTimer();
           /*}

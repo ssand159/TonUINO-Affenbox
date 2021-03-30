@@ -4,9 +4,9 @@
 
 /////!! NICHT ENTFERNEN!!/////
 #if not defined AiO
-#define VERSION_TONUINO 2.1
+#define VERSION_TONUINO 2.13
 #else
-#define VERSION_TONUINO 2.2
+#define VERSION_TONUINO 2.23
 #endif
 //////////////////////////////
 
@@ -27,9 +27,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 ///////// conifguration of the input and output pins //////////////////////
-#define buttonPause A2 //Default A0; Pocket A2
-#define buttonUp A0 //Default A1; AiO A4; Pocket A0
-#define buttonDown A1//Default A2; AiO A3; Pocket A1
+#define buttonPause A0 //Default A0; Pocket A2
+#define buttonUp A1 //Default A1; AiO A4; Pocket A0
+#define buttonDown A2//Default A2; AiO A3; Pocket A1
 #define busyPin 4
 
 #define shutdownPin 7 //Default 7; AiO 7
