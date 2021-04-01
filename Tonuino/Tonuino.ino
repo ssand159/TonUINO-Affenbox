@@ -52,6 +52,7 @@
       -OK-: Major: Pause wenn Kart weg ohne Funktion.
       -OK-: Major: Wenn Pause wenn Karte weg aktiv, next Track und Play ohne Funktion, wenn Kart weg -> knownCard = false pause Trigger triggert pause nicht
       -OK-: Update: Rotary Encoder without Interrupts, usable with nearly all Pins
+      -OK-: Update: Standard IR Remote werte ergänzt
 */
 #include "Configuration.h"
 #include <DFMiniMp3.h>
@@ -638,6 +639,7 @@ void resetSettings() {
   mySettings.stopWhenCardAway = false;
   mySettings.userAge = 0;
   mySettings.nfcGain = 1;
+  
   mySettings.analogInputTolerance = 5;
   mySettings.analogInputTriggerTime = SHORT_PRESS;
   mySettings.analogInputTriggerType = NoType;
@@ -654,12 +656,31 @@ void resetSettings() {
   mySettings.analogInUserValues[ShortcutTrigger + 9] = 6000;
   mySettings.analogInUserValues[ShortcutTrigger + 10] = 6000;
   mySettings.analogInUserValues[ShortcutTrigger + 11] = 6000;
-  for (uint8_t i = 1; i < ShortcutTrigger; i++) {
-    mySettings.analogInUserValues[i] = 6000;
-  }
-  for (uint8_t i = 0; i < sizeOfInputTrigger; i++) {
-    mySettings.irRemoteUserCodes[i] = 0;
-  }
+
+  
+  mySettings.irRemoteUserCodes[NoTrigger] = 0;
+  mySettings.irRemoteUserCodes[PauseTrackTrigger] = 0x1C;
+  mySettings.irRemoteUserCodes[NextTrigger] = 0x5a;
+  mySettings.irRemoteUserCodes[NextPlusTenTrigger] = 0;
+  mySettings.irRemoteUserCodes[PreviousTrigger] = 0x8;
+  mySettings.irRemoteUserCodes[PreviousPlusTenTrigger] = 0x5a;
+  mySettings.irRemoteUserCodes[VolumeUpTrigger] = 0x18;
+  mySettings.irRemoteUserCodes[VolumeDownTrigger] = 0;
+  mySettings.irRemoteUserCodes[AbortTrigger] = 0xd;
+  mySettings.irRemoteUserCodes[AdminMenuTrigger] = 0x16;
+  mySettings.irRemoteUserCodes[ResetTrackTrigger] = 0;
+  mySettings.irRemoteUserCodes[ShortcutTrigger] = 0x45;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 1] = 0x46;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 2] = 0x47;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 3] = 0x44;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 4] = 0x40;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 5] = 0x43;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 6] = 0x7;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 7] = 0x15;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 8] = 0x9;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 9] = 0x19;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 10] = 0;
+  mySettings.irRemoteUserCodes[ShortcutTrigger + 11] = 0;
 
   writeSettings();
 }
