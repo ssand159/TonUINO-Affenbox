@@ -2792,9 +2792,6 @@ void readTrigger(bool invertVolumeButtons = false) {
 #endif
 
 #if defined ROTARY_ENCODER
-#if define  ROTARY_ENCODER_PRINT
-  Serial.println(F("Rotary Enable"));
-#endif
   RotEncSetVolume();
 #endif
 

@@ -19,7 +19,7 @@
 //#define FADING_LED      //nur in Verbindung mit POWER_ON_LED
 //#define ANALOG_INPUT    //Programmierbarer Analoger Eingang, setzt entsprechende Hardware vorraus
 //#define IRREMOTE
-#define ROTARY_ENCODER    //
+//#define ROTARY_ENCODER    //
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -83,12 +83,12 @@
 #ifdef ROTARY_ENCODER
 #define ROTARY_ENCODER_STEPS 4
 #endif
-///////// conifguration of the analog input ////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
-//#define ANALOG_INPUT_PRINT //Aktiviert zusätzliche Debug Ausgaben im seriellen Moitor
-#define ROTARY_ENCODER_PRINT
+//#define ANALOG_INPUT_PRINT
+//#define ROTARY_ENCODER_PRINT
 //#define SHORTCUTS_PRINT
-//#define QUEUE_PRINT  //Debug Ausgabe der Queue
+//#define QUEUE_PRINT  
 //#define DFPLAYER_PRINT
 //#define IRREMOTE_PRINT
 
