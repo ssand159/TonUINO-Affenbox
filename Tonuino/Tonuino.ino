@@ -1,8 +1,11 @@
-/* ToDo:          
-   To Do: Startansage Puzzle/Quiz, ähnlich Rechnen lernen
+/* ToDo:
+   #########################Open#########################
+   Test: New Rotray Encoder with AiO
+   Add: Startansage Puzzle/Quiz, ähnlich Rechnen lernen
    Minor Hörbuch nach ende des letzten Tracks, wenn Titel nicht auf Karte gespeichert, keine Ansage
    Minor Trackspeicher, Fehlerhafte abhandlung wenn Track nicht gespeichert und karte wieder erwartet wird.
-   #########################
+   
+   #########################ToDo#########################
    ---Umzug auf PlatformIO---
    Alterssperre
    Sleepmodifier, Lautstärke ausfaden lassen
@@ -14,6 +17,8 @@
    Always Queue
    Jukebox Modifier: Rndom Track bis RFID aufgelegt, dann einen Track aus RFID und weiter mit Random
    Memory: Modifier karte, die mit einem Satz memory RFID Tags mehrere Motive zulässt
+   
+   #########################Done#########################
       -OK-:IR: Anlernen falsche Sprachausgaben
       -OK-:IR: Anlernen fehlerhaft, alle Buttons = pause
       -OK-:voiceMenu: NextTrack wird ausgeführt und Titel angespielt.
@@ -43,14 +48,15 @@
       -OK-: Minor: Puzzel/Quiz Feedbacksound fehlerhaft
       -OK- Minor: Shortcut enable in Puzzle/Quiz
       -OK-: Minor: Queue Probleme in Quiz, Fragen werden widerholt
-      -OK-: Minor: Erstellung Puzzle Karte, Teil speicher verdreht?   
+      -OK-: Minor: Erstellung Puzzle Karte, Teil speicher verdreht?
       -OK-: Major: Pause wenn Kart weg ohne Funktion.
       -OK-: Major: Wenn Pause wenn Karte weg aktiv, next Track und Play ohne Funktion, wenn Kart weg -> knownCard = false pause Trigger triggert pause nicht
+      -OK-: Update: Rotary Encoder without Interrupts, usable with nearly all Pins
 */
 #include "Configuration.h"
 #include <DFMiniMp3.h>
 #include <EEPROM.h>
-#include <JC_Button.h>
+#include <JC_Button.h> //https://github.com/JChristensen/JC_Button
 #include <MFRC522.h>
 #include <SPI.h>
 #include <SoftwareSerial.h>
@@ -58,11 +64,11 @@
 #include <avr/sleep.h>
 #endif
 #if defined ROTARY_ENCODER
-#include <TimerOne.h>
-#include <ClickEncoder.h>
+#define ENCODER_DO_NOT_USE_INTERRUPTS
+#include <Encoder.h> //https://github.com/PaulStoffregen/Encoder
 #endif
 #if defined IRREMOTE
-#include <IRremote.h>
+#include <IRremote.h> //https://github.com/Arduino-IRremote/Arduino-IRremote
 #endif
 #include "Emulated_EEPROM.h"
 
@@ -153,7 +159,12 @@ const uint8_t folderMemoryCount = 8;
 const uint8_t irRemoteCodeCount = sizeOfInputTrigger;
 //IRrecv IrReceiver(IRREMOTE_PIN); // create IRrecv instance
 //decode_results irReading;
+#endif
+//////////////////////////////////////////////////////////////////////////
 
+//////// Rotary Encoder ///////////////////////////////////////////////
+#if defined ROTARY_ENCODER
+Encoder myEnc(ROTARY_ENCODER_PIN_A, ROTARY_ENCODER_PIN_B);
 #endif
 //////////////////////////////////////////////////////////////////////////
 
@@ -165,14 +176,6 @@ uint8_t firstTrack;
 uint8_t queue[255];
 uint8_t volume;
 static uint8_t _lastTrackFinished;
-//////////////////////////////////////////////////////////////////////////
-
-//////// rotary encoder /////////////////////////////////////////////////
-#if defined ROTARY_ENCODER
-int8_t RotEncOldEncPos = -1 ;
-int8_t RotEncPos = 15;
-ClickEncoder encoder(ROTARY_ENCODER_PIN_A, ROTARY_ENCODER_PIN_B, ROTARY_ENCODER_STEPS);
-#endif
 //////////////////////////////////////////////////////////////////////////
 
 //////// analog input /////////////////////////////////////////////////
@@ -341,7 +344,6 @@ void readAnalogIn();
 #endif
 #if defined ROTARY_ENCODER
 void RotEncSetVolume ();
-void timerIsr() ;
 #endif
 void checkNoTrigger ();
 void readTrigger(bool invertVolumeButtons = false);
@@ -1067,7 +1069,7 @@ class QuizGame: public Modifier {
     }
 
     void CompareParts() {
-      if ((this->PartOneSpecial ==this-> PartTwoSpecial) && (this->PartOneFolder == this->PartTwoFolder) && (this->PartOneSpecial2 == this->PartTwoSpecial2)) {
+      if ((this->PartOneSpecial == this-> PartTwoSpecial) && (this->PartOneFolder == this->PartTwoFolder) && (this->PartOneSpecial2 == this->PartTwoSpecial2)) {
         PartTwoSaved = false;
         return;
       }
@@ -1137,7 +1139,7 @@ class QuizGame: public Modifier {
       this->PartOneSpecial = queue[currentTrack - 1];
       this->PartOneSpecial2 = this->PartOneSpecial;
 #if defined DEBUG
-Serial.print(F("Track: "));
+      Serial.print(F("Track: "));
       Serial.println(currentTrack);
       Serial.print(F("Part: "));
       Serial.println(this->PartOneSpecial);
@@ -2094,8 +2096,8 @@ static void nextTrack(uint8_t track, bool force = false) {
 #ifdef DEBUG
   Serial.print(F("next track "));
   Serial.println(track);
-          Serial.print(F("knownCard "));
-        Serial.println(knownCard);
+  Serial.print(F("knownCard "));
+  Serial.println(knownCard);
 #endif
   if (!force && (track == _lastTrackFinished || (knownCard == false && activeShortCut < 0))) {
 #ifdef DEBUG
@@ -2444,14 +2446,9 @@ void setup() {
   }
   randomSeed(ADCSeed); // Zufallsgenerator initialisieren
 
-#if defined ROTARY_ENCODER
-  Timer1.initialize(1000);
-  Timer1.attachInterrupt(timerIsr);
-  encoder.setAccelerationEnabled(false);
-#if defined ROTARY_ENCODER_PIN_SUPPLY
+#if defined ROTARY_ENCODER_PIN_SUPPLY && defined ROTARY_ENCODER
   pinMode(ROTARY_ENCODER_PIN_SUPPLY, OUTPUT);
   digitalWrite(ROTARY_ENCODER_PIN_SUPPLY, HIGH);
-#endif
 #endif
 
 #if defined IRREMOTE
@@ -2758,48 +2755,26 @@ void readAnalogIn() {
 #endif
 
 #if defined ROTARY_ENCODER
+int8_t currentPosition  = 0;
+
 void RotEncSetVolume () {
-
-  RotEncPos += encoder.getValue();
-
-  if (RotEncPos != RotEncOldEncPos)  {
-#if defined ROTARY_ENCODER_PRINT
-    Serial.print(F("RotEncPos: "));
-    Serial.println(RotEncPos);
-    Serial.print(F("RotEncOldEncPos: "));
-    Serial.println(RotEncOldEncPos);
+  int8_t newPosition = myEnc.read()/ROTARY_ENCODER_STEPS;
+  
+  if (newPosition != currentPosition) {
+    if (newPosition > currentPosition) {
+#if defined ROTARY_ENCODER
+      Serial.println(F("encoder direction clockwise"));
 #endif
-
-    RotEncOldEncPos = RotEncPos;
-
-    if (RotEncPos > (mySettings.maxVolume)) {
-#if defined ROTARY_ENCODER_PRINT
-      Serial.println(F("RotEncPos corrected to max"));
+      myTrigger.volumeUp |= true;
+    } else if (newPosition < currentPosition) {
+#if defined ROTARY_ENCODER
+      Serial.println(F("encoder direction conterclockwise"));
 #endif
-      RotEncPos  = mySettings.maxVolume;
+      myTrigger.volumeDown |= true;
     }
-    else if (RotEncPos < (mySettings.minVolume)) {
-#if defined ROTARY_ENCODER_PRINT
-      Serial.println(F("RotEncPos corrected to min"));
-#endif
-      RotEncPos  = mySettings.minVolume;
-    }
-
-    if (activeModifier != NULL) {
-      if (activeModifier->handleVolume() == true) {
-        return;
-      }
-    }
-    volume = RotEncPos;
-    mp3.setVolume(volume);
-#if defined DEBUG || defined ROTARY_ENCODER_PRINT
-    Serial.print(F("volume: "));
-    Serial.println(volume);
-#endif
+    currentPosition = 0;
+    myEnc.write(currentPosition);
   }
-}
-void timerIsr() {
-  encoder.service();
 }
 #endif
 
@@ -2814,6 +2789,13 @@ void readTrigger(bool invertVolumeButtons = false) {
 
 #if defined ANALOG_INPUT
   readAnalogIn();
+#endif
+
+#if defined ROTARY_ENCODER
+#if define  ROTARY_ENCODER_PRINT
+  Serial.println(F("Rotary Enable"));
+#endif
+  RotEncSetVolume();
 #endif
 
   checkNoTrigger ();
@@ -2959,12 +2941,12 @@ void previousAction() {
 }
 //////////////////////////////////////////////////////////////////////////
 void pauseAction() {
-  #if defined DEBUG
-        Serial.println(F("pause action"));
-          Serial.print(F("knownCard "));
-        Serial.println(knownCard);
-        #endif
-        
+#if defined DEBUG
+  Serial.println(F("pause action"));
+  Serial.print(F("knownCard "));
+  Serial.println(knownCard);
+#endif
+
   if (myTriggerEnable.pauseTrack == true) {
     myTriggerEnable.pauseTrack = false;
     if (activeModifier != NULL) {
@@ -3043,10 +3025,6 @@ void adminMenuAction() {
 void loop () {
   checkStandbyAtMillis();
   mp3.loop();
-
-#if defined ROTARY_ENCODER
-  RotEncSetVolume();
-#endif
 
 #if defined FADING_LED
   fadeStatusLed(isPlaying());
@@ -4417,7 +4395,7 @@ Enum_PCS handleCardReader() {
 
           //nur weiterspielen wenn vorher nicht konfiguriert wurde
           //if (!forgetLastCard) {
-          knownCard = true;          
+          knownCard = true;
           myTriggerEnable.pauseTrack |= true;
           myTrigger.pauseTrack |= true;
           pauseAction();

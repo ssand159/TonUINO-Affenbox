@@ -16,14 +16,11 @@
 //#define PUSH_ON_OFF     //Ein Ausschalten des TonUINO //mit AiO nicht mehr nötig, da standardmäßig vorhanden
 //#define SPEAKER_SWITCH  //mit AiO nicht mehr als externe Hardware nötig, da standardmäßig vorhanden
 //#define POWER_ON_LED
-//#define FADING_LED    //nur in Verbindung mit POWER_ON_LED
+//#define FADING_LED      //nur in Verbindung mit POWER_ON_LED
 //#define ANALOG_INPUT    //Programmierbarer Analoger Eingang, setzt entsprechende Hardware vorraus
 //#define IRREMOTE
+#define ROTARY_ENCODER    //
 
-#if not defined AiO    
-//Der AiO fehlen geeignete Inputs um den Rotary Encoder zu betreiben 
-//#define ROTARY_ENCODER // ROTARY ENCODER derzeit nicht nutzbar WIP
-#endif
 //////////////////////////////////////////////////////////////////////////
 
 ///////// conifguration of the input and output pins //////////////////////
@@ -37,8 +34,8 @@
 #define openAnalogPin A7 //Default A7, muss ein unbelegeter, analoger Eingang sein
 
 #ifdef FIVEBUTTONS
-#define buttonFourPin A4 //Default A3; AiO A2
-#define buttonFivePin A3 //Default A4; AiO A1
+#define buttonFourPin A3 //Default A3; AiO A2
+#define buttonFivePin A4 //Default A4; AiO A1
 #endif
 
 #define RST_PIN 9                 // Configurable, see typical pin layout above
@@ -49,7 +46,7 @@
 #endif
 
 #ifdef POWER_ON_LED
-#define POWER_ON_LED_PIN 6
+#define POWER_ON_LED_PIN 5
 #endif
 
 #ifdef ANALOG_INPUT
@@ -62,8 +59,8 @@
 #endif
 
 #ifdef ROTARY_ENCODER
-#define ROTARY_ENCODER_PIN_A 5 //Default 5; 
-#define ROTARY_ENCODER_PIN_B 6 //Default 6; 
+#define ROTARY_ENCODER_PIN_A A3  
+#define ROTARY_ENCODER_PIN_B A4  
 //#define ROTARY_ENCODER_PIN_SUPPLY 8 //Nur verwenden, wenn es unbedingt nötig ist! Die Versorgung des Rotary Encoder kann auch von einem IO Pin kommen-
 #endif
 //////////////////////////////////////////////////////////////////////////
@@ -89,7 +86,7 @@
 ///////// conifguration of the analog input ////////////////////////////
 
 //#define ANALOG_INPUT_PRINT //Aktiviert zusätzliche Debug Ausgaben im seriellen Moitor
-//#define ROTARY_ENCODER_PRINT
+#define ROTARY_ENCODER_PRINT
 //#define SHORTCUTS_PRINT
 //#define QUEUE_PRINT  //Debug Ausgabe der Queue
 //#define DFPLAYER_PRINT
