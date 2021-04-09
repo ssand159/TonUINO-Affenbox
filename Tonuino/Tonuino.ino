@@ -1,10 +1,11 @@
 /* ToDo:
    #########################Open#########################
+   
    Test: New Rotray Encoder with AiO
    Add: Startansage Puzzle/Quiz, ähnlich Rechnen lernen
    Minor Hörbuch nach ende des letzten Tracks, wenn Titel nicht auf Karte gespeichert, keine Ansage
    Minor Trackspeicher, Fehlerhafte abhandlung wenn Track nicht gespeichert und karte wieder erwartet wird.
-   
+
    #########################ToDo#########################
    ---Umzug auf PlatformIO---
    Alterssperre
@@ -17,7 +18,7 @@
    Always Queue
    Jukebox Modifier: Rndom Track bis RFID aufgelegt, dann einen Track aus RFID und weiter mit Random
    Memory: Modifier karte, die mit einem Satz memory RFID Tags mehrere Motive zulässt
-   
+
    #########################Done#########################
       -OK-:IR: Anlernen falsche Sprachausgaben
       -OK-:IR: Anlernen fehlerhaft, alle Buttons = pause
@@ -53,6 +54,7 @@
       -OK-: Major: Wenn Pause wenn Karte weg aktiv, next Track und Play ohne Funktion, wenn Kart weg -> knownCard = false pause Trigger triggert pause nicht
       -OK-: Update: Rotary Encoder without Interrupts, usable with nearly all Pins
       -OK-: Update: Standard IR Remote werte ergänzt
+      -OK-:Major: Quiz, bei aUflegen einer Antwort wird der Track der Antwort übernommen und die nächste Frage ist Antwort +1
 */
 #include "Configuration.h"
 #include <DFMiniMp3.h>
@@ -639,7 +641,7 @@ void resetSettings() {
   mySettings.stopWhenCardAway = false;
   mySettings.userAge = 0;
   mySettings.nfcGain = 1;
-  
+
   mySettings.analogInputTolerance = 5;
   mySettings.analogInputTriggerTime = SHORT_PRESS;
   mySettings.analogInputTriggerType = NoType;
@@ -657,7 +659,7 @@ void resetSettings() {
   mySettings.analogInUserValues[ShortcutTrigger + 10] = 6000;
   mySettings.analogInUserValues[ShortcutTrigger + 11] = 6000;
 
-  
+
   mySettings.irRemoteUserCodes[NoTrigger] = 0;
   mySettings.irRemoteUserCodes[PauseTrackTrigger] = 0x1C;
   mySettings.irRemoteUserCodes[NextTrigger] = 0x5a;
@@ -981,11 +983,12 @@ class PuzzleGame: public Modifier {
     PuzzleGame(uint8_t special)
     {
       mp3.loop();
-      mp3Pause();
 #if defined DEBUG
       Serial.println(F("PuzzleGame"));
 #endif
-
+      mp3Pause();
+      mp3.playMp3FolderTrack(407); // intro
+      waitForTrackToFinish();
       mode = special;
     }
 
@@ -1129,6 +1132,8 @@ class QuizGame: public Modifier {
       Serial.println(F("QuizGame"));
 #endif
       mp3Pause();
+      mp3.playMp3FolderTrack(408); // intro
+      waitForTrackToFinish();
 
       this->PartOneFolder = special;
       numTracksInFolder = mp3.getFolderTrackCount(this->PartOneFolder);
@@ -1152,9 +1157,13 @@ class QuizGame: public Modifier {
         currentTrack++;
       } else {
 #if defined DEBUG
-        Serial.println(F("QuizGame > queue repeat"));
+        Serial.println(F("QuizGame > end of queue"));
 #endif
-        currentTrack = 1;
+        mp3Pause();
+        mp3.playMp3FolderTrack(409);
+        waitForTrackToFinish();
+        RemoveModifier();
+        return;        
       }
       this->PartOneSaved = true;
       this->PartOneSpecial = queue[currentTrack - 1];
@@ -1179,8 +1188,11 @@ class QuizGame: public Modifier {
 #if defined DEBUG
       Serial.println(F("QuizGame > pause and repeat "));
 #endif
-      mp3Pause();
-      mp3.playFolderTrack(this->PartOneFolder, this->PartOneSpecial);
+      if (isPlaying()) {
+        mp3Pause();
+      } else {
+        mp3.playFolderTrack(this->PartOneFolder, this->PartOneSpecial);
+      }
       return true;
     }
 
@@ -1220,7 +1232,10 @@ class QuizGame: public Modifier {
           this->PartTwoSpecial2 = newCard->nfcFolderSettings.special2;
           this->PartTwoSaved = true;
         }
-        return false;
+        
+        mp3.playFolderTrack(newCard->nfcFolderSettings.folder, newCard->nfcFolderSettings.special);
+        waitForTrackToFinish();
+        return true;
       }
     }
     virtual bool handleStopWhenCardAway() {
@@ -2374,6 +2389,7 @@ void waitForTrackToFinish (bool interruptByTrigger = true, uint16_t timeOut = 50
 #if defined DFPLAYER_PRINT
       Serial.println(F("abort wait"));
 #endif
+      mp3Pause();
       break;
     }
 
@@ -2779,8 +2795,8 @@ void readAnalogIn() {
 int8_t currentPosition  = 0;
 
 void RotEncSetVolume () {
-  int8_t newPosition = myEnc.read()/ROTARY_ENCODER_STEPS;
-  
+  int8_t newPosition = myEnc.read() / ROTARY_ENCODER_STEPS;
+
   if (newPosition != currentPosition) {
     if (newPosition > currentPosition) {
 #if defined ROTARY_ENCODER
