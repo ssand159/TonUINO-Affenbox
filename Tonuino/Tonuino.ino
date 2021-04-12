@@ -1,6 +1,9 @@
 /* ToDo:
    #########################Open#########################
    
+   Major: Satischer Analoger input, Anlernprozedur falsch. EIngang wird direkt übernommen, anstatt auf wechsel zu warten, bzw sollte stellung bestätigt werden.
+   Major: statischer analoger input, falsche Erkennung der Zustände, Bsp. Admin MEnü erst bei wechsel erkannt.
+
    Test: New Rotray Encoder with AiO
    Add: Startansage Puzzle/Quiz, ähnlich Rechnen lernen
    Minor Hörbuch nach ende des letzten Tracks, wenn Titel nicht auf Karte gespeichert, keine Ansage
@@ -55,6 +58,8 @@
       -OK-: Update: Rotary Encoder without Interrupts, usable with nearly all Pins
       -OK-: Update: Standard IR Remote werte ergänzt
       -OK-:Major: Quiz, bei aUflegen einer Antwort wird der Track der Antwort übernommen und die nächste Frage ist Antwort +1
+      -OK-:Critical: Lautstärke auf langem Druck, wird nur um eins erhöht pro Druck
+      -OK-: Major: unprogrammierter Shortcut löscht Karte
 */
 #include "Configuration.h"
 #include <DFMiniMp3.h>
@@ -1163,7 +1168,7 @@ class QuizGame: public Modifier {
         mp3.playMp3FolderTrack(409);
         waitForTrackToFinish();
         RemoveModifier();
-        return;        
+        return;
       }
       this->PartOneSaved = true;
       this->PartOneSpecial = queue[currentTrack - 1];
@@ -1232,7 +1237,7 @@ class QuizGame: public Modifier {
           this->PartTwoSpecial2 = newCard->nfcFolderSettings.special2;
           this->PartTwoSaved = true;
         }
-        
+
         mp3.playFolderTrack(newCard->nfcFolderSettings.folder, newCard->nfcFolderSettings.special);
         waitForTrackToFinish();
         return true;
@@ -2095,9 +2100,9 @@ void activateShortCut (uint8_t shortCutNo) {
 #if defined DEBUG || defined SHORTCUTS_PRINT
   Serial.print("play short cut no ");
   Serial.println(shortCutNo);
-#endif
-  knownCard = false;
+#endif  
   if (shortCuts[shortCutNo].mode != 0) {
+    knownCard = false;
     switch (shortCuts[shortCutNo].folder) {
       case ModifierMode:
         SetModifier (&shortCuts[shortCutNo]);
@@ -2167,9 +2172,10 @@ static void nextTrack(uint8_t track, bool force = false) {
         currentTrack = currentTrack + 1;
         if (myFolder->special3 > 0 && currentTrack != 0) {
           writeCardMemory (currentTrack);
-        }
+        } 
+      }else {
         return;
-      }
+        }
       break;
     case Album_Section:
       if (currentTrack < myFolder->special2) {
@@ -2592,18 +2598,6 @@ void readButtons(bool invertVolumeButtons = false) {
                       !upButton.isPressed() && !downButton.isPressed();
   myTrigger.pauseTrack |= pauseButton.wasReleased() && myTriggerEnable.cancel;
 #if defined FIVEBUTTONS
-  //  if (invertVolumeButtons) {
-  //    //5 Buttons invertiert
-  //    myTrigger.next |= upButton.wasReleased() && myTriggerEnable.shortCutNo[0];
-  //    myTrigger.previous |= downButton.wasReleased() && myTriggerEnable.shortCutNo[1];
-  //    myTrigger.shortCutNo[0] |= upButton.pressedFor(LONG_PRESS);
-  //    myTrigger.shortCutNo[1] |= downButton.pressedFor(LONG_PRESS);
-  //    myTrigger.volumeUp |= buttonFour.wasReleased();
-  //    myTrigger.volumeDown |= buttonFive.wasReleased();
-  //    myTrigger.nextPlusTen |= myTrigger.shortCutNo[0];
-  //    myTrigger.previousPlusTen |= myTrigger.shortCutNo[1];
-  //  } else {
-  //5 Buttons nicht invertiert
   myTrigger.volumeUp |= upButton.wasReleased();
   myTrigger.volumeDown |= downButton.wasReleased();
   myTrigger.shortCutNo[0] |= buttonFour.pressedFor(LONG_PRESS);
@@ -2616,8 +2610,10 @@ void readButtons(bool invertVolumeButtons = false) {
 #else
   if (invertVolumeButtons) {
     //3 Buttons invertiert
+#if not defined ROTARY_ENCODER 
     myTrigger.volumeUp |= upButton.wasReleased() && myTriggerEnable.next && myTriggerEnable.shortCutNo[0];
     myTrigger.volumeDown |= downButton.wasReleased() && myTriggerEnable.previous && myTriggerEnable.shortCutNo[1];
+#endif
     myTrigger.next |= upButton.pressedFor(LONG_PRESS) && myTriggerEnable.shortCutNo[0];
     myTrigger.previous |= downButton.pressedFor(LONG_PRESS) && myTriggerEnable.shortCutNo[1];
     myTrigger.shortCutNo[0] |= upButton.pressedFor(LONG_PRESS);
@@ -2626,8 +2622,10 @@ void readButtons(bool invertVolumeButtons = false) {
     myTrigger.previousPlusTen |= downButton.pressedFor(LONG_PRESS);
   } else {
     //3 Buttons nicht invertiert
-    myTrigger.volumeUp |= upButton.pressedFor(LONG_PRESS) && myTriggerEnable.shortCutNo[0];
-    myTrigger.volumeDown |= downButton.pressedFor(LONG_PRESS) && myTriggerEnable.shortCutNo[1];
+#if not defined ROTARY_ENCODER  
+    myTrigger.volumeUp |= upButton.pressedFor(LONG_PRESS); //&& myTriggerEnable.shortCutNo[0];
+    myTrigger.volumeDown |= downButton.pressedFor(LONG_PRESS); //&& myTriggerEnable.shortCutNo[1];
+#endif
     myTrigger.next |= upButton.wasReleased() && myTriggerEnable.volumeUp && myTriggerEnable.shortCutNo[0];
     myTrigger.previous |= downButton.wasReleased() && myTriggerEnable.volumeDown && myTriggerEnable.shortCutNo[1];
     myTrigger.shortCutNo[0] |= upButton.pressedFor(LONG_PRESS);
@@ -3121,18 +3119,18 @@ void loop () {
   }
 
   if (myTrigger.volumeUp) {
-#if defined FIVEBUTTONS
+#if defined FIVEBUTTONS || defined ROTARY_ENCODER
     volumeUpAction(false);
 #else
-    volumeUpAction(mySettings.invertVolumeButtons);
+    volumeUpAction(!mySettings.invertVolumeButtons);
 #endif
   }
 
   if (myTrigger.volumeDown) {
-#if defined FIVEBUTTONS
+#if defined FIVEBUTTONS || defined ROTARY_ENCODER
     volumeDownAction(false);
 #else
-    volumeDownAction(mySettings.invertVolumeButtons);
+    volumeDownAction(!mySettings.invertVolumeButtons);
 #endif
   }
 
@@ -3263,7 +3261,11 @@ void adminMenu(bool fromCard = false) {
     }
     else if (subMenu == InvertButtons) {
       // Invert Functions for Up/Down Buttons
-      switch (voiceMenu(2, 933, 933, false)) {
+#if defined FIVEBUTTONS || defined ROTARY_ENCODER
+      mp3.playMp3FolderTrack(992);
+      waitForTrackToFinish();
+#else
+      switch (voiceMenu(2, 989, 989, false)) {
         case 1:
           mySettings.invertVolumeButtons = false;
           break;
@@ -3271,6 +3273,7 @@ void adminMenu(bool fromCard = false) {
           mySettings.invertVolumeButtons = true;
           break;
       }
+#endif
     }
     else if (subMenu == StopWhenCardAway) {
       switch (voiceMenu(2, 937, 933, false)) {

@@ -50,7 +50,7 @@
 #endif
 
 #ifdef ANALOG_INPUT
-#define ANALOG_INPUT_PIN  A4
+#define ANALOG_INPUT_PIN  A5
 //#define ANALOG_INPUT_SUPPLY_PIN 6 //Nur verwenden, wenn es unbedingt nötig ist!Der Referenzpegel kann auch von einem IO Pin kommen.
 #endif
 
@@ -85,6 +85,29 @@
 #endif
 /////////////////////////////////////////////////////////////////////////
 
+///////// conifguration of the rotary encoder ////////////////////////////
+//Wenn das Protokoll der gewünschten Fernbedienung beaknnt ist, sollte NUR DAS ENTSPRECHENDE PROTOKOLL auskommentiert werden, um Speicher zu sparen.
+//Falls alle Protokolle auskommentiert sind, werden auch alle Protokolle unterstüzt. !ACHUTNG! Hoher Speicherverbrauch bei Verwendung aller Protokolle !Achtung!
+#ifdef IRREMOTE
+//#define DECODE_DENON        // Includes Sharp
+//#define DECODE_JVC
+//#define DECODE_KASEIKYO
+//#define DECODE_PANASONIC    // the same as DECODE_KASEIKYO
+//#define DECODE_LG
+#define DECODE_NEC          // Includes Apple and Onkyo
+//#define DECODE_SAMSUNG
+//#define DECODE_SONY
+//#define DECODE_RC5
+//#define DECODE_RC6
+
+//#define DECODE_BOSEWAVE
+//#define DECODE_LEGO_PF
+//#define DECODE_MAGIQUEST
+//#define DECODE_WHYNTER
+
+//#define DECODE_HASH         // special decoder for all protocols
+#endif
+/////////////////////////////////////////////////////////////////////////
 //#define ANALOG_INPUT_PRINT
 //#define ROTARY_ENCODER_PRINT
 //#define SHORTCUTS_PRINT
