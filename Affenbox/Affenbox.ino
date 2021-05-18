@@ -2267,33 +2267,7 @@ void waitForTrackToStart(uint16_t timeOut /* = 5000 */)
 }
 //////////////////////////////////////////////////////////////////////////
 void setup()
-{
-
-#if defined AiO
-  // spannung einschalten
-  pinMode(7, OUTPUT);
-  digitalWrite(7, HIGH);
-
-  // sd karten zugang aus
-  pinMode(A5, OUTPUT);
-  digitalWrite(A5, LOW);
-#elif defined PUSH_ON_OFF
-  pinMode(PUSH_ON_OFF_PIN, OUTPUT);
-  digitalWrite(PUSH_ON_OFF_PIN, LOW);
-#endif
-
-#if defined AiO
-  // verstärker aus
-  pinMode(8, OUTPUT);
-  digitalWrite(8, HIGH);
-
-#elif defined SPEAKER_SWITCH
-  pinMode(SPEAKER_SWITCH_PIN, OUTPUT);
-  digitalWrite(SPEAKER_SWITCH_PIN, LOW);
-#endif
-
-  mp3.begin();
-
+{      
 #if defined DEBUG || defined ANALOG_INPUT_PRINT || defined ROTARY_ENCODER_PRINT || defined SHORTCUTS_PRINT || defined QUEUE_PRINT || defined DFPLAYER_PRINT || defined IRREMOTE_PRINT
   Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
   // Dieser Hinweis darf nicht entfernt werden
@@ -2303,40 +2277,42 @@ void setup()
 #endif
 
 #if defined AiO
- // internal reference voltage 2,048V
+  // spannung einschalten
+  pinMode(7, OUTPUT);
+  digitalWrite(7, HIGH);
+
+   // sd karten zugang aus
+  pinMode(A5, OUTPUT);
+  digitalWrite(A5, LOW);
+
+  // verstärker aus
+  pinMode(8, OUTPUT);
+  digitalWrite(8, HIGH);
+
+   // internal reference voltage 2,048V
   analogReference(INTERNAL2V048);
   // adc resolution 12 bit
   analogReadResolution(12);
 #else
-  analogReference(DEFAULT);
+#if defined SPEAKER_SWITCH
+  pinMode(SPEAKER_SWITCH_PIN, OUTPUT);
+  digitalWrite(SPEAKER_SWITCH_PIN, LOW);
 #endif
 
-  // Busy Pin
+#if defined PUSH_ON_OFF
+  pinMode(PUSH_ON_OFF_PIN, OUTPUT);
+  digitalWrite(PUSH_ON_OFF_PIN, LOW);
+#endif
+
+analogReference(DEFAULT);
+
+#endif
+
+  mp3.begin();
+  delay(500);
+
+ // Busy Pin
   pinMode(busyPin, INPUT);
-
-  // Wert für randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
-  uint32_t ADC_LSB;
-  uint32_t ADCSeed;
-  for (uint8_t i = 0; i < 128; i++)
-  {
-    ADC_LSB = analogRead(openAnalogPin) & 0x1;
-    ADCSeed ^= ADC_LSB << (i % 32);
-  }
-  randomSeed(ADCSeed); // Zufallsgenerator initialisieren
-
-#if defined ROTARY_ENCODER_PIN_SUPPLY && defined ROTARY_ENCODER
-  pinMode(ROTARY_ENCODER_PIN_SUPPLY, OUTPUT);
-  digitalWrite(ROTARY_ENCODER_PIN_SUPPLY, HIGH);
-#endif
-
-#if defined IRREMOTE
-  IrReceiver.begin(IRREMOTE_PIN, DISABLE_LED_FEEDBACK);
-#endif
-
-#if defined POWER_ON_LED
-  pinMode(POWER_ON_LED_PIN, OUTPUT);
-  digitalWrite(POWER_ON_LED_PIN, LOW);
-#endif
 
   // NFC Leser initialisieren
   SPI.begin();        // Init SPI bus
@@ -2367,6 +2343,20 @@ void setup()
   pinMode(buttonFivePin, INPUT_PULLUP);
 #endif
 
+#if defined ROTARY_ENCODER_PIN_SUPPLY && defined ROTARY_ENCODER
+  pinMode(ROTARY_ENCODER_PIN_SUPPLY, OUTPUT);
+  digitalWrite(ROTARY_ENCODER_PIN_SUPPLY, HIGH);
+#endif
+
+#if defined IRREMOTE
+  IrReceiver.begin(IRREMOTE_PIN, DISABLE_LED_FEEDBACK);
+#endif
+
+#if defined POWER_ON_LED
+  pinMode(POWER_ON_LED_PIN, OUTPUT);
+  digitalWrite(POWER_ON_LED_PIN, LOW);
+#endif
+
 #if defined ANALOG_INPUT
   // Don't use internal pull-up resistor.
   pinMode(ANALOG_INPUT_PIN, INPUT);
@@ -2381,6 +2371,16 @@ void setup()
   analogInputButtonConfig->setFeature(ButtonConfig::kFeatureClick);
   analogInputButtonConfig->setFeature(ButtonConfig::kFeatureLongPress);
 #endif
+
+  // Wert für randomSeed() erzeugen durch das mehrfache Sammeln von rauschenden LSBs eines offenen Analogeingangs
+  uint32_t ADC_LSB;
+  uint32_t ADCSeed;
+  for (uint8_t i = 0; i < 128; i++)
+  {
+    ADC_LSB = analogRead(openAnalogPin) & 0x1;
+    ADCSeed ^= ADC_LSB << (i % 32);
+  }
+  randomSeed(ADCSeed); // Zufallsgenerator initialisieren
 
   resetTriggerEnable();
 
@@ -2407,20 +2407,20 @@ void setup()
   getSettings();
   getShortCuts();
 
+delay(1500);
+
 #if defined AiO
-  // verstärker an
-  digitalWrite(8, LOW);
-  delay(500);
+  //  verstärker an
+   digitalWrite(8, LOW);
 #elif defined SPEAKER_SWITCH
   digitalWrite(SPEAKER_SWITCH_PIN, HIGH);
-  delay(500);
 #endif
 
 #if defined POWER_ON_LED
   digitalWrite(POWER_ON_LED_PIN, HIGH);
 #endif
 
-  delay(2000);
+delay(500);
 
   mp3.loop();
   volume = mySettings.initVolume;

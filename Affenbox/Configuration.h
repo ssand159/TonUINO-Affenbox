@@ -7,9 +7,7 @@
 *https://www.leiterkartenpiraten.de/produkt/tonuino-all-in-one/
 */
 
-//#define AiO
-
-
+#define AiO
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,10 +28,21 @@
 /** 
  * Konfiguration der Standard Button Pins 
  */
+ 
+/**
+*Sample Classic
+*/
+//#define buttonPause A0
+//#define buttonUp A1 
+//#define buttonDown A2
 
-#define buttonPause A0
-#define buttonUp A1 
-#define buttonDown A2
+
+/**
+*Sample All in One
+*/
+ #define buttonPause A0
+ #define buttonUp A4
+ #define buttonDown A3
 
 /**
 *Sample Affenbox Pocket
@@ -50,12 +59,20 @@
 /**
 *Für die Verwendung von fünf Buttons, statt drei.
 */
-//#define FIVEBUTTONS    
+#define FIVEBUTTONS    
 
 #if defined FIVEBUTTONS
+/**
+*Sample Classic
+*/
+//#define buttonFourPin A3
+//#define buttonFivePin A4
 
-#define buttonFourPin A3
-#define buttonFivePin A4
+/**
+*Sample All in One
+*/
+#define buttonFourPin A1
+#define buttonFivePin A2
 
 #endif
 //===========================================================================
@@ -122,7 +139,7 @@
 *Bitte beachten: die AiO verwendet andere Referenspegel als der Arduino Nano!
 */
 
-#define ANALOG_INPUT
+//#define ANALOG_INPUT
 
 #if defined ANALOG_INPUT
 
@@ -401,5 +418,3 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-

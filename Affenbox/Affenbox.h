@@ -57,7 +57,11 @@ static const uint16_t EEPROM_size = 512;
 #endif
 static const uint16_t EEPROM_settingsStartAdress = 1;
 
+#if defined ANALOG_INPUT
 static const uint8_t availableShortCuts = 3 + ANALOG_INPUT_BUTTON_COUNT; //Die Anzahl Inputs einer 3x4 Matrix oder eines 0-9,#,* Tastenfeldes
+#else
+static const uint8_t availableShortCuts = 3 ; //
+#endif
 ///////// setup buttons //////////////////////////////////////////////////
 Button pauseButton(buttonPause);
 Button upButton(buttonUp);
