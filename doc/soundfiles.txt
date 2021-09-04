@@ -356,7 +356,7 @@
 0937.mp3|Möchtest du den Track stoppen wenn die Karte enfernt wird?
 0940.mp3|Wähle eine Shortcut Nummer mit der Vor- und Zurücktaste aus. Mit Pause bestätigen.
 0941.mp3|Wähle mit der Vor- und Zurücktaste aus was sie werden soll. Mit Pause bestätigen.
-0942.mp3|Ein Wiedergabe
+0942.mp3|Eine Wiedergabe
 0943.mp3|Eine Modifikation
 0944.mp3|Löschen
 0960.mp3|Nach wievielen Minuten soll der TonUINO ausgeschaltet werden?
@@ -381,7 +381,7 @@
 0981.mp3|Warte! Ich konnte deinen Fortschritt nicht speichern! Bitte lege die Karte nochmal auf.
 0982.mp3|Fortschritt gespeichert!
 0983.mp3|Soll der Fortschritt gespeichert werden?
-0986.mp3|Wähle eine Schutz mit der Vor- und Zurücktaste aus. Mit Pause bestätigen.
+0986.mp3|Wähle einen Schutz mit der Vor- und Zurücktaste aus. Mit Pause bestätigen.
 0987.mp3|Kein Schutz. Das Adminmenü kann jederzeit durch drücken von allen drei Tasten aktiviert werden.
 0988.mp3|Nur Adminkarte. Das Adminmenü kann nur mit einer Adminkarte geöffnet werden. Eine neue Adminkarte kann jederzeit angelernt werden.
 0989.mp3|Welche Funktionsweise sollen die Vor- und Zurücktasten haben? Es gibt die Möglichkeit die Lautstärke mit einem kurzen Tastendruck und den Titelwechsel mit einem langen Tastendruck zu konfigurieren. Oder entsprechend umgekehrt.
