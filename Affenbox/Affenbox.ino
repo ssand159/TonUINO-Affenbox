@@ -1957,7 +1957,7 @@ static void nextTrack(uint8_t track, bool force /* = false */)
     case AudioDrama_Section:
       resetCurrentCard();
       return;
-    break;
+      break;
     case Album:
       if (currentTrack < numTracksInFolder)
       {
@@ -2337,6 +2337,9 @@ void setup()
 #endif
 
   pinMode(buttonPause, INPUT_PULLUP);
+#if defined buttonPower
+  pinMode(buttonPower, INPUT_PULLUP);
+#endif
   pinMode(buttonUp, INPUT_PULLUP);
   pinMode(buttonDown, INPUT_PULLUP);
 #if defined FIVEBUTTONS
@@ -2449,9 +2452,13 @@ void readButtons(bool invertVolumeButtons = false)
   buttonFour.read();
   buttonFive.read();
 #endif
+#if defined buttonPower
+
+#else
   myTrigger.cancel |= pauseButton.pressedFor(LONGER_PRESS) &&
                       !upButton.isPressed() && !downButton.isPressed();
   myTrigger.pauseTrack |= pauseButton.wasReleased() && myTriggerEnable.cancel;
+#endif
 #if defined FIVEBUTTONS
   myTrigger.volumeUp |= upButton.wasReleased();
   myTrigger.volumeDown |= downButton.wasReleased();
@@ -4088,7 +4095,7 @@ bool SetModifier(folderSettings *tmpFolderSettings)
   if (activeModifier != NULL)
   {
     if (activeModifier->getActive() == tmpFolderSettings->mode)
-    {      
+    {
       return RemoveModifier();
     }
   }
@@ -4423,6 +4430,7 @@ void setstandbyTimer()
 #if defined DEBUG
   Serial.println(F("set stby timer"));
 #endif
+  standbyTimerSet = true;
 #if defined AiO
   // verstärker aus
   digitalWrite(8, HIGH);
@@ -4446,6 +4454,7 @@ void disablestandbyTimer()
 #if defined DEBUG
   Serial.println(F("disable stby timer"));
 #endif
+  standbyTimerSet = false;
 #if defined AiO
   // verstärker an
   digitalWrite(8, LOW);
@@ -4469,22 +4478,24 @@ void checkStandbyAtMillis()
       sleepAtMillis = 0;
       shutDown();
     }
-    if (isPlaying())
+    if (isPlaying() && standbyTimerSet)
     {
       disablestandbyTimer();
     }
   } else
   {
-    if (!isPlaying())
+    if (!isPlaying() && !standbyTimerSet)
     {
       setstandbyTimer();
+    } else if (isPlaying() && standbyTimerSet)
+    {
+      disablestandbyTimer();
     }
   }
 }
 //////////////////////////////////////////////////////////////////////////
 void shutDown()
 {
-#if defined PUSH_ON_OFF || defined AiO
 #if defined DEBUG
   Serial.println("Shut Down");
 #endif
@@ -4523,8 +4534,9 @@ void shutDown()
 #endif
 
 #if not defined AiO
+#if defined PUSH_ON_OFF
   digitalWrite(PUSH_ON_OFF_PIN, HIGH);
-
+#endif
   // enter sleep state
   // http://discourse.voss.earth/t/intenso-s10000-powerbank-automatische-abschaltung-software-only/805
   // powerdown to 27mA (powerbank switches off after 30-60s)
@@ -4535,9 +4547,9 @@ void shutDown()
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   cli(); // Disable interrupts
   sleep_mode();
+
 #else
   digitalWrite(7, LOW);
-#endif
 #endif
 }
 
