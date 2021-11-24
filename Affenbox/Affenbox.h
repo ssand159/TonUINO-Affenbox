@@ -85,6 +85,7 @@ enum Enum_Trigger {
   VolumeUpTrigger,
   VolumeDownTrigger,
   AbortTrigger,
+  ShutDownTrigger,
   AdminMenuTrigger,
   ResetTrackTrigger,
   ShortcutTrigger //muss an letzter Stelle stehen bleiben!
@@ -100,6 +101,7 @@ struct inputTrigger {
   bool volumeUp;
   bool volumeDown;
   bool cancel;
+  bool shutDown;
   bool adminMenu;
   bool resetTrack;
   bool shortCutNo [availableShortCuts]; //muss an letzter Stelle stehen bleiben!
