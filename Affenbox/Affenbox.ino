@@ -2452,12 +2452,14 @@ void readButtons(bool invertVolumeButtons = false)
   buttonFour.read();
   buttonFive.read();
 #endif
-#if defined buttonPower
 
-#else
   myTrigger.cancel |= pauseButton.pressedFor(LONGER_PRESS) &&
-                      !upButton.isPressed() && !downButton.isPressed();
+                      !upButton.isPressed() && !downButton.isPressed();                      
   myTrigger.pauseTrack |= pauseButton.wasReleased() && myTriggerEnable.cancel;
+#if defined buttonPower
+  myTrigger.shutDown |= powerButton.pressedFor(LONGER_PRESS);
+#else
+  myTrigger.shutDown |= myTrigger.cancel;
 #endif
 #if defined FIVEBUTTONS
   myTrigger.volumeUp |= upButton.wasReleased();
@@ -2560,6 +2562,9 @@ void readIr()
         case AbortTrigger:
           myTrigger.cancel |= true;
           break;
+        case ShutDownTrigger:
+          myTrigger.shutDown |= true;
+          break;
         case AdminMenuTrigger:
           myTrigger.adminMenu |= true;
           break;
@@ -2634,6 +2639,9 @@ void readAnalogIn(AceButton *button, uint8_t eventType, uint8_t buttonState)
             break;
           case AbortTrigger:
             myTrigger.cancel |= true;
+            break;
+          case ShutDownTrigger:
+            myTrigger.shutDown |= true;
             break;
           case AdminMenuTrigger:
             myTrigger.adminMenu |= true;
@@ -2714,7 +2722,7 @@ void readTrigger(bool invertVolumeButtons /* = false */)
 
 void checkNoTrigger()
 {
-  myTrigger.noTrigger = !(myTrigger.pauseTrack || myTrigger.next || myTrigger.nextPlusTen || myTrigger.previous || myTrigger.previousPlusTen || myTrigger.volumeUp || myTrigger.volumeDown || myTrigger.pauseTrack || myTrigger.cancel || myTrigger.adminMenu || myTrigger.resetTrack);
+  myTrigger.noTrigger = !(myTrigger.pauseTrack || myTrigger.next || myTrigger.nextPlusTen || myTrigger.previous || myTrigger.previousPlusTen || myTrigger.volumeUp || myTrigger.volumeDown || myTrigger.pauseTrack || myTrigger.cancel || myTrigger.shutDown || myTrigger.adminMenu || myTrigger.resetTrack);
 
   for (uint8_t i = 0; i < availableShortCuts; i++)
   {
@@ -2737,6 +2745,7 @@ void resetTrigger()
     myTrigger.shortCutNo[i] = false;
   }
   myTrigger.cancel = false;
+  myTrigger.shutDown = false;
   myTrigger.adminMenu = false;
   myTrigger.resetTrack = false;
 }
@@ -2756,6 +2765,7 @@ void resetTriggerEnable()
     myTriggerEnable.shortCutNo[i] = true;
   }
   myTriggerEnable.cancel = true;
+  myTriggerEnable.shutDown = true;
   myTriggerEnable.adminMenu = true;
   myTriggerEnable.resetTrack = true;
 }
@@ -2910,11 +2920,11 @@ void pauseAction()
 }
 
 //////////////////////////////////////////////////////////////////////////
-void cancelAction()
+void shutDownAction()
 {
-  if (myTriggerEnable.cancel == true)
+  if (myTriggerEnable.shutDown == true)
   {
-    myTriggerEnable.cancel = false;
+    myTriggerEnable.shutDown = false;
     if (activeModifier != NULL)
     {
       if (activeModifier->handleShutDown() == true)
@@ -2925,9 +2935,12 @@ void cancelAction()
         return;
       }
     }
+#if not defined buttonPower
     shutDown();
+#endif
   }
 }
+
 //////////////////////////////////////////////////////////////////////////
 void shortCutAction(uint8_t shortCutNo)
 {
@@ -3041,9 +3054,9 @@ void loop()
     pauseAction();
   }
 
-  else if (myTrigger.cancel)
+  else if (myTrigger.shutDown)
   {
-    cancelAction();
+    shutDownAction();
   }
 
   if (myTrigger.volumeUp)
