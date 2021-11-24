@@ -27,7 +27,7 @@ using ace_button::LadderButtonConfig;
 
 ///////// General globals ////////////////////////////////////////////////
 unsigned long sleepAtMillis = 0;
-
+bool standbyTimerSet = false;
 static const uint8_t openAnalogPin = A7; //Default A7, muss ein unbelegeter, analoger Eingang sein
 //////////////////////////////////////////////////////////////////////////
 
@@ -64,6 +64,9 @@ static const uint8_t availableShortCuts = 3 ; //
 #endif
 ///////// setup buttons //////////////////////////////////////////////////
 Button pauseButton(buttonPause);
+#if defined buttonPower
+  Button powerButton(buttonPower);
+#endif
 Button upButton(buttonUp);
 Button downButton(buttonDown);
 #if defined FIVEBUTTONS
