@@ -52,6 +52,10 @@
 // #define buttonUp A0 
 // #define buttonDown A1
 
+/** 
+ * Konfiguration eines separten power buttons
+ */
+//#define buttonPower A0
 
 //===========================================================================
 //============================= FIVEBUTTONS =================================
