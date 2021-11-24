@@ -2272,7 +2272,7 @@ void setup()
 #if defined DEBUG || defined ANALOG_INPUT_PRINT || defined ROTARY_ENCODER_PRINT || defined SHORTCUTS_PRINT || defined QUEUE_PRINT || defined DFPLAYER_PRINT || defined IRREMOTE_PRINT
   Serial.begin(115200); // Es gibt ein paar Debug Ausgaben über die serielle Schnittstelle
   // Dieser Hinweis darf nicht entfernt werden
-  Serial.println(F("Affenbox v2.04 by Marco Schulz"));
+  Serial.println(F("Affenbox v2.10 by Marco Schulz"));
   Serial.println(F("forked from TonUINO by Thorsten Voß; licensed under GNU/GPL."));
   Serial.println(F("Information and contribution https://tonuino.de.\n"));
 #endif
