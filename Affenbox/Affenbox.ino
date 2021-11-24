@@ -3326,7 +3326,7 @@ void adminMenu(bool fromCard /* = false */)
     }
     else if (subMenu == ResetEEPROM)
     {
-      if (voiceMenu(2, 825, 933, false, false, 0) == 1)
+      if (voiceMenu(2, 825, 933, false, false, 0) == 2)
       {
 #if defined AiO
         for (uint16_t i = 0; i < EEPROM_size; i++)
