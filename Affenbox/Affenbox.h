@@ -276,6 +276,8 @@ void writeShortCuts();
 void getShortCuts();
 void updateShortCutTrackMemory();
 void resetSettings();
+void SetVolume(uint8_t volume);
+void PlayMp3FolderTrack(uint16_t Track);
 void playFolder();
 void activateShortCut (uint8_t shortCutNo);
 static void nextTrack(uint8_t track, bool force = false) ;
