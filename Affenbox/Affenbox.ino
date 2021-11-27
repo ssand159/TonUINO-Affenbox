@@ -560,7 +560,7 @@ class PuzzleGame : public Modifier
       Serial.println(F("Puzzle right"));
 #endif
 
-      mp3.playMp3FolderTrack(256); //Toll gemacht! Das ist richtig.
+      PlayMp3FolderTrack(256); //Toll gemacht! Das ist richtig.
       waitForTrackToFinish();
     }
 
@@ -576,7 +576,7 @@ class PuzzleGame : public Modifier
       Serial.println(F("Puzzle err"));
 #endif
 
-      mp3.playMp3FolderTrack(257);
+      PlayMp3FolderTrack(257);
       waitForTrackToFinish();
     }
 
@@ -613,7 +613,7 @@ class PuzzleGame : public Modifier
         Serial.println(F("Puzzle del part"));
 #endif
         mp3Pause();
-        mp3.playMp3FolderTrack(298); //Okay, lass uns was anderes probieren.
+        PlayMp3FolderTrack(298); //Okay, lass uns was anderes probieren.
         PartOneSaved = false;
         PartTwoSaved = false;
       }
@@ -629,7 +629,7 @@ class PuzzleGame : public Modifier
       knownCard = false;
       activeShortCut = -1;
 
-      mp3.playMp3FolderTrack(407); // intro
+      PlayMp3FolderTrack(407); // intro
       waitForTrackToFinish();
       mode = special;
     }
@@ -679,7 +679,7 @@ class PuzzleGame : public Modifier
         Serial.println(F("Puzzle no valid part"));
 #endif
         mp3Pause();
-        mp3.playMp3FolderTrack(258); //Diese Karte ist nicht Teil des Spiels. Probiere eine Andere.
+        PlayMp3FolderTrack(258); //Diese Karte ist nicht Teil des Spiels. Probiere eine Andere.
         return true;
       }
       else
@@ -730,7 +730,7 @@ class QuizGame : public Modifier
 #if defined DEBUG
       Serial.println(F("Quiz right"));
 #endif
-      mp3.playMp3FolderTrack(256);
+      PlayMp3FolderTrack(256);
       waitForTrackToFinish();
       this->PartOneSaved = false;
       this->PartTwoSaved = false;
@@ -743,7 +743,7 @@ class QuizGame : public Modifier
 #if defined DEBUG
       Serial.println(F("Quiz err"));
 #endif
-      mp3.playMp3FolderTrack(257);
+      PlayMp3FolderTrack(257);
       waitForTrackToFinish();
     }
 
@@ -781,7 +781,7 @@ class QuizGame : public Modifier
         Serial.println(F("Quiz del part"));
 #endif
         mp3Pause();
-        mp3.playMp3FolderTrack(298); //Okay, lass uns was anderes probieren.
+        PlayMp3FolderTrack(298); //Okay, lass uns was anderes probieren.
         waitForTrackToFinish();
         this->PartOneSaved = false;
         this->PartTwoSaved = false;
@@ -799,7 +799,7 @@ class QuizGame : public Modifier
       knownCard = false;
       activeShortCut = -1;
 
-      mp3.playMp3FolderTrack(408); // intro
+      PlayMp3FolderTrack(408); // intro
       waitForTrackToFinish();
 
       this->PartOneFolder = special;
@@ -831,7 +831,7 @@ class QuizGame : public Modifier
         Serial.println(F("Quiz end of Q"));
 #endif
         mp3Pause();
-        mp3.playMp3FolderTrack(409);
+        PlayMp3FolderTrack(409);
         waitForTrackToFinish();
         RemoveModifier();
         return;
@@ -900,7 +900,7 @@ class QuizGame : public Modifier
         Serial.println(F("Quiz no valid part"));
 #endif
         mp3Pause();
-        mp3.playMp3FolderTrack(258); //Diese Karte ist nicht Teil des Spiels. Probiere eine Andere.
+        PlayMp3FolderTrack(258); //Diese Karte ist nicht Teil des Spiels. Probiere eine Andere.
         return true;
       }
       else
@@ -961,7 +961,7 @@ class QuizGame : public Modifier
   #if defined DEBUG
       Serial.println(F("TheQuest > success"));
   #endif
-    mp3.playMp3FolderTrack(297);
+    PlayMp3FolderTrack(297);
       waitForTrackToFinish();
       next();
     }
@@ -998,7 +998,7 @@ class QuizGame : public Modifier
         Serial.println(F("TheQuest > delete part"));
   #endif
   mp3Pause();
-      mp3.playMp3FolderTrack(298); //Okay, lass uns was anderes probieren.
+      PlayMp3FolderTrack(298); //Okay, lass uns was anderes probieren.
         waitForTrackToFinish();
         this->PartOneSaved = false;
         next();
@@ -1327,13 +1327,13 @@ class Calculate : public Modifier
           break;
       }
 
-      mp3.playMp3FolderTrack(411); // question "how much is"
+      PlayMp3FolderTrack(411); // question "how much is"
       waitForTrackToFinish();
-      mp3.playMp3FolderTrack(this->opA); // 1..254
+      PlayMp3FolderTrack(this->opA); // 1..254
       waitForTrackToFinish();
-      mp3.playMp3FolderTrack(411 + this->opr); // 402, 403, 404, 405
+      PlayMp3FolderTrack(411 + this->opr); // 402, 403, 404, 405
       waitForTrackToFinish();
-      mp3.playMp3FolderTrack(this->opB); // 1..254
+      PlayMp3FolderTrack(this->opB); // 1..254
       waitForTrackToFinish();
     }
 
@@ -1342,7 +1342,7 @@ class Calculate : public Modifier
       if (this->answer != this->answerOld)
       {
         this->answerOld = this->answer;
-        mp3.playMp3FolderTrack(this->answer);
+        PlayMp3FolderTrack(this->answer);
         waitForTrackToStart();
       }
     }
@@ -1355,7 +1355,7 @@ class Calculate : public Modifier
       {
         this->answer = 0;
         this->answerOld = 0;
-        mp3.playMp3FolderTrack(298); // next Question
+        PlayMp3FolderTrack(298); // next Question
         waitForTrackToFinish();
         this->nextQuestion();
         return;
@@ -1369,7 +1369,7 @@ class Calculate : public Modifier
           Serial.println(F("Calc right"));
 #endif
 
-          mp3.playMp3FolderTrack(420); // richtig
+          PlayMp3FolderTrack(420); // richtig
           waitForTrackToFinish();
           this->nextQuestion();
         }
@@ -1379,7 +1379,7 @@ class Calculate : public Modifier
           Serial.println(F("Calc wrong"));
 #endif
 
-          mp3.playMp3FolderTrack(421); // falsch
+          PlayMp3FolderTrack(421); // falsch
           waitForTrackToFinish();
           this->nextQuestion(true); // repeat question
         }
@@ -1471,7 +1471,7 @@ class Calculate : public Modifier
         this->opr = this->mode;
       }
       //waitForTrackToFinish();
-      mp3.playMp3FolderTrack(410); // intro
+      PlayMp3FolderTrack(410); // intro
       waitForTrackToFinish();
       this->nextQuestion();
     }
@@ -1720,13 +1720,23 @@ class RepeatSingleModifier : public Modifier
 //////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////
+void SetVolume(uint8_t volume) {
+  mp3.setVolume(volume);
+  delay(100);
+}
+
+void PlayMp3FolderTrack(uint16_t Track)
+{
+  disablestandbyTimer();
+  mp3.playMp3FolderTrack(Track);
+}
+
 void playFolder()
 {
   // uint8_t counter = 0;
   bool queueTrack = false;
 
   mp3.loop();
-  //disablestandbyTimer();
   _lastTrackFinished = 0;
   numTracksInFolder = mp3.getFolderTrackCount(myFolder->folder);
   firstTrack = 1;
@@ -1856,6 +1866,8 @@ void playFolder()
       break;
   }
 
+  disablestandbyTimer();
+
 #ifdef DEBUG
   Serial.print(numTracksInFolder);
   Serial.print(F(" mp3 in folder "));
@@ -1914,7 +1926,7 @@ void activateShortCut(uint8_t shortCutNo)
     }
   } /*else {
     mp3Pause();
-  mp3.playMp3FolderTrack(297);
+  PlayMp3FolderTrack(297);
     waitForTrackToFinish();
     setupShortCut(shortCutNo);
   }*/
@@ -2093,7 +2105,6 @@ static void previousTrack()
     }
   }
 
-  //disablestandbyTimer();
   _lastTrackFinished = 0;
 
   switch (myFolder->mode)
@@ -2259,9 +2270,10 @@ void waitForTrackToStart(uint16_t timeOut /* = 5000 */)
 #ifdef DFPLAYER_PRINT
       Serial.println(F("track not starting"));
 #endif
-      break;
+      return;
     }
   }
+
 #if defined DFPLAYER_PRINT
   Serial.println(F("track startet"));
 #endif
@@ -2428,10 +2440,10 @@ void setup()
 
   mp3.loop();
   volume = mySettings.initVolume;
-  mp3.setVolume(volume);
+  SetVolume(volume);
   mp3.setEq((DfMp3_Eq)(mySettings.eq - 1));
 
-  mp3.playMp3FolderTrack(264);
+  PlayMp3FolderTrack(264);
   waitForTrackToFinish();
 
   // activate standby timer
@@ -2454,7 +2466,7 @@ void readButtons(bool invertVolumeButtons = false)
 #endif
 
   myTrigger.cancel |= pauseButton.pressedFor(LONGER_PRESS) &&
-                      !upButton.isPressed() && !downButton.isPressed();                      
+                      !upButton.isPressed() && !downButton.isPressed();
   myTrigger.pauseTrack |= pauseButton.wasReleased() && myTriggerEnable.cancel;
 #if defined buttonPower
   myTrigger.shutDown |= powerButton.pressedFor(LONGER_PRESS);
@@ -2791,6 +2803,7 @@ void volumeUpAction(bool rapidFire /* = false */)
       if (volume < mySettings.maxVolume)
       {
         mp3.increaseVolume();
+        delay(100);
         volume++;
         if (rapidFire)
         {
@@ -2826,6 +2839,7 @@ void volumeDownAction(bool rapidFire /* = false */)
       if (volume > mySettings.minVolume && volume > 1)
       {
         mp3.decreaseVolume();
+        delay(100);
         volume--;
         if (rapidFire)
         {
@@ -3124,7 +3138,6 @@ void adminMenu(bool fromCard /* = false */)
     if (subMenu == Exit)
     {
       writeSettings();
-      //setstandbyTimer();
       return;
     }
     else if (subMenu == ResetCard)
@@ -3193,11 +3206,11 @@ void adminMenu(bool fromCard /* = false */)
       uint8_t special2 = voiceMenu(mp3.getFolderTrackCount(tempCard.nfcFolderSettings.folder), 322, 0,
                                    true, tempCard.nfcFolderSettings.folder, special, true);
 
-      mp3.playMp3FolderTrack(936);
+      PlayMp3FolderTrack(936);
       waitForTrackToFinish();
       for (uint8_t x = special; x <= special2; x++)
       {
-        mp3.playMp3FolderTrack(x);
+        PlayMp3FolderTrack(x);
         tempCard.nfcFolderSettings.special = x;
 #if defined DEBUG
         Serial.print(x);
@@ -3212,7 +3225,7 @@ void adminMenu(bool fromCard /* = false */)
             Serial.println(F("abort!"));
 #endif
             myTriggerEnable.cancel = false;
-            mp3.playMp3FolderTrack(802);
+            PlayMp3FolderTrack(802);
             return;
           }
         } while (!mfrc522.PICC_IsNewCardPresent());
@@ -3235,7 +3248,7 @@ void adminMenu(bool fromCard /* = false */)
     {
       // Invert Functions for Up/Down Buttons
 #if defined FIVEBUTTONS || defined ROTARY_ENCODER
-      mp3.playMp3FolderTrack(992);
+      PlayMp3FolderTrack(992);
       waitForTrackToFinish();
 #else
       switch (voiceMenu(2, 989, 989, false))
@@ -3276,17 +3289,18 @@ void adminMenu(bool fromCard /* = false */)
         {
           mySettings.irRemoteUserCodes[i] = 0;
         }
-        mp3.playMp3FolderTrack(999);
+        PlayMp3FolderTrack(999);
         waitForTrackToFinish();
       }
       mp3Pause();
-      mp3.playMp3FolderTrack(832);
+      PlayMp3FolderTrack(832);
       waitForTrackToFinish();
       bool exitWhile = true;
       uint8_t triggerNo = 0;
       do
       {
         mp3.loop();
+
         triggerNo = voiceMenu((sizeOfInputTrigger - availableShortCuts) + 1, 834, 834, false, false, 0);
         if (triggerNo == 0)
         {
@@ -3307,7 +3321,7 @@ void adminMenu(bool fromCard /* = false */)
         Serial.println(triggerNo);
 #endif
         mp3Pause();
-        mp3.playMp3FolderTrack(833);
+        PlayMp3FolderTrack(833);
         // clear ir receive buffer
         IrReceiver.resume();
         // wait for ir signal
@@ -3333,7 +3347,7 @@ void adminMenu(bool fromCard /* = false */)
       Serial.println(F("IRRemote end learning"));
 #endif
 #else
-      mp3.playMp3FolderTrack(831);
+      PlayMp3FolderTrack(831);
       waitForTrackToFinish();
 #endif
     }
@@ -3353,7 +3367,7 @@ void adminMenu(bool fromCard /* = false */)
         }
 #endif
         resetSettings();
-        mp3.playMp3FolderTrack(999);
+        PlayMp3FolderTrack(999);
       }
     }
     else if (subMenu == LockAdminMenu)
@@ -3371,7 +3385,7 @@ void adminMenu(bool fromCard /* = false */)
   } while (true);
 
   writeSettings();
-  //setstandbyTimer();
+
 }
 //////////////////////////////////////////////////////////////////////////
 uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOffset,
@@ -3382,11 +3396,12 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
   int16_t currentValue = defaultValue;
   int16_t currentValueOld = currentValue;
 
+  disablestandbyTimer();
   mp3Pause();
 
   if (startMessage != 0)
   {
-    mp3.playMp3FolderTrack(startMessage);
+    PlayMp3FolderTrack(startMessage);
     waitForTrackToStart();
   }
 
@@ -3457,7 +3472,7 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
 #if defined DEBUG
       Serial.println(currentValue);
 #endif
-      mp3.playMp3FolderTrack(messageOffset + currentValue);
+      PlayMp3FolderTrack(messageOffset + currentValue);
       if (preview)
       {
         waitForTrackToFinish(); // mit preview Track (in der Regel Nummer) komplett Spielen, da es sonst zu abgehakten Anssagen kommt.
@@ -3480,10 +3495,8 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
     {
       myTriggerEnable.cancel = false;
 
-      mp3.playMp3FolderTrack(802);
+      PlayMp3FolderTrack(802);
       waitForTrackToFinish();
-
-      checkStandbyAtMillis();
       returnValue = defaultValue;
     }
     if (myTrigger.pauseTrack && myTriggerEnable.pauseTrack)
@@ -3633,7 +3646,7 @@ void setupShortCut(int8_t shortCutNo /* = -1 */)
   }
   if (returnValue)
   {
-    mp3.playMp3FolderTrack(400);
+    PlayMp3FolderTrack(400);
     waitForTrackToStart();
     writeShortCuts();
   }
@@ -3863,7 +3876,7 @@ bool readCard(nfcTagObject *nfcTag)
 
 void resetCard()
 {
-  mp3.playMp3FolderTrack(800);
+  PlayMp3FolderTrack(800);
   do
   {
     readTrigger();
@@ -3873,7 +3886,7 @@ void resetCard()
       Serial.print(F("abort"));
 #endif
       myTriggerEnable.cancel = false;
-      mp3.playMp3FolderTrack(802);
+      PlayMp3FolderTrack(802);
       return;
     }
   } while (!mfrc522.PICC_IsNewCardPresent());
@@ -3940,7 +3953,7 @@ void writeCard(nfcTagObject nfcTag, int8_t writeBlock /* = -1 */, bool feedback 
 #endif
     if (feedback)
     {
-      mp3.playMp3FolderTrack(401);
+      PlayMp3FolderTrack(401);
       waitForTrackToFinish();
     }
     return;
@@ -3999,12 +4012,12 @@ void writeCard(nfcTagObject nfcTag, int8_t writeBlock /* = -1 */, bool feedback 
 #endif
     if (feedback)
     {
-      mp3.playMp3FolderTrack(401);
+      PlayMp3FolderTrack(401);
     }
   }
   else if (feedback)
   {
-    mp3.playMp3FolderTrack(400);
+    PlayMp3FolderTrack(400);
     waitForTrackToFinish();
   }
 #if defined DEBUG
@@ -4126,7 +4139,7 @@ bool SetModifier(folderSettings *tmpFolderSettings)
     }
     else
     {
-      mp3.playMp3FolderTrack(260);
+      PlayMp3FolderTrack(260);
     }
     waitForTrackToFinish();
   }
@@ -4205,7 +4218,7 @@ bool RemoveModifier()
   else
   {
     mp3Pause();
-    mp3.playMp3FolderTrack(261);
+    PlayMp3FolderTrack(261);
     waitForTrackToFinish();
   }
   return false;
@@ -4222,7 +4235,7 @@ void checkForUnwrittenTrack()
     }
     else
     {
-      mp3.playMp3FolderTrack(981);
+      PlayMp3FolderTrack(981);
     }
     waitForTrackToFinish();
     delay(100);
@@ -4423,7 +4436,7 @@ void onNewCard()
   // Neue Karte konfigurieren
   else if (myCard.cookie != cardCookie)
   {
-    mp3.playMp3FolderTrack(300);
+    PlayMp3FolderTrack(300);
     waitForTrackToFinish();
     setupCard();
   }
@@ -4440,43 +4453,49 @@ void resetCurrentCard()
 
 void setstandbyTimer()
 {
+  if (!standbyTimerSet)
+  {
 #if defined DEBUG
-  Serial.println(F("set stby timer"));
+    Serial.println(F("set stby timer"));
 #endif
-  standbyTimerSet = true;
+    standbyTimerSet = true;
 #if defined AiO
-  // verstärker aus
-  digitalWrite(8, HIGH);
-  delay(100);
+    // verstärker aus
+    digitalWrite(8, HIGH);
+    delay(100);
 #elif defined SPEAKER_SWITCH
-  digitalWrite(SPEAKER_SWITCH_PIN, LOW);
-  delay(100);
+    digitalWrite(SPEAKER_SWITCH_PIN, LOW);
+    delay(100);
 #endif
-  if (mySettings.standbyTimer != 0)
-    sleepAtMillis = millis() + (mySettings.standbyTimer * 60 * 1000);
-  else
-    sleepAtMillis = 0;
+    if (mySettings.standbyTimer != 0)
+      sleepAtMillis = millis() + (mySettings.standbyTimer * 60 * 1000);
+    else
+      sleepAtMillis = 0;
 #if defined DEBUG
-  Serial.print(F("milis "));
-  Serial.println(sleepAtMillis);
+    Serial.print(F("milis "));
+    Serial.println(sleepAtMillis);
 #endif
+  }
 }
 //////////////////////////////////////////////////////////////////////////
 void disablestandbyTimer()
 {
+  if (standbyTimerSet)
+  {
 #if defined DEBUG
-  Serial.println(F("disable stby timer"));
+    Serial.println(F("disable stby timer"));
 #endif
-  standbyTimerSet = false;
+    standbyTimerSet = false;
 #if defined AiO
-  // verstärker an
-  digitalWrite(8, LOW);
-  delay(100);
+    // verstärker an
+    digitalWrite(8, LOW);
+    delay(25);
 #elif defined SPEAKER_SWITCH
-  digitalWrite(SPEAKER_SWITCH_PIN, HIGH);
-  delay(100);
+    digitalWrite(SPEAKER_SWITCH_PIN, HIGH);
+    delay(25);
 #endif
-  sleepAtMillis = 0;
+    sleepAtMillis = 0;
+  }
 }
 //////////////////////////////////////////////////////////////////////////
 void checkStandbyAtMillis()
@@ -4491,16 +4510,16 @@ void checkStandbyAtMillis()
       sleepAtMillis = 0;
       shutDown();
     }
-    if (isPlaying() && standbyTimerSet)
+    if (isPlaying())
     {
       disablestandbyTimer();
     }
   } else
   {
-    if (!isPlaying() && !standbyTimerSet)
+    if (!isPlaying())
     {
       setstandbyTimer();
-    } else if (isPlaying() && standbyTimerSet)
+    } else
     {
       disablestandbyTimer();
     }
@@ -4515,14 +4534,6 @@ void shutDown()
 
   mp3Pause();
 
-#if defined AiO
-  // verstärker an
-  digitalWrite(8, LOW);
-
-#elif defined SPEAKER_SWITCH
-  digitalWrite(SPEAKER_SWITCH_PIN, HIGH);
-#endif
-
 #if defined POWER_ON_LED
   digitalWrite(POWER_ON_LED_PIN, LOW);
 #endif
@@ -4530,12 +4541,12 @@ void shutDown()
   if (volume > mySettings.initVolume)
     volume = mySettings.initVolume;
 
-  mp3.setVolume(volume);
-  delay(100);
+  SetVolume(volume);
 
   knownCard = false;
   activeShortCut = -1;
-  mp3.playMp3FolderTrack(265);
+  PlayMp3FolderTrack(265);
+  delay(1500);
   waitForTrackToFinish();
 
 #if defined AiO
