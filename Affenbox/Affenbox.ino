@@ -2464,15 +2464,20 @@ void readButtons(bool invertVolumeButtons = false)
   buttonFour.read();
   buttonFive.read();
 #endif
-
+#if defined buttonPower
+ powerButton.read();
+ #endif
+ 
   myTrigger.cancel |= pauseButton.pressedFor(LONGER_PRESS) &&
                       !upButton.isPressed() && !downButton.isPressed();
   myTrigger.pauseTrack |= pauseButton.wasReleased() && myTriggerEnable.cancel;
+  
 #if defined buttonPower
   myTrigger.shutDown |= powerButton.pressedFor(LONGER_PRESS);
 #else
   myTrigger.shutDown |= myTrigger.cancel;
 #endif
+
 #if defined FIVEBUTTONS
   myTrigger.volumeUp |= upButton.wasReleased();
   myTrigger.volumeDown |= downButton.wasReleased();
@@ -2684,14 +2689,14 @@ void RotEncSetVolume()
   {
     if (newPosition > currentPosition)
     {
-#if defined ROTARY_ENCODER
+#if defined ROTARY_ENCODER_PRINT
       Serial.println(F("encoder direction clockwise"));
 #endif
       myTrigger.volumeUp |= true;
     }
     else if (newPosition < currentPosition)
     {
-#if defined ROTARY_ENCODER
+#if defined ROTARY_ENCODER_PRINT
       Serial.println(F("encoder direction conterclockwise"));
 #endif
       myTrigger.volumeDown |= true;
@@ -2949,9 +2954,7 @@ void shutDownAction()
         return;
       }
     }
-#if not defined buttonPower
     shutDown();
-#endif
   }
 }
 
@@ -3068,7 +3071,7 @@ void loop()
     pauseAction();
   }
 
-  else if (myTrigger.shutDown)
+  if (myTrigger.shutDown)
   {
     shutDownAction();
   }
