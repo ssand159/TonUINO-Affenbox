@@ -75,8 +75,8 @@
 /**
 *Sample All in One
 */
-#define buttonFourPin A1
-#define buttonFivePin A2
+#define buttonFourPin A2
+#define buttonFivePin A1
 
 #endif
 //===========================================================================
