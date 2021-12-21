@@ -305,7 +305,7 @@ void volumeUpAction(bool rapidFire = false);
 void volumeDownAction(bool rapidFire = false);
 void nextAction() ;
 void previousAction();
-void pauseAction();
+void pauseAction(bool fromCard = false);
 void loop();
 void adminMenu(bool fromCard = false);
 uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOffset,

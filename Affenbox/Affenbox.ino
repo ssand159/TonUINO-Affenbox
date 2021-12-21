@@ -2903,14 +2903,14 @@ void previousAction()
   }
 }
 //////////////////////////////////////////////////////////////////////////
-void pauseAction()
+void pauseAction(bool fromCard /* = false */)
 {
   if (myTriggerEnable.pauseTrack == true)
   {
     myTriggerEnable.pauseTrack = false;
     if (activeModifier != NULL)
     {
-      if (activeModifier->handlePause() == true)
+      if (activeModifier->handlePause() == true && !fromCard)
       {
 #if defined DEBUG
         Serial.println(F("pause act lckd"));
@@ -4377,7 +4377,7 @@ Enum_PCS handleCardReader()
           knownCard = false;
           myTriggerEnable.pauseTrack |= true;
           myTrigger.pauseTrack |= true;
-          pauseAction();
+          pauseAction(true);
           //mp3Pause();
           //setstandbyTimer();
         }
@@ -4395,7 +4395,7 @@ Enum_PCS handleCardReader()
           knownCard = true;
           myTriggerEnable.pauseTrack |= true;
           myTrigger.pauseTrack |= true;
-          pauseAction();
+          pauseAction(true);
         }
         else if (trackToStoreOnCard == 0)
         {
