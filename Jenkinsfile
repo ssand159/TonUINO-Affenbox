@@ -1,9 +1,5 @@
 pipeline {
-                agent {
-
-        label 'PlatformIO-slave'
-
-      }
+                agent any
   
   stages {
     stage('Build') {
