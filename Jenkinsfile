@@ -1,9 +1,6 @@
 pipeline {
   agent any
   environment {
-
-    BUILD_TOKEN = credentials('e18aa8c0-221e-4417-90b1-9b27c5268801')
-
   }
   stages {
     stage('Build') {
