@@ -11,7 +11,7 @@ pipeline {
         label 'PlatformIO-slave'
       }
       steps {
-        sh '''/home/pi/.local/bin/pio -r'''
+        sh '''/home/pi/.local/bin/pio run -r'''
       }
     }
 
