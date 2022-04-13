@@ -7,7 +7,7 @@
 *https://www.leiterkartenpiraten.de/produkt/tonuino-all-in-one/
 */
 
-#define AiO
+//#define AiO
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -28,21 +28,25 @@
 /** 
  * Konfiguration der Standard Button Pins 
  */
- 
-/**
-*Sample Classic
-*/
-//#define buttonPause A0
-//#define buttonUp A1 
-//#define buttonDown A2
-
-
+ #if defined AiO
 /**
 *Sample All in One
 */
+
  #define buttonPause A0
  #define buttonUp A4
  #define buttonDown A3
+
+#else
+/**
+*Sample Classic
+*/
+
+#define buttonPause A0
+#define buttonUp A1 
+#define buttonDown A2
+
+#endif
 
 /**
 *Sample Affenbox Pocket
