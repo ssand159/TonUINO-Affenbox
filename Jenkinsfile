@@ -21,7 +21,7 @@ PLATFORMIO_AUTH_TOKEN=$BUILD_TOKEN pio remote run -r
         label 'PlatformIO-slave'
       }
       steps {
-        sh '''/home/pi/.local/bin/pio run -e uno -t upload --upload-port /dev/ttyUSB0
+        sh '''/home/pi/.local/bin/pio run -e nanoatmega328 -t upload --upload-port /dev/ttyUSB0
 sleep 5
 python test_scripts/check.py'''
       }
