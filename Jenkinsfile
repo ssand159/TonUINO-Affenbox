@@ -4,7 +4,7 @@ pipeline {
   stages {
     stage('Build') {
               agent {
-        label 'PlatformIO-slave'
+        label 'BuildNode'
       }
       steps {
         sh '''/home/pi/.local/bin/pio run'''
@@ -14,7 +14,7 @@ pipeline {
   
     stage('Hardware test') {
       agent {
-        label 'PlatformIO-slave'
+        label 'TestNode'
       }
       steps {
         sh '''/home/pi/.local/bin/pio run -e nanoatmega328 -t upload --upload-port /dev/ttyUSB0
