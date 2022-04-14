@@ -1,7 +1,10 @@
 import serial, time, sys
 arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
-time.sleep(1)
 arduino.reset_input_buffer()
 arduino.reset_output_buffer()
-print (arduino.readline())
+arduino.open()
+time.sleep(1)
+while arduino.in_waiting() > 0:
+  print (arduino.readlines())
+  
 sys.exit(0)
