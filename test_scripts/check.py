@@ -4,8 +4,6 @@ arduino.reset_input_buffer()
 arduino.reset_output_buffer()
 arduino.close()
 arduino.open()
-time.sleep(1)
-while arduino.in_waiting() > 0:
-  print (arduino.readline())
+print (arduino.readlines())
   
 sys.exit(0)
