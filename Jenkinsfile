@@ -18,7 +18,6 @@ pipeline {
       }
       steps {
         sh '''/home/pi/.local/bin/pio run -e nanoatmega328 -t upload --upload-port /dev/ttyUSB0
-sleep 5
 python test_scripts/check.py'''
       }
     }
