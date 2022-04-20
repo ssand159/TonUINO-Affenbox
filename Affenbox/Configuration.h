@@ -67,7 +67,7 @@
 /**
 *Für die Verwendung von fünf Buttons, statt drei.
 */
-#define FIVEBUTTONS    
+//#define FIVEBUTTONS    
 
 #if defined FIVEBUTTONS
 /**
