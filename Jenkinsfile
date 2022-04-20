@@ -17,7 +17,7 @@ pipeline {
         label 'TestNode'
       }
       steps {
-        sh '''/home/pi/.local/bin/pio run -e nanoatmega328 -t upload --upload-port /dev/ttyUSB0
+        sh '''/home/pi/.local/bin/pio run -e Classic_Test -t upload --upload-port /dev/ttyUSB0
 python test_scripts/check.py'''
       }
     }
