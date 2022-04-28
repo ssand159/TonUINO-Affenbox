@@ -7,7 +7,7 @@ pipeline {
         label 'BuildNode'
       }
       steps {
-        sh '''/home/pi/.local/bin/pio run'''
+        sh '''~/bin/pio run'''
       }
     }
 
@@ -17,7 +17,7 @@ pipeline {
         label 'TestNode'
       }
       steps {
-        sh '''/home/pi/.local/bin/pio run -e Classic_Test -t upload --upload-port /dev/ttyUSB0
+        sh '''~/.local/bin/pio run -e Classic_Test -t upload --upload-port /dev/ttyUSB0
 python test_scripts/check.py'''
       }
     }
