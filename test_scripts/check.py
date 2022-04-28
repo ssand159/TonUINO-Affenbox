@@ -1,6 +1,6 @@
 from pickle import TRUE
 import serial, time, sys
-arduino = serial.Serial('COM11', 115200, timeout=.1)
+arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
 arduino.reset_input_buffer()
 arduino.reset_output_buffer()
 arduino.close()
