@@ -1,7 +1,7 @@
 pipeline {
   agent none
   
-//  stages {
+  stages {
 //    stage('Build') {
 //             agent {
 //     label 'BuildNode'
@@ -22,5 +22,5 @@ python test_scripts/check.py'''
       }
     }
   }
-
+}
 
