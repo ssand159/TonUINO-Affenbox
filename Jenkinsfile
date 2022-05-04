@@ -1,15 +1,15 @@
 pipeline {
   agent none
   
-  stages {
-    stage('Build') {
-              agent {
-        label 'BuildNode'
-      }
-      steps {
+//  stages {
+//    stage('Build') {
+//             agent {
+//     label 'BuildNode'
+// }
+     // steps {
         //sh '''~/.local/bin/pio run'''
-      }
-    }
+//      }
+//    }
 
   
     stage('Hardware test') {
