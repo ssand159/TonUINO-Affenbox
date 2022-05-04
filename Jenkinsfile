@@ -7,7 +7,7 @@ pipeline {
         label 'BuildNode'
       }
       steps {
-        sh '''~/.local/bin/pio run'''
+        //sh '''~/.local/bin/pio run'''
       }
     }
 
