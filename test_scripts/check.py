@@ -20,10 +20,11 @@ GPIO.output(16, True)
 GPIO.setup(20, GPIO.OUT) #In 2.4
 GPIO.output(20, True)
 
-arduino = serial.Serial('COM11', 115200, timeout=.1)
+arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
 arduino.reset_input_buffer()
 arduino.reset_output_buffer()
 arduino.close()
+GPIO.output(12, True)
 arduino.open()
 sc = ''
 s = ""
