@@ -31,7 +31,7 @@ i = 1
 while i < 70:
   s = arduino.readline()
   if s :
-    _print = s.replace("'b", '')
+    _print = s.replace("b", "", 1)
     #s.replace("/r/n", '')
     print (_print)
   i += 1
