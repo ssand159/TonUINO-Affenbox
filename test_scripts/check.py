@@ -26,13 +26,14 @@ arduino.reset_output_buffer()
 arduino.close()
 arduino.open()
 s = ""
+_print = ""
 i = 1
 while i < 70:
   s = arduino.readline()
   if s :
-    s.replace("'b",'')
-    s.replace("/r/n",'')
-    print (s)
+    _print = s.replace("'b", '')
+    #s.replace("/r/n", '')
+    print (_print)
   i += 1
 
 arduino.close()
