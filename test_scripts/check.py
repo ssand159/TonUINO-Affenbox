@@ -24,7 +24,7 @@ arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
 arduino.reset_input_buffer()
 arduino.reset_output_buffer()
 arduino.close()
-GPIO.output(12, True)
+GPIO.output(12, True) #Turn device on
 arduino.open()
 sc = ''
 s = ""
@@ -38,4 +38,5 @@ while i < 70:
   i += 1
 
 arduino.close()
+GPIO.output(12, False) #Turn device off
 sys.exit(0)
