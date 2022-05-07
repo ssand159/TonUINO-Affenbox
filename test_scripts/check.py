@@ -14,7 +14,7 @@ GPIO.output(19, True)
 GPIO.setup(26, GPIO.OUT) #In 2.1 Button 5
 GPIO.output(26, True)
 GPIO.setup(12, GPIO.OUT) #In 2.2 !Supply
-GPIO.output(12, False)
+GPIO.output(12, True)
 GPIO.setup(16, GPIO.OUT) #In 2.3
 GPIO.output(16, True)
 GPIO.setup(20, GPIO.OUT) #In 2.4
@@ -24,7 +24,6 @@ arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
 arduino.reset_input_buffer()
 arduino.reset_output_buffer()
 arduino.close()
-GPIO.output(12, True) #Turn device on
 arduino.open()
 sc = ''
 s = ""
@@ -38,5 +37,4 @@ while i < 70:
   i += 1
 
 arduino.close()
-GPIO.output(12, False) #Turn device off
 sys.exit(0)
