@@ -30,7 +30,7 @@ i = 1
 while i < 70:
   s = arduino.readline()
   if s :
-    s = s.replace(b'/r/n', '', 1)
+    s = s.replace(b'/r/n', b'', 1)
     print (s)
   i += 1
 
