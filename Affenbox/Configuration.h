@@ -154,13 +154,13 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 *Für genauere Debugausgaben im seriellen Monitor.
 *!Achtung! Benötigt viel Speicher, eventuell müssen andere Funktionen temporär deaktivert werden!
 */
-#define ANALOG_INPUT_PRINT
+//#define ANALOG_INPUT_PRINT
 
 /*
 *Gibt die analogen Werte so schnell wieder wie möglich. 
 *Falls die analogen Werte der Taste nicht bekannt sind können sie hiermit ermittelt werden.
 */
-#define ANALOG_INPUT_PRINT_ANALOGREAD
+//#define ANALOG_INPUT_PRINT_ANALOGREAD
 
 #endif
 
