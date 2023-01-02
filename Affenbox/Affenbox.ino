@@ -154,20 +154,15 @@ void writeSettings()
 #if defined DEBUG
   Serial.println(F("writeSettings"));
 #endif
-#if defined AiO
-  EEPROM_put(EEPROM_settingsStartAdress, mySettings);
-#else
+
   EEPROM.put(EEPROM_settingsStartAdress, mySettings);
-#endif
+
 }
 
 void getSettings()
 {
-#if defined AiO
-  EEPROM_get(EEPROM_settingsStartAdress, mySettings);
-#else
+
   EEPROM.get(EEPROM_settingsStartAdress, mySettings);
-#endif
 
   if (mySettings.version != 3 || mySettings.cookie != cardCookie)
   {
@@ -303,11 +298,8 @@ void writeShortCuts()
   Serial.println(EEPROM_settingsStartAdress + sizeOfAdminSettings);
 #endif
 
-#if defined AiO
-  EEPROM_put(EEPROM_settingsStartAdress + sizeOfAdminSettings, shortCuts);
-#else
   EEPROM.put(EEPROM_settingsStartAdress + sizeOfAdminSettings, shortCuts);
-#endif
+
 }
 
 void getShortCuts()
@@ -316,11 +308,8 @@ void getShortCuts()
   Serial.print(F("get short cuts from "));
   Serial.println(EEPROM_settingsStartAdress + sizeOfAdminSettings);
 #endif
-#if defined AiO
-  EEPROM_get(EEPROM_settingsStartAdress + sizeOfAdminSettings, shortCuts);
-#else
+
   EEPROM.get(EEPROM_settingsStartAdress + sizeOfAdminSettings, shortCuts);
-#endif
 
 #if defined SHORTCUTS_PRINT
   for (uint8_t i = 0; i < availableShortCuts; i++)
@@ -354,11 +343,9 @@ void updateShortCutTrackMemory(uint8_t track)
   Serial.println(track);
 #endif
   shortCuts[activeShortCut].special3 = track;
-#if defined AiO
-  EEPROM_put(EEPROM_settingsStartAdress + sizeOfAdminSettings + (sizeOfFolderSettings * activeShortCut), shortCuts[activeShortCut]);
-#else
+
   EEPROM.put(EEPROM_settingsStartAdress + sizeOfAdminSettings + (sizeOfFolderSettings * activeShortCut), shortCuts[activeShortCut]);
-#endif
+
 }
 //////////////////////////////////////////////////////////////////////////
 class Modifier
@@ -2276,37 +2263,17 @@ void setup()
   Serial.println(F("Information and contribution https://tonuino.de.\n"));
 #endif
 
-#if defined AiO
   // spannung einschalten
-  pinMode(7, OUTPUT);
-  digitalWrite(7, HIGH);
+  pinMode(powerPin, OUTPUT);
+  digitalWrite(powerPin, HIGH);
 
   // sd karten zugang aus
-  pinMode(A5, OUTPUT);
-  digitalWrite(A5, LOW);
+  pinMode(usbSwitchPin, OUTPUT);
+  digitalWrite(usbSwitchPin, LOW);
 
   // verstärker aus
-  pinMode(8, OUTPUT);
-  digitalWrite(8, HIGH);
-
-  // internal reference voltage 2,048V
-  analogReference(INTERNAL2V048);
-  // adc resolution 12 bit
-  analogReadResolution(12);
-#else
-#if defined SPEAKER_SWITCH
-  pinMode(SPEAKER_SWITCH_PIN, OUTPUT);
-  digitalWrite(SPEAKER_SWITCH_PIN, LOW);
-#endif
-
-#if defined PUSH_ON_OFF
-  pinMode(PUSH_ON_OFF_PIN, OUTPUT);
-  digitalWrite(PUSH_ON_OFF_PIN, LOW);
-#endif
-
-  analogReference(DEFAULT);
-
-#endif
+  pinMode(ampPin, OUTPUT);
+  digitalWrite(ampPin, HIGH);
 
   mp3.begin();
   delay(500);
@@ -2344,11 +2311,6 @@ void setup()
 #if defined FIVEBUTTONS
   pinMode(buttonFourPin, INPUT_PULLUP);
   pinMode(buttonFivePin, INPUT_PULLUP);
-#endif
-
-#if defined ROTARY_ENCODER_PIN_SUPPLY && defined ROTARY_ENCODER
-  pinMode(ROTARY_ENCODER_PIN_SUPPLY, OUTPUT);
-  digitalWrite(ROTARY_ENCODER_PIN_SUPPLY, HIGH);
 #endif
 
 #if defined IRREMOTE
@@ -2392,17 +2354,10 @@ void setup()
       digitalRead(buttonDown) == LOW)
   {
     Serial.println(F("del EEPROM"));
-#if defined AiO
-    for (uint16_t i = 0; i < EEPROM_size; i++)
-    {
-      EEPROM_update(i, 0);
-    }
-#else
     for (uint16_t i = 0; i < EEPROM.length(); i++)
     {
       EEPROM.update(i, 0);
     }
-#endif
     resetSettings();
     resetShortCuts();
   }
@@ -2412,12 +2367,8 @@ void setup()
 
   delay(1500);
 
-#if defined AiO
   //  verstärker an
-  digitalWrite(8, LOW);
-#elif defined SPEAKER_SWITCH
-  digitalWrite(SPEAKER_SWITCH_PIN, HIGH);
-#endif
+  digitalWrite(ampPin, LOW);
 
 #if defined POWER_ON_LED
   digitalWrite(POWER_ON_LED_PIN, HIGH);
@@ -2927,8 +2878,7 @@ void pauseAction(bool fromCard /* = false */)
 
 //////////////////////////////////////////////////////////////////////////
 void shutDownAction()
-{
-  #if defined AiO || defined PUSH_ON_OFF
+{  
   if (myTriggerEnable.shutDown == true)
   {
     myTriggerEnable.shutDown = false;
@@ -2944,7 +2894,6 @@ void shutDownAction()
     }
     shutDown();
   }
-  #endif
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -3349,17 +3298,11 @@ void adminMenu(bool fromCard /* = false */)
     {
       if (voiceMenu(2, 825, 933, false, false, 0) == 2)
       {
-#if defined AiO
-        for (uint16_t i = 0; i < EEPROM_size; i++)
-        {
-          EEPROM_update(i, 0);
-        }
-#else
+
         for (uint16_t i = 0; i < EEPROM.length(); i++)
         {
           EEPROM.update(i, 0);
         }
-#endif
         resetSettings();
         PlayMp3FolderTrack(999);
       }
@@ -4453,14 +4396,11 @@ void setstandbyTimer()
     Serial.println(F("set stby timer"));
 #endif
     standbyTimerSet = true;
-#if defined AiO
+
     // verstärker aus
-    digitalWrite(8, HIGH);
+    digitalWrite(ampPin, HIGH);
     delay(100);
-#elif defined SPEAKER_SWITCH
-    digitalWrite(SPEAKER_SWITCH_PIN, LOW);
-    delay(100);
-#endif
+
     if (mySettings.standbyTimer != 0)
       sleepAtMillis = millis() + (mySettings.standbyTimer * 60 * 1000);
     else
@@ -4480,14 +4420,11 @@ void disablestandbyTimer()
     Serial.println(F("disable stby timer"));
 #endif
     standbyTimerSet = false;
-#if defined AiO
+
     // verstärker an
-    digitalWrite(8, LOW);
+    digitalWrite(ampPin, LOW);
     delay(25);
-#elif defined SPEAKER_SWITCH
-    digitalWrite(SPEAKER_SWITCH_PIN, HIGH);
-    delay(25);
-#endif
+
     sleepAtMillis = 0;
   }
 }
@@ -4543,31 +4480,12 @@ void shutDown()
   delay(1500);
   waitForTrackToFinish();
 
-#if defined AiO
+
   // verstärker aus
-  digitalWrite(8, HIGH);
+  digitalWrite(ampPin, HIGH);
 
-#elif defined SPEAKER_SWITCH_PIN
-  digitalWrite(SPEAKER_SWITCH_PIN, LOW);
-#endif
+digitalWrite(powerPin, LOW);
 
-#if defined AiO
-digitalWrite(7, LOW);
-#else
-#if defined PUSH_ON_OFF_PIN
-  digitalWrite(PUSH_ON_OFF_PIN, HIGH);
-#endif
-  // enter sleep state
-  // http://discourse.voss.earth/t/intenso-s10000-powerbank-automatische-abschaltung-software-only/805
-  // powerdown to 27mA (powerbank switches off after 30-60s)
-  mfrc522.PCD_AntennaOff();
-  mfrc522.PCD_SoftPowerDown();
-  //mp3.sleep();
-
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  cli(); // Disable interrupts
-  sleep_mode();  
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -7,18 +7,12 @@
 #include <MFRC522.h>
 #include <SPI.h>
 #include <SoftwareSerial.h>
-#if not defined AiO
-#include <avr/sleep.h>
-#endif
 #if defined ROTARY_ENCODER
 #define ENCODER_DO_NOT_USE_INTERRUPTS
 #include <Encoder.h>
 #endif
 #if defined IRREMOTE
 #include <IRremote.h>
-#endif
-#if defined AiO
-#include "Emulated_EEPROM.h"
 #endif
 
 using ace_button::AceButton;
@@ -29,6 +23,8 @@ using ace_button::LadderButtonConfig;
 unsigned long sleepAtMillis = 0;
 bool standbyTimerSet = false;
 static const uint8_t openAnalogPin = A7; //Default A7, muss ein unbelegeter, analoger Eingang sein
+static const uint8_t powerPin = 27;
+static const uint8_t usbSwitchPin = 20;
 //////////////////////////////////////////////////////////////////////////
 
 ////////// Button timings ////////////////////////////////////////////////
@@ -38,9 +34,9 @@ static const uint16_t LONGER_PRESS = 1500;
 //////////////////////////////////////////////////////////////////////////
 
 ///////// MFRC522 ////////////////////////////////////////////////////////
-static const uint8_t RST_PIN = 9;                 // Configurable, see typical pin layout above
-static const uint8_t SS_PIN = 10;               // Configurable, see typical pin layout above
-MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522
+static const uint8_t RST_PIN = 11;  // Configurable, see typical pin layout above
+static const uint8_t SS_PIN = 7;    // Configurable, see typical pin layout above
+MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522
 MFRC522::MIFARE_Key key;
 bool successRead;
 uint8_t sector = 1;
@@ -52,9 +48,6 @@ MFRC522::StatusCode status;
 ///////// card cookie ////////////////////////////////////////////////////
 static const uint32_t cardCookie = 322417479;
 //////////////////////////////////////////////////////////////////////////
-#if defined AiO
-static const uint16_t EEPROM_size = 512;
-#endif
 static const uint16_t EEPROM_settingsStartAdress = 1;
 
 #if defined ANALOG_INPUT
@@ -114,11 +107,7 @@ static inputTrigger myTriggerEnable;
 
 static const uint8_t sizeOfInputTrigger = sizeof(inputTrigger);
 
-#if defined AiO
-const uint8_t folderMemoryCount = 3; //limited EEPROM space for the LGT8F328P
-#else
 const uint8_t folderMemoryCount = 5;
-#endif
 
 //////// IR Remote ////////////////////////////////////////////////////
 #if defined IRREMOTE
@@ -133,14 +122,16 @@ Encoder myEnc(ROTARY_ENCODER_PIN_A, ROTARY_ENCODER_PIN_B);
 //////////////////////////////////////////////////////////////////////////
 
 ///////// DFPlayer Mini //////////////////////////////////////////////////
-SoftwareSerial mySoftwareSerial(2, 3); // RX, TX
-static const uint8_t busyPin = 4;
+static const uint8_t busyPin = 13;
 uint8_t numTracksInFolder;
 uint8_t currentTrack;
 uint8_t firstTrack;
 uint8_t queue[255];
 uint8_t volume;
 static uint8_t _lastTrackFinished;
+static const uint8_t ampPin = 19;
+class Mp3Notify;
+static DFMiniMp3<HardwareSerial, Mp3Notify> mp3(Serial3);
 //////////////////////////////////////////////////////////////////////////
 
 //////// analog input /////////////////////////////////////////////////
@@ -337,6 +328,4 @@ void shutDown();
 void fadeStatusLed(bool isPlaying);
 #endif
 //////////////////////////////////////////////////////////////////////////
-class Mp3Notify;
 
-static DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(mySoftwareSerial);
