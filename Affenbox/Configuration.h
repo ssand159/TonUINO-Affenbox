@@ -34,8 +34,8 @@
 */
 
  #define buttonPause A0
- #define buttonUp A4
- #define buttonDown A3
+ #define buttonUp A1
+ #define buttonDown A2
 
 /** 
  * Konfiguration eines separten power buttons
@@ -235,17 +235,17 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 *https://www.az-delivery.de/products/drehimpulsgeber-modul?_pos=1&_sid=85bb51922&_ss=r
 */
 
-//#define ROTARY_ENCODER   
+#define ROTARY_ENCODER   
 
 #if defined ROTARY_ENCODER
 
 /* 
 *Angabe der Anschlusspins für den Data und Clock Pin des Drehgebers.
-*Es kann jeder freie  Pin geählt werden, auch Analoge.
+*Es kann jeder freie  Pin geählt werden, auch analoge.
 *Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergeneben Pins.
  */
-#define ROTARY_ENCODER_PIN_A A9 
-#define ROTARY_ENCODER_PIN_B A10
+#define ROTARY_ENCODER_PIN_A A14
+#define ROTARY_ENCODER_PIN_B A12
 
 /* 
 *Anzahl erkannter Steps pro Klick des Drehgebers.
@@ -261,6 +261,35 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 
 #endif
 
+//===========================================================================
+//============================ 7-Segment-Anzeige ============================
+//===========================================================================
+/**
+*Gibt die Möglichkeit die aktuelle Titelnummer über eine 7-Segmentanzeige auszugeben
+*Hierzu wird extra Hardware benötigt.
+*z.B.:
+TM1637 4 Digit 7-Segment Display
+https://www.az-delivery.de/products/4-digit-display
+*/
+
+#define DISPLAY   
+
+#if defined DISPLAY
+
+/* 
+*Angabe der Anschlusspins für den DIO und CLK des Displays
+*Es kann jeder freie  Pin geählt werden, auch analoge.
+*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergeneben Pins.
+ */
+#define DISPLAY_PIN_A A13 //CLK
+#define DISPLAY_PIN_B A15 //DIO
+
+/* 
+Eingestellte Helligkeit des Displays. Kann manuell über das Adminmenü einstellbar
+ */
+#define DISPLAY_BRIGHTNESS 4
+
+#endif
 
 //===========================================================================
 //===================== POWER_ON_LED(EXPERIMENTEL!!) ========================
@@ -277,7 +306,7 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 
 /* 
 *Angabe des Anschlusspins für die LED.
-*Es kann jeder freie  Pin geählt werden, auch Analoge.
+*Es kann jeder freie  Pin geählt werden, auch analoge.
 *Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergeneben Pins.
  */
 #define POWER_ON_LED_PIN 36
