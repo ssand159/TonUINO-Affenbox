@@ -14,6 +14,9 @@
 #if defined IRREMOTE
 #include <IRremote.h>
 #endif
+#if defined DISPLAY
+#include <TM1637Display.h>
+#endif
 
 using ace_button::AceButton;
 using ace_button::ButtonConfig;
@@ -109,15 +112,21 @@ static const uint8_t sizeOfInputTrigger = sizeof(inputTrigger);
 
 const uint8_t folderMemoryCount = 5;
 
-//////// IR Remote ////////////////////////////////////////////////////
+//////// IR Remote ///////////////////////////////////////////////////////
 #if defined IRREMOTE
 const uint8_t irRemoteCodeCount = sizeOfInputTrigger;
 #endif
 //////////////////////////////////////////////////////////////////////////
 
-//////// Rotary Encoder ///////////////////////////////////////////////
+//////// Rotary Encoder //////////////////////////////////////////////////
 #if defined ROTARY_ENCODER
 Encoder myEnc(ROTARY_ENCODER_PIN_A, ROTARY_ENCODER_PIN_B);
+#endif
+//////////////////////////////////////////////////////////////////////////
+
+//////// 7-Segmentanzeige ////////////////////////////////////////////////
+#if defined DISPLAY
+TM1637Display myDisplay(DISPLAY_PIN_A, DISPLAY_PIN_B);
 #endif
 //////////////////////////////////////////////////////////////////////////
 
@@ -134,7 +143,7 @@ class Mp3Notify;
 static DFMiniMp3<HardwareSerial, Mp3Notify> mp3(Serial3);
 //////////////////////////////////////////////////////////////////////////
 
-//////// analog input /////////////////////////////////////////////////
+//////// analog input ////////////////////////////////////////////////////
 #if defined ANALOG_INPUT
 static AceButton analogInputButtons[ANALOG_INPUT_BUTTON_COUNT];
 static AceButton* analogInputButtonsPointer[ANALOG_INPUT_BUTTON_COUNT];
@@ -189,6 +198,9 @@ enum Enum_AdminMenuOptions
   StopWhenCardAway,
   SetupIRRemote,
   ResetEEPROM,
+#if defined DISPLAY
+  ConfigureDisplayBrightness,
+#endif
   LockAdminMenu
 };
 enum Enum_PCS
@@ -207,7 +219,7 @@ enum Enum_NfcGain
 };
 //////////////////////////////////////////////////////////////////////////
 
-///////// this object stores nfc tag data ///////////////////////////////
+///////// this object stores nfc tag data ////////////////////////////////
 struct folderSettings {
   uint8_t folder;
   uint8_t mode;
@@ -229,7 +241,7 @@ struct nfcTagObject {
 nfcTagObject myCard;
 //////////////////////////////////////////////////////////////////////////
 
-///////// admin settings stored in eeprom ///////////////////////////////
+///////// admin settings stored in eeprom ////////////////////////////////
 struct adminSettings {
   uint32_t cookie;
   byte version;
@@ -244,6 +256,7 @@ struct adminSettings {
   folderSettings savedModifier;
   bool stopWhenCardAway;
   uint8_t userAge; // Reserviert für zukünftige Funktion
+  uint8_t savedDisplayBrightness;
   uint16_t irRemoteUserCodes[sizeOfInputTrigger];//Ein Slot pro möglichem Trigger
 };
 adminSettings mySettings;
