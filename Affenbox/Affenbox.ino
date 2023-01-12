@@ -211,7 +211,10 @@ void getSettings()
 
   Serial.print(F("Saved Modifier "));
   Serial.println(mySettings.savedModifier.mode);
-#endif
+
+  Serial.print(F("Saved Display Brightness "));
+  Serial.println(mySettings.savedDisplayBrightness);
+#endif  
 #if defined IRREMOTE_PRINT && defined EEPROM_PRINT
   for (uint8_t i = 0; i < sizeOfInputTrigger; i++)
   {
@@ -248,7 +251,8 @@ void resetSettings()
   mySettings.savedModifier.mode = 0;
   mySettings.stopWhenCardAway = false;
   mySettings.userAge = 0;
-
+  mySettings.savedDisplayBrightness = 4;
+  
   mySettings.irRemoteUserCodes[NoTrigger] = 0;
   mySettings.irRemoteUserCodes[PauseTrackTrigger] = 0x1C;
   mySettings.irRemoteUserCodes[NextTrigger] = 0x5a;
@@ -2062,6 +2066,10 @@ static void nextTrack(uint8_t track, bool force /* = false */)
     Serial.println(currentTrack);
 #endif
   }
+#if defined DISPLAY
+  myDisplay.clear();
+  myDisplay.showNumberDec(currentTrack, false);
+#endif
 }
 
 static void previousTrack()
@@ -2190,6 +2198,10 @@ static void previousTrack()
     Serial.println(currentTrack);
 #endif
   }
+#if defined DISPLAY
+  myDisplay.clear();
+  myDisplay.showNumberDec(currentTrack, false);
+#endif
 }
 //////////////////////////////////////////////////////////////////////////
 bool isPlaying()
@@ -2373,6 +2385,11 @@ void setup()
 #if defined POWER_ON_LED
   digitalWrite(POWER_ON_LED_PIN, HIGH);
 #endif
+
+#if defined DISPLAY
+//TODO Display initialisieren
+#endif
+
 
   delay(500);
 
@@ -3307,6 +3324,14 @@ void adminMenu(bool fromCard /* = false */)
         PlayMp3FolderTrack(999);
       }
     }
+#if defined DISPLAY    
+    else if (subMenu == ConfigureDisplayBrightness)
+    {
+      uint8_t selectedValue = voiceMenu(8, 986, 986, false, false, 4, false) - 1;
+      mySettings.savedDisplayBrightness = selectedValue;
+      myDisplay.setBrightness(0x0f);
+    }
+#endif
     else if (subMenu == LockAdminMenu)
     {
       switch (voiceMenu(2, 986, 986))
@@ -3412,7 +3437,7 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
       PlayMp3FolderTrack(messageOffset + currentValue);
       if (preview)
       {
-        waitForTrackToFinish(); // mit preview Track (in der Regel Nummer) komplett Spielen, da es sonst zu abgehakten Anssagen kommt.
+        waitForTrackToFinish(); // mit preview Track (in der Regel Nummer) komplett spielen, da es sonst zu abgehakten Ansagen kommt.
         if (previewFromFolder == 0)
         {
           mp3.playFolderTrack(currentValue, 1);
@@ -3424,7 +3449,7 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
       }
       else
       {
-        waitForTrackToStart(); // ohne preview Track nur anspielen um Menü flüssiger zu gestallten
+        waitForTrackToStart(); // ohne preview Track nur anspielen um Menü flüssiger zu gestalten
       }
     }
 
