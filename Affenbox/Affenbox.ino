@@ -2067,8 +2067,7 @@ static void nextTrack(uint8_t track, bool force /* = false */)
 #endif
   }
 #if defined DISPLAY
-  myDisplay.clearDisplay();
-  showOnDisplay(currentTrack, false);
+  showTrackOnDisplay(currentTrack);
 #endif
 }
 
@@ -2199,8 +2198,7 @@ static void previousTrack()
 #endif
   }
 #if defined DISPLAY
-  myDisplay.clearDisplay();
-  showOnDisplay(currentTrack, false);
+  showTrackOnDisplay(currentTrack);
 #endif
 }
 //////////////////////////////////////////////////////////////////////////
@@ -2774,8 +2772,7 @@ void volumeUpAction(bool rapidFire /* = false */)
         }
       }
 #if defined DISPLAY
-      myDisplay.clearDisplay();
-      showOnDisplay(volume, false);
+      showVolumeOnDisplay(volume);
 #endif
 #if defined DEBUG
       Serial.print(F("vol up "));
@@ -2814,8 +2811,7 @@ void volumeDownAction(bool rapidFire /* = false */)
         }
       }
 #if defined DISPLAY
-      myDisplay.clearDisplay();
-      showOnDisplay(volume, false);
+      showVolumeOnDisplay(volume);
 #endif
 #if defined DEBUG
       Serial.print(F("vol down "));
@@ -4572,9 +4568,36 @@ void fadeStatusLed(bool isPlaying)
 #endif
 //////////////////////////////////////////////////////////////////////////
 #if defined DISPLAY
-void showOnDisplay(int number, bool dots)
+void showTrackOnDisplay(int track)
 {
-  
+  //clear
+  myDisplay.clearDisplay();
+  myDisplay.point(0);
+
+  //write new track
+  myDisplay.display(0, track / 1000);
+  myDisplay.display(1, track / 100);
+  myDisplay.display(2, track / 10);
+  myDisplay.display(3, track % 10);
+} 
+
+void showVolumeOnDisplay(int volume)
+{
+  //clear
+  myDisplay.clearDisplay();
+  myDisplay.point(0);
+
+  //write new volume
+  myDisplay.displayNum(volume);
+} 
+
+void showTimeOnDisplay(int minutes, int seconds)
+{
+  //clear
+  myDisplay.clearDisplay();
+  myDisplay.point(1);
+
+  //write time
 } 
 #endif
 //////////////////////////////////////////////////////////////////////////
