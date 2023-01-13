@@ -15,7 +15,7 @@
 #include <IRremote.h>
 #endif
 #if defined DISPLAY
-#include <TM1637Display.h>
+#include "TM1637.h"
 #endif
 
 using ace_button::AceButton;
@@ -126,7 +126,7 @@ Encoder myEnc(ROTARY_ENCODER_PIN_A, ROTARY_ENCODER_PIN_B);
 
 //////// 7-Segmentanzeige ////////////////////////////////////////////////
 #if defined DISPLAY
-TM1637Display myDisplay(DISPLAY_PIN_A, DISPLAY_PIN_B);
+TM1637 myDisplay(DISPLAY_PIN_A, DISPLAY_PIN_B);
 #endif
 //////////////////////////////////////////////////////////////////////////
 
