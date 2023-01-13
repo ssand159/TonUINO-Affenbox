@@ -164,7 +164,7 @@ void getSettings()
 
   EEPROM.get(EEPROM_settingsStartAdress, mySettings);
 
-  if (mySettings.version != 3 || mySettings.cookie != cardCookie)
+  if (mySettings.version != 4 || mySettings.cookie != cardCookie)
   {
     resetSettings();
   }
@@ -236,7 +236,7 @@ void resetSettings()
   Serial.println(F("rsetSettings"));
 #endif
   mySettings.cookie = cardCookie;
-  mySettings.version = 3;
+  mySettings.version = 4;
   mySettings.maxVolume = 25;
   mySettings.minVolume = 1;
   mySettings.initVolume = 18;
@@ -2386,10 +2386,6 @@ void setup()
   digitalWrite(POWER_ON_LED_PIN, HIGH);
 #endif
 
-#if defined DISPLAY
-//TODO Display initialisieren
-#endif
-
 
   delay(500);
 
@@ -2763,9 +2759,6 @@ void volumeUpAction(bool rapidFire /* = false */)
       if (volume < mySettings.maxVolume)
       {
         mp3.increaseVolume();
-#if defined DISPLAY
-//TODO Volume anzeigen
-#endif
         delay(100);
         volume++;
         if (rapidFire)
@@ -2773,6 +2766,9 @@ void volumeUpAction(bool rapidFire /* = false */)
           delay(75);
         }
       }
+#if defined DISPLAY
+      myDisplay.
+#endif
 #if defined DEBUG
       Serial.print(F("vol up "));
       Serial.println(volume);
