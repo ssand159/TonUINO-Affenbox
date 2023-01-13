@@ -4588,7 +4588,8 @@ void showVolumeOnDisplay(int volume)
   myDisplay.point(0);
 
   //write new volume
-  myDisplay.displayNum(volume);
+  myDisplay.display(2, volume / 10);
+  myDisplay.display(1, volume % 10);
 } 
 
 void showTimeOnDisplay(int minutes, int seconds)
@@ -4598,6 +4599,11 @@ void showTimeOnDisplay(int minutes, int seconds)
   myDisplay.point(1);
 
   //write time
+  myDisplay.display(0, minutes / 10);
+  myDisplay.display(1, minutes % 10);
+  myDisplay.display(2, seconds / 10);
+  myDisplay.display(3, seconds % 10);
+  
 } 
 #endif
 //////////////////////////////////////////////////////////////////////////
