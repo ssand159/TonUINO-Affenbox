@@ -287,7 +287,7 @@ https://www.az-delivery.de/products/4-digit-display
 /* 
 Eingestellte Helligkeit des Displays. Kann manuell über das Adminmenü einstellbar
  */
-#define DISPLAY_BRIGHTNESS 4
+#define DISPLAY_DEFAULT_BRIGHTNESS 4
 
 #endif
 

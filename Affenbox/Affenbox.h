@@ -198,10 +198,11 @@ enum Enum_AdminMenuOptions
   StopWhenCardAway,
   SetupIRRemote,
   ResetEEPROM,
+  LockAdminMenu,
 #if defined DISPLAY
   ConfigureDisplayBrightness,
 #endif
-  LockAdminMenu
+  AdminMenuOptionsCount
 };
 enum Enum_PCS
 {

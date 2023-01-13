@@ -251,7 +251,7 @@ void resetSettings()
   mySettings.savedModifier.mode = 0;
   mySettings.stopWhenCardAway = false;
   mySettings.userAge = 0;
-  mySettings.savedDisplayBrightness = 4;
+  mySettings.savedDisplayBrightness = DISPLAY_DEFAULT_BRIGHTNESS;
   
   mySettings.irRemoteUserCodes[NoTrigger] = 0;
   mySettings.irRemoteUserCodes[PauseTrackTrigger] = 0x1C;
@@ -2763,6 +2763,9 @@ void volumeUpAction(bool rapidFire /* = false */)
       if (volume < mySettings.maxVolume)
       {
         mp3.increaseVolume();
+#if defined DISPLAY
+//TODO Volume anzeigen
+#endif
         delay(100);
         volume++;
         if (rapidFire)
@@ -2799,6 +2802,9 @@ void volumeDownAction(bool rapidFire /* = false */)
       if (volume > mySettings.minVolume && volume > 1)
       {
         mp3.decreaseVolume();
+#if defined DISPLAY
+//TODO Volume anzeigen
+#endif
         delay(100);
         volume--;
         if (rapidFire)
@@ -3093,7 +3099,7 @@ void adminMenu(bool fromCard /* = false */)
 
   do
   {
-    subMenu = voiceMenu(13, 900, 900, false, false, 0);
+    subMenu = voiceMenu(AdminMenuOptionsCount, 900, 900, false, false, 0);
     if (subMenu == Exit)
     {
       writeSettings();
@@ -3324,14 +3330,6 @@ void adminMenu(bool fromCard /* = false */)
         PlayMp3FolderTrack(999);
       }
     }
-#if defined DISPLAY    
-    else if (subMenu == ConfigureDisplayBrightness)
-    {
-      uint8_t selectedValue = voiceMenu(8, 986, 986, false, false, 4, false) - 1;
-      mySettings.savedDisplayBrightness = selectedValue;
-      myDisplay.setBrightness(0x0f);
-    }
-#endif
     else if (subMenu == LockAdminMenu)
     {
       switch (voiceMenu(2, 986, 986))
@@ -3344,6 +3342,14 @@ void adminMenu(bool fromCard /* = false */)
           break;
       }
     }
+#if defined DISPLAY    
+    else if (subMenu == ConfigureDisplayBrightness)
+    {
+      uint8_t selectedValue = voiceMenu(8, 986, 1, false, false, DISPLAY_DEFAULT_BRIGHTNESS, false) - 1;
+      mySettings.savedDisplayBrightness = selectedValue;
+      myDisplay.setBrightness(selectedValue);
+    }
+#endif
   } while (true);
 
   writeSettings();
