@@ -2067,8 +2067,8 @@ static void nextTrack(uint8_t track, bool force /* = false */)
 #endif
   }
 #if defined DISPLAY
-  myDisplay.clear();
-  myDisplay.showNumberDec(currentTrack, false);
+  myDisplay.clearDisplay();
+  showOnDisplay(currentTrack, false);
 #endif
 }
 
@@ -2199,8 +2199,8 @@ static void previousTrack()
 #endif
   }
 #if defined DISPLAY
-  myDisplay.clear();
-  myDisplay.showNumberDec(currentTrack, false);
+  myDisplay.clearDisplay();
+  showOnDisplay(currentTrack, false);
 #endif
 }
 //////////////////////////////////////////////////////////////////////////
@@ -2384,6 +2384,13 @@ void setup()
 
 #if defined POWER_ON_LED
   digitalWrite(POWER_ON_LED_PIN, HIGH);
+#endif
+
+
+#if defined DISPLAY
+  myDisplay.init();
+  myDisplay.set(mySettings.savedDisplayBrightness);
+  myDisplay.point(0);
 #endif
 
 
@@ -2767,7 +2774,8 @@ void volumeUpAction(bool rapidFire /* = false */)
         }
       }
 #if defined DISPLAY
-      myDisplay.
+      myDisplay.clearDisplay();
+      showOnDisplay(volume, false);
 #endif
 #if defined DEBUG
       Serial.print(F("vol up "));
@@ -2798,9 +2806,6 @@ void volumeDownAction(bool rapidFire /* = false */)
       if (volume > mySettings.minVolume && volume > 1)
       {
         mp3.decreaseVolume();
-#if defined DISPLAY
-//TODO Volume anzeigen
-#endif
         delay(100);
         volume--;
         if (rapidFire)
@@ -2808,6 +2813,10 @@ void volumeDownAction(bool rapidFire /* = false */)
           delay(75);
         }
       }
+#if defined DISPLAY
+      myDisplay.clearDisplay();
+      showOnDisplay(volume, false);
+#endif
 #if defined DEBUG
       Serial.print(F("vol down "));
       Serial.println(volume);
@@ -3343,7 +3352,7 @@ void adminMenu(bool fromCard /* = false */)
     {
       uint8_t selectedValue = voiceMenu(8, 986, 1, false, false, DISPLAY_DEFAULT_BRIGHTNESS, false) - 1;
       mySettings.savedDisplayBrightness = selectedValue;
-      myDisplay.setBrightness(selectedValue);
+      myDisplay.set(selectedValue);
     }
 #endif
   } while (true);
@@ -4560,5 +4569,12 @@ void fadeStatusLed(bool isPlaying)
     analogWrite(POWER_ON_LED_PIN, statusLedValue);
   }
 }
+#endif
+//////////////////////////////////////////////////////////////////////////
+#if defined DISPLAY
+void showOnDisplay(int number, bool dots)
+{
+  
+} 
 #endif
 //////////////////////////////////////////////////////////////////////////
