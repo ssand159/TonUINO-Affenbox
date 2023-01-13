@@ -83,7 +83,7 @@
 /**
 *Angabe des Anschlusspins für die analogen Signale.
 *Es kann jeder freie analoge Eingagn gewählt werden.
-*Ausgeschlossen sind folgende Pins: A7, sowie bereits durch andere Funktionen vergeneben Pins.
+*Ausgeschlossen sind folgende Pins: A7, sowie bereits durch andere Funktionen vergebene Pins.
  */
 #define ANALOG_INPUT_PIN A3 //Forward Button Pin, used by 3x3 Button Board
 
@@ -184,8 +184,8 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 
 /* 
 *Angabe des Anschlusspins für den Data Pin des IR Empfängers.
-*Es kann jeder freie digtale Eingang geählt werden.
-*Ausgeschlossen sind folgende Pins: 4, 9, 10, sowie bereits durch andere Funktionen vergeneben Pins.
+*Es kann jeder freie digtale Eingang gewählt werden.
+*Ausgeschlossen sind folgende Pins: 4, 9, 10, sowie bereits durch andere Funktionen vergebene Pins.
  */
 #define IRREMOTE_PIN 18
 
@@ -241,11 +241,11 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 
 /* 
 *Angabe der Anschlusspins für den Data und Clock Pin des Drehgebers.
-*Es kann jeder freie  Pin geählt werden, auch analoge.
-*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergeneben Pins.
+*Es kann jeder freie  Pin gewählt werden, auch analoge.
+*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergebene Pins.
  */
-#define ROTARY_ENCODER_PIN_A A14
-#define ROTARY_ENCODER_PIN_B A12
+#define ROTARY_ENCODER_PIN_A A14 // CLK
+#define ROTARY_ENCODER_PIN_B A12 // DT
 
 /* 
 *Anzahl erkannter Steps pro Klick des Drehgebers.
@@ -265,9 +265,8 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 //============================ 7-Segment-Anzeige ============================
 //===========================================================================
 /**
-*Gibt die Möglichkeit die aktuelle Titelnummer über eine 7-Segmentanzeige auszugeben
-*Hierzu wird extra Hardware benötigt.
-*z.B.:
+*Gibt die Möglichkeit Informationen über eine 7-Segmentanzeige auszugeben
+*Hierzu wird extra Hardware benötigt, z.B.:
 TM1637 4 Digit 7-Segment Display
 https://www.az-delivery.de/products/4-digit-display
 */
@@ -278,8 +277,8 @@ https://www.az-delivery.de/products/4-digit-display
 
 /* 
 *Angabe der Anschlusspins für den DIO und CLK des Displays
-*Es kann jeder freie  Pin geählt werden, auch analoge.
-*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergeneben Pins.
+*Es kann jeder freie  Pin gewählt werden, auch analoge.
+*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergebene Pins.
  */
 #define DISPLAY_PIN_A A13 //CLK
 #define DISPLAY_PIN_B A15 //DIO
@@ -287,7 +286,7 @@ https://www.az-delivery.de/products/4-digit-display
 /* 
 Eingestellte Helligkeit des Displays. Kann manuell über das Adminmenü einstellbar
  */
-#define DISPLAY_DEFAULT_BRIGHTNESS 4
+#define DISPLAY_DEFAULT_BRIGHTNESS 2
 
 #endif
 
@@ -306,8 +305,8 @@ Eingestellte Helligkeit des Displays. Kann manuell über das Adminmenü einstell
 
 /* 
 *Angabe des Anschlusspins für die LED.
-*Es kann jeder freie  Pin geählt werden, auch analoge.
-*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergeneben Pins.
+*Es kann jeder freie  Pin gewählt werden, auch analoge.
+*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergebene Pins.
  */
 #define POWER_ON_LED_PIN 36
 
