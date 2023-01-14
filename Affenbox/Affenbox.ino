@@ -2399,7 +2399,7 @@ void setup()
   SetVolume(volume);
   mp3.setEq((DfMp3_Eq)(mySettings.eq - 1));
 
-  PlayMp3FolderTrack(264);
+  PlayMp3FolderTrack(266);
   waitForTrackToFinish();
 
   // activate standby timer
@@ -3346,7 +3346,7 @@ void adminMenu(bool fromCard /* = false */)
 #if defined DISPLAY    
     else if (subMenu == ConfigureDisplayBrightness)
     {
-      uint8_t selectedValue = voiceMenu(8, 986, 1, false, false, DISPLAY_DEFAULT_BRIGHTNESS, false) - 1;
+      uint8_t selectedValue = voiceMenu(8, 984, 1, false, false, DISPLAY_DEFAULT_BRIGHTNESS, false) - 1;
       mySettings.savedDisplayBrightness = selectedValue;
       myDisplay.set(selectedValue);
     }
