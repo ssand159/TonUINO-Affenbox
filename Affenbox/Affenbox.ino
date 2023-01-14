@@ -2067,7 +2067,7 @@ static void nextTrack(uint8_t track, bool force /* = false */)
 #endif
   }
 #if defined DISPLAY
-  showTrackOnDisplay(currentTrack);
+  showTrackOnDisplay();
 #endif
 }
 
@@ -2198,7 +2198,7 @@ static void previousTrack()
 #endif
   }
 #if defined DISPLAY
-  showTrackOnDisplay(currentTrack);
+  showTrackOnDisplay();
 #endif
 }
 //////////////////////////////////////////////////////////////////////////
@@ -4568,17 +4568,17 @@ void fadeStatusLed(bool isPlaying)
 #endif
 //////////////////////////////////////////////////////////////////////////
 #if defined DISPLAY
-void showTrackOnDisplay(int track)
+void showTrackOnDisplay()
 {
   //clear
   myDisplay.clearDisplay();
   myDisplay.point(0);
 
   //write new track
-  myDisplay.display(0, track / 1000);
-  myDisplay.display(1, track / 100);
-  myDisplay.display(2, track / 10);
-  myDisplay.display(3, track % 10);
+  myDisplay.display(0, currentTrack / 1000);
+  myDisplay.display(1, currentTrack / 100);
+  myDisplay.display(2, currentTrack / 10);
+  myDisplay.display(3, currentTrack % 10);
 } 
 
 void showVolumeOnDisplay(int volume)
