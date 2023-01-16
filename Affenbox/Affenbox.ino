@@ -1883,6 +1883,7 @@ void playFolder()
   }
 
   waitForTrackToStart();
+  showTrackOnDisplay();
 }
 
 void activateShortCut(uint8_t shortCutNo)
@@ -4568,32 +4569,40 @@ void fadeStatusLed(bool isPlaying)
 #endif
 //////////////////////////////////////////////////////////////////////////
 #if defined DISPLAY
-void showTrackOnDisplay()
-{
+void showTrackOnDisplay(){
   //clear
   myDisplay.clearDisplay();
   myDisplay.point(0);
 
   //write new track
-  myDisplay.display(0, currentTrack / 1000);
-  myDisplay.display(1, currentTrack / 100);
-  myDisplay.display(2, currentTrack / 10);
-  myDisplay.display(3, currentTrack % 10);
+  int digit0 = currentTrack / 100;
+  int digit1 = currentTrack / 100;
+  int digit2 = currentTrack / 10;
+  int digit3 = currentTrack % 10;
+
+  if(digit0 > 0){
+    myDisplay.display(0, digit0);
+  }
+  if(digit1 > 0){
+    myDisplay.display(1, digit1);
+  }
+  if(digit2 > 0){
+    myDisplay.display(2, digit2);
+  }
+  myDisplay.display(3, digit3);
 } 
 
-void showVolumeOnDisplay(int volume)
-{
+void showVolumeOnDisplay(int volume){
   //clear
   myDisplay.clearDisplay();
   myDisplay.point(0);
 
   //write new volume
   myDisplay.display(2, volume / 10);
-  myDisplay.display(1, volume % 10);
+  myDisplay.display(3, volume % 10);
 } 
 
-void showTimeOnDisplay(int minutes, int seconds)
-{
+void showTimeOnDisplay(int minutes, int seconds){
   //clear
   myDisplay.clearDisplay();
   myDisplay.point(1);
