@@ -280,8 +280,8 @@ https://www.az-delivery.de/products/4-digit-display
 *Es kann jeder freie  Pin gewählt werden, auch analoge.
 *Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergebene Pins.
  */
-#define DISPLAY_PIN_A A13 //CLK
-#define DISPLAY_PIN_B A15 //DIO
+#define DISPLAY_PIN_A A15 //CLK
+#define DISPLAY_PIN_B A13 //DIO
 
 /* 
 Eingestellte Helligkeit des Displays. Kann manuell über das Adminmenü einstellbar
