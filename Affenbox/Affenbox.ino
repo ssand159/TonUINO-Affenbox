@@ -2969,6 +2969,14 @@ void loop()
   fadeStatusLed(isPlaying());
 #endif
 
+
+#if defined DISPLAY
+  if(volumeIsShown && millis() > volumeTimer){
+    volumeIsShown = false;
+    showTrackOnDisplay();
+  }
+#endif
+
   readTrigger(mySettings.invertVolumeButtons);
 
   if (activeModifier != NULL)
@@ -4586,8 +4594,12 @@ void showVolumeOnDisplay(int volume){
   myDisplay.point(0);
 
   //write new volume
-  myDisplay.display(2, volume / 10);
-  myDisplay.display(3, volume % 10);
+  myDisplay.display(0, volume / 10);
+  myDisplay.display(1, volume % 10);
+
+  //start timer for 1 second, so display will switch back to currentTrack
+  volumeIsShown = true;
+  volumeTimer = millis() + 1000; // 1000ms = 1s 
 } 
 
 void showTimeOnDisplay(int minutes, int seconds){
