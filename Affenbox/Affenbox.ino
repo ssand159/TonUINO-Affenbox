@@ -2385,7 +2385,9 @@ void setup()
 #if defined DISPLAY
   myDisplay.init();
   myDisplay.set(DISPLAY_BRIGHTNESS);
-  myDisplay.point(0);
+  myDisplay.point(1);
+  myDisplay.display(1, "-");
+  myDisplay.display(2, "-");
 #endif
 
 
