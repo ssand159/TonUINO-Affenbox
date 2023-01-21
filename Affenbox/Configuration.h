@@ -284,9 +284,9 @@ https://www.az-delivery.de/products/4-digit-display
 #define DISPLAY_PIN_B A13 //DIO
 
 /* 
-Eingestellte Helligkeit des Displays. Kann manuell über das Adminmenü einstellbar
+Helligkeit des Displays
  */
-#define DISPLAY_DEFAULT_BRIGHTNESS 2
+#define DISPLAY_BRIGHTNESS 2
 
 #endif
 

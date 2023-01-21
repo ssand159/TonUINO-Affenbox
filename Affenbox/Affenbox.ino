@@ -211,9 +211,6 @@ void getSettings()
 
   Serial.print(F("Saved Modifier "));
   Serial.println(mySettings.savedModifier.mode);
-
-  Serial.print(F("Saved Display Brightness "));
-  Serial.println(mySettings.savedDisplayBrightness);
 #endif  
 #if defined IRREMOTE_PRINT && defined EEPROM_PRINT
   for (uint8_t i = 0; i < sizeOfInputTrigger; i++)
@@ -251,7 +248,6 @@ void resetSettings()
   mySettings.savedModifier.mode = 0;
   mySettings.stopWhenCardAway = false;
   mySettings.userAge = 0;
-  mySettings.savedDisplayBrightness = DISPLAY_DEFAULT_BRIGHTNESS;
   
   mySettings.irRemoteUserCodes[NoTrigger] = 0;
   mySettings.irRemoteUserCodes[PauseTrackTrigger] = 0x1C;
@@ -2388,7 +2384,7 @@ void setup()
 
 #if defined DISPLAY
   myDisplay.init();
-  myDisplay.set(mySettings.savedDisplayBrightness);
+  myDisplay.set(DISPLAY_BRIGHTNESS);
   myDisplay.point(0);
 #endif
 
@@ -3101,7 +3097,7 @@ void adminMenu(bool fromCard /* = false */)
 
   do
   {
-    subMenu = voiceMenu(AdminMenuOptionsCount, 900, 900, false, false, 0);
+    subMenu = voiceMenu(13, 900, 900, false, false, 0);
     if (subMenu == Exit)
     {
       writeSettings();
@@ -3344,14 +3340,6 @@ void adminMenu(bool fromCard /* = false */)
           break;
       }
     }
-#if defined DISPLAY    
-    else if (subMenu == ConfigureDisplayBrightness)
-    {
-      uint8_t selectedValue = voiceMenu(8, 984, 1, false, false, DISPLAY_DEFAULT_BRIGHTNESS, false) - 1;
-      mySettings.savedDisplayBrightness = selectedValue;
-      myDisplay.set(selectedValue);
-    }
-#endif
   } while (true);
 
   writeSettings();
