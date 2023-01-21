@@ -2320,6 +2320,14 @@ void setup()
   pinMode(buttonFivePin, INPUT_PULLUP);
 #endif
 
+#if defined DISPLAY
+  myDisplay.init();
+  myDisplay.set(DISPLAY_BRIGHTNESS);
+  myDisplay.point(1);
+  myDisplay.display(1, "-");
+  myDisplay.display(2, "-");
+#endif
+
 #if defined IRREMOTE
   IrReceiver.begin(IRREMOTE_PIN, DISABLE_LED_FEEDBACK);
 #endif
@@ -2380,16 +2388,6 @@ void setup()
 #if defined POWER_ON_LED
   digitalWrite(POWER_ON_LED_PIN, HIGH);
 #endif
-
-
-#if defined DISPLAY
-  myDisplay.init();
-  myDisplay.set(DISPLAY_BRIGHTNESS);
-  myDisplay.point(1);
-  myDisplay.display(1, "-");
-  myDisplay.display(2, "-");
-#endif
-
 
   delay(500);
 
