@@ -211,7 +211,7 @@ void getSettings()
 
   Serial.print(F("Saved Modifier "));
   Serial.println(mySettings.savedModifier.mode);
-#endif  
+#endif
 #if defined IRREMOTE_PRINT && defined EEPROM_PRINT
   for (uint8_t i = 0; i < sizeOfInputTrigger; i++)
   {
@@ -3444,7 +3444,7 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
       PlayMp3FolderTrack(messageOffset + currentValue);
       if (preview)
       {
-        waitForTrackToFinish(); // mit preview Track (in der Regel Nummer) komplett spielen, da es sonst zu abgehakten Ansagen kommt.
+        waitForTrackToFinish(); // mit preview Track (in der Regel Nummer) komplett Spielen, da es sonst zu abgehakten Anssagen kommt.
         if (previewFromFolder == 0)
         {
           mp3.playFolderTrack(currentValue, 1);
@@ -3456,7 +3456,7 @@ uint8_t voiceMenu(int16_t numberOfOptions, uint16_t startMessage, int messageOff
       }
       else
       {
-        waitForTrackToStart(); // ohne preview Track nur anspielen um Menü flüssiger zu gestalten
+        waitForTrackToStart(); // ohne preview Track nur anspielen um Menü flüssiger zu gestallten
       }
     }
 

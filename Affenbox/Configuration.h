@@ -83,7 +83,7 @@
 /**
 *Angabe des Anschlusspins für die analogen Signale.
 *Es kann jeder freie analoge Eingagn gewählt werden.
-*Ausgeschlossen sind folgende Pins: A7, sowie bereits durch andere Funktionen vergebene Pins.
+*Ausgeschlossen sind folgende Pins: A7, sowie bereits durch andere Funktionen vergeneben Pins.
  */
 #define ANALOG_INPUT_PIN A3 //Forward Button Pin, used by 3x3 Button Board
 
@@ -184,8 +184,8 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 
 /* 
 *Angabe des Anschlusspins für den Data Pin des IR Empfängers.
-*Es kann jeder freie digtale Eingang gewählt werden.
-*Ausgeschlossen sind folgende Pins: 4, 9, 10, sowie bereits durch andere Funktionen vergebene Pins.
+*Es kann jeder freie digtale Eingang geählt werden.
+*Ausgeschlossen sind folgende Pins: 4, 9, 10, sowie bereits durch andere Funktionen vergeneben Pins.
  */
 #define IRREMOTE_PIN 18
 
@@ -241,11 +241,11 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 
 /* 
 *Angabe der Anschlusspins für den Data und Clock Pin des Drehgebers.
-*Es kann jeder freie  Pin gewählt werden, auch analoge.
-*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergebene Pins.
+*Es kann jeder freie  Pin geählt werden, auch Analoge.
+*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergeneben Pins.
  */
-#define ROTARY_ENCODER_PIN_A A9 // CLK
-#define ROTARY_ENCODER_PIN_B A10 // DT
+#define ROTARY_ENCODER_PIN_A A9
+#define ROTARY_ENCODER_PIN_B A10
 
 /* 
 *Anzahl erkannter Steps pro Klick des Drehgebers.
@@ -305,8 +305,8 @@ Helligkeit des Displays
 
 /* 
 *Angabe des Anschlusspins für die LED.
-*Es kann jeder freie  Pin gewählt werden, auch analoge.
-*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergebene Pins.
+*Es kann jeder freie  Pin geählt werden, auch Analoge.
+*Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergeneben Pins.
  */
 #define POWER_ON_LED_PIN 36
 
