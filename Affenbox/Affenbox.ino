@@ -2972,9 +2972,9 @@ void loop()
   fadeStatusLed(isPlaying());
 #endif
 
-
 #if defined DISPLAY
   if(volumeIsShown && millis() > volumeTimer){
+    //switch back from volume to track
     volumeIsShown = false;
     showTrackOnDisplay();
   }
@@ -4603,19 +4603,6 @@ void showVolumeOnDisplay(int volume){
   //start timer for 1 second, so display will switch back to currentTrack
   volumeIsShown = true;
   volumeTimer = millis() + 1000; // 1000ms = 1s 
-} 
-
-void showTimeOnDisplay(int minutes, int seconds){
-  //clear
-  myDisplay.clearDisplay();
-  myDisplay.point(1);
-
-  //write time
-  myDisplay.display(0, minutes / 10);
-  myDisplay.display(1, minutes % 10);
-  myDisplay.display(2, seconds / 10);
-  myDisplay.display(3, seconds % 10);
-  
 } 
 #endif
 //////////////////////////////////////////////////////////////////////////
