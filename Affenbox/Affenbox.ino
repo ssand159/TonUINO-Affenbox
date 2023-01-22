@@ -2323,9 +2323,10 @@ void setup()
 #if defined DISPLAY
   myDisplay.init();
   myDisplay.set(DISPLAY_BRIGHTNESS);
-  myDisplay.point(1);
-  myDisplay.display(1, "-");
-  myDisplay.display(2, "-");
+  myDisplay.point(0);
+  //show "--" on display to give some feedback during startup
+  myDisplay.display(1, 0x34);
+  myDisplay.display(2, 0x34);
 #endif
 
 #if defined IRREMOTE
