@@ -164,7 +164,7 @@ void getSettings()
 
   EEPROM.get(EEPROM_settingsStartAdress, mySettings);
 
-  if (mySettings.version != 4 || mySettings.cookie != cardCookie)
+  if (mySettings.version != 3 || mySettings.cookie != cardCookie)
   {
     resetSettings();
   }
@@ -233,7 +233,7 @@ void resetSettings()
   Serial.println(F("rsetSettings"));
 #endif
   mySettings.cookie = cardCookie;
-  mySettings.version = 4;
+  mySettings.version = 3;
   mySettings.maxVolume = 25;
   mySettings.minVolume = 1;
   mySettings.initVolume = 18;
@@ -248,7 +248,7 @@ void resetSettings()
   mySettings.savedModifier.mode = 0;
   mySettings.stopWhenCardAway = false;
   mySettings.userAge = 0;
-  
+
   mySettings.irRemoteUserCodes[NoTrigger] = 0;
   mySettings.irRemoteUserCodes[PauseTrackTrigger] = 0x1C;
   mySettings.irRemoteUserCodes[NextTrigger] = 0x5a;
@@ -1879,7 +1879,9 @@ void playFolder()
   }
 
   waitForTrackToStart();
+#if defined DISPLAY  
   showTrackOnDisplay();
+#endif  
 }
 
 void activateShortCut(uint8_t shortCutNo)
@@ -2397,7 +2399,7 @@ void setup()
   SetVolume(volume);
   mp3.setEq((DfMp3_Eq)(mySettings.eq - 1));
 
-  PlayMp3FolderTrack(266);
+  PlayMp3FolderTrack(264);
   waitForTrackToFinish();
 
   // activate standby timer

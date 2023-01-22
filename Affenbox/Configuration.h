@@ -34,8 +34,8 @@
 */
 
  #define buttonPause A0
- #define buttonUp A1
- #define buttonDown A2
+ #define buttonUp A4
+ #define buttonDown A3
 
 /** 
  * Konfiguration eines separten power buttons
@@ -235,7 +235,7 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 *https://www.az-delivery.de/products/drehimpulsgeber-modul?_pos=1&_sid=85bb51922&_ss=r
 */
 
-#define ROTARY_ENCODER   
+//#define ROTARY_ENCODER   
 
 #if defined ROTARY_ENCODER
 
@@ -244,8 +244,8 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 *Es kann jeder freie  Pin gewählt werden, auch analoge.
 *Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergebene Pins.
  */
-#define ROTARY_ENCODER_PIN_A A14 // CLK
-#define ROTARY_ENCODER_PIN_B A12 // DT
+#define ROTARY_ENCODER_PIN_A A9 // CLK
+#define ROTARY_ENCODER_PIN_B A10 // DT
 
 /* 
 *Anzahl erkannter Steps pro Klick des Drehgebers.
