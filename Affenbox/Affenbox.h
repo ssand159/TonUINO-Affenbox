@@ -255,7 +255,6 @@ struct adminSettings {
   folderSettings savedModifier;
   bool stopWhenCardAway;
   uint8_t userAge; // Reserviert für zukünftige Funktion
-  uint8_t savedDisplayBrightness;
   uint16_t irRemoteUserCodes[sizeOfInputTrigger];//Ein Slot pro möglichem Trigger
 };
 adminSettings mySettings;
