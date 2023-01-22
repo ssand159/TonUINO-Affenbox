@@ -1879,7 +1879,9 @@ void playFolder()
   }
 
   waitForTrackToStart();
+#if defined DISPLAY
   showTrackOnDisplay();
+#endif  
 }
 
 void activateShortCut(uint8_t shortCutNo)
