@@ -244,7 +244,7 @@ static const uint8_t ANALOG_INPUT_BUTTON_MAP[ANALOG_INPUT_BUTTON_COUNT + 1 ] = {
 *Es kann jeder freie  Pin geählt werden, auch Analoge.
 *Ausgeschlossen sind folgende Pins: 4, 9, 10, A7, sowie bereits durch andere Funktionen vergeneben Pins.
  */
-#define ROTARY_ENCODER_PIN_A A9
+#define ROTARY_ENCODER_PIN_A A9 
 #define ROTARY_ENCODER_PIN_B A10
 
 /* 
